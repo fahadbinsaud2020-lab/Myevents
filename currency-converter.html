@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محول العملات | Currency Converter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#122019;
+    --panel:#1a2b23;
+    --panel-2:#20362c;
+    --brass:#c8963c;
+    --brass-soft:#e0b968;
+    --sage:#6f9179;
+    --ivory:#efe7d6;
+    --muted:#93a89b;
+    --line: rgba(200,150,60,0.18);
+    --radius: 18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      repeating-linear-gradient(0deg, rgba(239,231,214,0.02) 0px, rgba(239,231,214,0.02) 1px, transparent 1px, transparent 34px),
+      var(--ink);
+    color:var(--ivory);
+    font-family:'Cairo', sans-serif;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  body.lang-en{ font-family:'Cairo', sans-serif; }
+
+  .stage{
+    width:100%;
+    max-width:480px;
+  }
+
+  .topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:28px;
+  }
+  .brandmark{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:var(--brass-soft);
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    opacity:.75;
+  }
+  .brandmark .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--brass);
+    box-shadow:0 0 8px var(--brass);
+  }
+  .lang-toggle{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-family:'Space Mono', monospace;
+    font-size:12px;
+    padding:7px 14px;
+    border-radius:100px;
+    cursor:pointer;
+    letter-spacing:.05em;
+    transition:all .2s ease;
+  }
+  .lang-toggle:hover{ border-color:var(--brass); color:var(--brass-soft); }
+  .lang-toggle:focus-visible{ outline:2px solid var(--brass); outline-offset:2px; }
+
+  .hero{ margin-bottom:26px; }
+  .eyebrow{
+    font-family:'Space Mono', monospace;
+    font-size:11px;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:var(--sage);
+    margin:0 0 10px;
+  }
+  h1{
+    font-family:'Aref Ruqaa', serif;
+    font-weight:700;
+    font-size:42px;
+    line-height:1.15;
+    margin:0 0 8px;
+    color:var(--ivory);
+  }
+  body.lang-en h1{ font-family:'Cairo', sans-serif; font-size:32px; font-weight:700; }
+  .sub{
+    color:var(--muted);
+    font-size:14px;
+    margin:0;
+  }
+
+  .card{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+      linear-gradient(90deg, transparent, var(--brass), transparent);
+    height:1px;
+    top:0;
+    opacity:.5;
+  }
+
+  .field{
+    background:rgba(0,0,0,0.18);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .field label{
+    font-family:'Space Mono', monospace;
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--sage);
+  }
+  .field-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .field input[type="number"]{
+    background:transparent;
+    border:none;
+    color:var(--ivory);
+    font-family:'Space Mono', monospace;
+    font-size:24px;
+    width:100%;
+    outline:none;
+    direction:ltr;
+    text-align:right;
+    unicode-bidi:plaintext;
+  }
+  body.lang-en .field input[type="number"]{ text-align:left; }
+  .field input[type="number"]::-webkit-outer-spin-button,
+  .field input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+
+  select{
+    background:var(--ink);
+    color:var(--ivory);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 10px;
+    font-family:'Cairo', sans-serif;
+    font-size:14px;
+    cursor:pointer;
+    max-width:150px;
+  }
+  select:focus-visible{ outline:2px solid var(--brass); }
+
+  .swap-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin:8px 0;
+  }
+  .swap-btn{
+    width:46px;height:46px;
+    border-radius:50%;
+    border:1px solid var(--brass);
+    background:var(--ink);
+    color:var(--brass-soft);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    transition:transform .5s cubic-bezier(.4,1.6,.4,1), box-shadow .3s ease;
+  }
+  .swap-btn:hover{ box-shadow:0 0 0 6px rgba(200,150,60,0.1); }
+  .swap-btn:focus-visible{ outline:2px solid var(--brass); outline-offset:3px; }
+  .swap-btn.spin{ transform:rotate(180deg); }
+  .swap-btn svg{ width:20px;height:20px; }
+  .swap-btn::after{
+    content:"";
+    position:absolute;
+    inset:-8px;
+    border-radius:50%;
+    border:1px dashed var(--line);
+  }
+
+  .rate-line{
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px dashed var(--line);
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .rate-line .rate{
+    font-family:'Space Mono', monospace;
+    font-size:15px;
+    color:var(--brass-soft);
+    direction:ltr;
+    text-align:right;
+    unicode-bidi:plaintext;
+  }
+  .rate-line .updated{
+    font-size:11.5px;
+    color:var(--muted);
+  }
+  body.lang-en .rate-line .rate{ text-align:left; }
+
+  .status{
+    font-size:13px;
+    color:var(--muted);
+    min-height:18px;
+    margin-top:10px;
+  }
+  .status.err{ color:#d98c5f; }
+
+  .footer-note{
+    margin-top:18px;
+    text-align:center;
+    font-size:11.5px;
+    color:var(--muted);
+    opacity:.7;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .swap-btn{ transition:none; }
+  }
+
+  @media (max-width:380px){
+    h1{ font-size:34px; }
+    .field input[type="number"]{ font-size:20px; }
+  }
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="topbar">
+    <div class="brandmark"><span class="dot"></span><span id="brandmarkText">صرف حي</span></div>
+    <button class="lang-toggle" id="langToggle" type="button">EN</button>
+  </div>
+
+  <div class="hero">
+    <p class="eyebrow" id="eyebrow">أسعار صرف لحظية</p>
+    <h1 id="title">محول العملات</h1>
+    <p class="sub" id="subtitle">حوّل بين أكثر من ٣٠ عملة بأسعار محدثة</p>
+  </div>
+
+  <div class="card">
+    <div class="field">
+      <label id="labelFrom">من</label>
+      <div class="field-row">
+        <input type="number" id="amountFrom" value="1" min="0" step="any" inputmode="decimal" dir="ltr">
+        <select id="currencyFrom"></select>
+      </div>
+    </div>
+
+    <div class="swap-row">
+      <button class="swap-btn" id="swapBtn" type="button" aria-label="تبديل العملتين">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="17 1 21 5 17 9"></polyline>
+          <path d="M3 11V9a4 4 0 0 1 4-4h14"></path>
+          <polyline points="7 23 3 19 7 15"></polyline>
+          <path d="M21 13v2a4 4 0 0 1-4 4H3"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="field">
+      <label id="labelTo">إلى</label>
+      <div class="field-row">
+        <input type="number" id="amountTo" readonly dir="ltr">
+        <select id="currencyTo"></select>
+      </div>
+    </div>
+
+    <div class="rate-line">
+      <span class="rate" id="rateText">—</span>
+      <span class="updated" id="updatedText"></span>
+    </div>
+
+    <div class="status" id="statusText"></div>
+  </div>
+
+  <p class="footer-note" id="footerNote">البيانات من Open Exchange Rates API</p>
+</div>
+
+<script>
+(function(){
+  var CURRENCIES = [
+    {code:"SAR", ar:"ريال سعودي", en:"Saudi Riyal"},
+    {code:"AED", ar:"درهم إماراتي", en:"UAE Dirham"},
+    {code:"KWD", ar:"دينار كويتي", en:"Kuwaiti Dinar"},
+    {code:"QAR", ar:"ريال قطري", en:"Qatari Riyal"},
+    {code:"BHD", ar:"دينار بحريني", en:"Bahraini Dinar"},
+    {code:"OMR", ar:"ريال عماني", en:"Omani Rial"},
+    {code:"JOD", ar:"دينار أردني", en:"Jordanian Dinar"},
+    {code:"EGP", ar:"جنيه مصري", en:"Egyptian Pound"},
+    {code:"IQD", ar:"دينار عراقي", en:"Iraqi Dinar"},
+    {code:"LBP", ar:"ليرة لبنانية", en:"Lebanese Pound"},
+    {code:"MAD", ar:"درهم مغربي", en:"Moroccan Dirham"},
+    {code:"TND", ar:"دينار تونسي", en:"Tunisian Dinar"},
+    {code:"DZD", ar:"دينار جزائري", en:"Algerian Dinar"},
+    {code:"USD", ar:"دولار أمريكي", en:"US Dollar"},
+    {code:"EUR", ar:"يورو", en:"Euro"},
+    {code:"GBP", ar:"جنيه إسترليني", en:"British Pound"},
+    {code:"TRY", ar:"ليرة تركية", en:"Turkish Lira"},
+    {code:"CHF", ar:"فرنك سويسري", en:"Swiss Franc"},
+    {code:"JPY", ar:"ين ياباني", en:"Japanese Yen"},
+    {code:"CNY", ar:"يوان صيني", en:"Chinese Yuan"},
+    {code:"INR", ar:"روبية هندية", en:"Indian Rupee"},
+    {code:"PKR", ar:"روبية باكستانية", en:"Pakistani Rupee"},
+    {code:"CAD", ar:"دولار كندي", en:"Canadian Dollar"},
+    {code:"AUD", ar:"دولار أسترالي", en:"Australian Dollar"},
+    {code:"MYR", ar:"رينغيت ماليزي", en:"Malaysian Ringgit"},
+    {code:"SGD", ar:"دولار سنغافوري", en:"Singapore Dollar"},
+    {code:"RUB", ar:"روبل روسي", en:"Russian Ruble"},
+    {code:"SDG", ar:"جنيه سوداني", en:"Sudanese Pound"},
+    {code:"YER", ar:"ريال يمني", en:"Yemeni Rial"},
+    {code:"LYD", ar:"دينار ليبي", en:"Libyan Dinar"}
+  ];
+
+  var TXT = {
+    ar:{
+      title:"محول العملات",
+      subtitle:"حوّل بين أكثر من ٣٠ عملة بأسعار محدثة",
+      eyebrow:"أسعار صرف لحظية",
+      brandmark:"صرف حي",
+      labelFrom:"من",
+      labelTo:"إلى",
+      footer:"البيانات من Currency API (jsDelivr)",
+      loading:"جارٍ تحديث الأسعار…",
+      err:"تعذّر تحديث الأسعار، حاول مرة أخرى",
+      updatedPrefix:"آخر تحديث: ",
+      langBtn:"EN",
+      dir:"rtl"
+    },
+    en:{
+      title:"Currency Converter",
+      subtitle:"Convert between 30+ currencies at live rates",
+      eyebrow:"Live Exchange Rates",
+      brandmark:"Live Rates",
+      labelFrom:"From",
+      labelTo:"To",
+      footer:"Data from Currency API (jsDelivr)",
+      loading:"Updating rates…",
+      err:"Couldn't fetch rates, try again",
+      updatedPrefix:"Updated: ",
+      langBtn:"AR",
+      dir:"ltr"
+    }
+  };
+
+  var state = {
+    lang: "ar",
+    from: "SAR",
+    to: "USD",
+    rates: null,
+    ratesBase: null,
+    lastFetched: null
+  };
+
+  var els = {
+    body: document.body,
+    html: document.documentElement,
+    langToggle: document.getElementById("langToggle"),
+    title: document.getElementById("title"),
+    subtitle: document.getElementById("subtitle"),
+    eyebrow: document.getElementById("eyebrow"),
+    brandmarkText: document.getElementById("brandmarkText"),
+    labelFrom: document.getElementById("labelFrom"),
+    labelTo: document.getElementById("labelTo"),
+    footerNote: document.getElementById("footerNote"),
+    statusText: document.getElementById("statusText"),
+    rateText: document.getElementById("rateText"),
+    updatedText: document.getElementById("updatedText"),
+    amountFrom: document.getElementById("amountFrom"),
+    amountTo: document.getElementById("amountTo"),
+    currencyFrom: document.getElementById("currencyFrom"),
+    currencyTo: document.getElementById("currencyTo"),
+    swapBtn: document.getElementById("swapBtn")
+  };
+
+  function currencyName(code){
+    var c = CURRENCIES.filter(function(x){ return x.code === code; })[0];
+    if(!c) return code;
+    return state.lang === "ar" ? (code + " · " + c.ar) : (code + " · " + c.en);
+  }
+
+  function populateSelects(){
+    [els.currencyFrom, els.currencyTo].forEach(function(sel){
+      var current = sel.value;
+      sel.innerHTML = "";
+      CURRENCIES.forEach(function(c){
+        var opt = document.createElement("option");
+        opt.value = c.code;
+        opt.textContent = currencyName(c.code);
+        sel.appendChild(opt);
+      });
+      if(current) sel.value = current;
+    });
+  }
+
+  function applyLang(){
+    var t = TXT[state.lang];
+    els.html.lang = state.lang;
+    els.html.dir = t.dir;
+    els.body.classList.toggle("lang-en", state.lang === "en");
+    els.title.textContent = t.title;
+    els.subtitle.textContent = t.subtitle;
+    els.eyebrow.textContent = t.eyebrow;
+    els.brandmarkText.textContent = t.brandmark;
+    els.labelFrom.textContent = t.labelFrom;
+    els.labelTo.textContent = t.labelTo;
+    els.footerNote.textContent = t.footer;
+    els.langToggle.textContent = t.langBtn;
+    populateSelects();
+    els.currencyFrom.value = state.from;
+    els.currencyTo.value = state.to;
+    renderRateLine();
+  }
+
+  function renderRateLine(){
+    if(!state.rates) return;
+    var rate = getRate(state.from, state.to);
+    if(rate == null) return;
+    var oneLine = "1 " + state.from + " = " + rate.toFixed(4) + " " + state.to;
+    els.rateText.textContent = oneLine;
+    var t = TXT[state.lang];
+    if(state.lastFetched){
+      els.updatedText.textContent = t.updatedPrefix + state.lastFetched;
+    }
+  }
+
+  function getRate(from, to){
+    if(!state.rates) return null;
+    // state.rates is keyed against state.ratesBase
+    var base = state.ratesBase;
+    if(from === base) return state.rates[to] || null;
+    if(to === base) return state.rates[from] ? (1 / state.rates[from]) : null;
+    var fromRate = state.rates[from];
+    var toRate = state.rates[to];
+    if(!fromRate || !toRate) return null;
+    return toRate / fromRate;
+  }
+
+  function convert(){
+    var amount = parseFloat(els.amountFrom.value);
+    if(isNaN(amount)){ els.amountTo.value = ""; return; }
+    var rate = getRate(state.from, state.to);
+    if(rate == null){ els.amountTo.value = ""; return; }
+    els.amountTo.value = (amount * rate).toFixed(4).replace(/\.?0+$/,"") ;
+    renderRateLine();
+  }
+
+  function ratesUrl(base, useFallback){
+    var code = base.toLowerCase();
+    if(useFallback){
+      return "https://latest.currency-api.pages.dev/v1/currencies/" + code + ".json";
+    }
+    return "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/" + code + ".json";
+  }
+
+  function fetchRates(){
+    var t = TXT[state.lang];
+    els.statusText.classList.remove("err");
+    els.statusText.textContent = t.loading;
+    var base = state.from;
+    var code = base.toLowerCase();
+
+    function handleData(data){
+      if(!data || !data[code]){
+        throw new Error("bad data");
+      }
+      var raw = data[code];
+      var mapped = {};
+      Object.keys(raw).forEach(function(k){
+        mapped[k.toUpperCase()] = raw[k];
+      });
+      state.rates = mapped;
+      state.ratesBase = base;
+      state.lastFetched = new Date().toLocaleString(state.lang === "ar" ? "ar-SA" : "en-US", {
+        hour:"2-digit", minute:"2-digit", day:"2-digit", month:"2-digit"
+      });
+      els.statusText.textContent = "";
+      convert();
+    }
+
+    fetch(ratesUrl(base, false))
+      .then(function(res){
+        if(!res.ok) throw new Error("network");
+        return res.json();
+      })
+      .then(handleData)
+      .catch(function(){
+        fetch(ratesUrl(base, true))
+          .then(function(res){
+            if(!res.ok) throw new Error("network");
+            return res.json();
+          })
+          .then(handleData)
+          .catch(function(){
+            els.statusText.classList.add("err");
+            els.statusText.textContent = TXT[state.lang].err;
+          });
+      });
+  }
+
+  els.langToggle.addEventListener("click", function(){
+    state.lang = state.lang === "ar" ? "en" : "ar";
+    applyLang();
+  });
+
+  els.currencyFrom.addEventListener("change", function(){
+    state.from = els.currencyFrom.value;
+    fetchRates();
+  });
+  els.currencyTo.addEventListener("change", function(){
+    state.to = els.currencyTo.value;
+    convert();
+  });
+  els.amountFrom.addEventListener("input", convert);
+
+  els.swapBtn.addEventListener("click", function(){
+    els.swapBtn.classList.toggle("spin");
+    var tmp = state.from;
+    state.from = state.to;
+    state.to = tmp;
+    els.currencyFrom.value = state.from;
+    els.currencyTo.value = state.to;
+    fetchRates();
+  });
+
+  applyLang();
+  fetchRates();
+})();
+</script>
+</body>
+</html>
