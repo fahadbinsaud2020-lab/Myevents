@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>المناسبات والأحداث</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    :root{
+      --bg:#0f1117;--surface:#181c27;--card:#1e2333;
+      --border:#2a3050;--muted:#4a5280;--text:#e8ecf8;
+      --subtext:#8b96c0;--gold:#c9a84c;--past:#e05555;
+      --future:#3ecf8e;--accent:#5b7fff;
+    }
+    body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:0;}
+
+    /* شاشة الإعداد */
+    #setupScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:32px 16px;text-align:center;}
+    .setup-logo{font-size:3.5rem;margin-bottom:16px;}
+    .setup-title{font-size:1.9rem;font-weight:800;color:var(--text);margin-bottom:8px;}
+    .setup-title span{color:var(--gold);}
+    .setup-sub{color:var(--subtext);margin-bottom:40px;font-size:0.95rem;line-height:1.7;}
+    .setup-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 28px;width:100%;max-width:400px;}
+    .setup-box label{display:block;text-align:right;margin-bottom:8px;font-size:0.9rem;color:var(--subtext);}
+    .setup-box input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:1rem;outline:none;margin-bottom:20px;transition:border-color .2s;text-align:right;}
+    .setup-box input:focus{border-color:var(--accent);}
+    .pin-input{letter-spacing:8px;font-size:1.4rem !important;text-align:center !important;}
+    .btn-start{width:100%;background:var(--accent);border:none;border-radius:12px;padding:14px;color:#fff;font-family:'Tajawal',sans-serif;font-size:1.05rem;font-weight:700;cursor:pointer;transition:opacity .2s;}
+    .btn-start:hover{opacity:.85;}
+    .setup-note{margin-top:16px;font-size:0.78rem;color:var(--muted);}
+
+    /* شاشة التطبيق */
+    #appScreen{display:none;padding:24px 16px 48px;}
+    header{text-align:center;margin-bottom:24px;}
+    header h1{font-size:2rem;font-weight:800;color:var(--text);}
+    header h1 span{color:var(--gold);}
+    .user-bar{max-width:680px;margin:0 auto 24px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:10px 16px;}
+    .user-info{display:flex;align-items:center;gap:8px;}
+    .user-icon{font-size:1.3rem;}
+    .user-name{font-size:0.9rem;font-weight:600;color:var(--gold);}
+    .btn-switch{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;color:var(--subtext);font-family:'Tajawal',sans-serif;font-size:0.8rem;cursor:pointer;transition:color .15s,border-color .15s;}
+    .btn-switch:hover{color:var(--accent);border-color:var(--accent);}
+    .today-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 24px;max-width:680px;margin:0 auto 32px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:center;}
+    .today-badge{display:flex;flex-direction:column;align-items:center;gap:2px;}
+    .today-badge .label{font-size:0.72rem;color:var(--muted);letter-spacing:1px;}
+    .today-badge .date-val{font-size:1.1rem;font-weight:700;color:var(--gold);}
+    .sep{width:1px;height:40px;background:var(--border);}
+    .controls{max-width:680px;margin:0 auto 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .controls input[type="text"]{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 16px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:0.95rem;outline:none;transition:border-color .2s;}
+    .controls input[type="text"]:focus{border-color:var(--accent);}
+    .controls input[type="date"]{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-family:'Tajawal',sans-serif;font-size:0.9rem;outline:none;transition:border-color .2s;}
+    .controls input[type="date"]:focus{border-color:var(--accent);}
+    .controls button{background:var(--accent);border:none;border-radius:10px;padding:10px 20px;color:#fff;font-family:'Tajawal',sans-serif;font-size:0.95rem;font-weight:700;cursor:pointer;transition:opacity .2s;white-space:nowrap;}
+    .controls button:hover{opacity:.85;}
+    .filter-bar{max-width:680px;margin:0 auto 16px;display:flex;gap:8px;flex-wrap:wrap;}
+    .filter-btn{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:7px 16px;color:var(--subtext);font-family:'Tajawal',sans-serif;font-size:0.85rem;font-weight:600;cursor:pointer;transition:all .2s;}
+    .filter-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+    .filter-btn.past-btn.active{background:var(--past);border-color:var(--past);color:#fff;}
+    .filter-btn.future-btn.active{background:var(--future);border-color:var(--future);color:#000;}
+    .filter-btn.today-btn.active{background:var(--gold);border-color:var(--gold);color:#000;}
+    .legend{max-width:680px;margin:0 auto 16px;display:flex;gap:18px;font-size:0.82rem;color:var(--subtext);}
+    .legend span{display:flex;align-items:center;gap:6px;}
+    .dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+    .dot.past{background:var(--past);}.dot.future{background:var(--future);}
+    .status-bar{max-width:680px;margin:0 auto 12px;font-size:0.82rem;color:var(--muted);text-align:center;min-height:20px;}
+    .status-bar.error{color:var(--past);}.status-bar.ok{color:var(--future);}
+    .list{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start;transition:transform .15s,box-shadow .15s;}
+    .card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.35);}
+    .card.past{border-right:4px solid var(--past);}
+    .card.future{border-right:4px solid var(--future);}
+    .card-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+    .card.past .card-icon{background:rgba(224,85,85,.12);}
+    .card.future .card-icon{background:rgba(62,207,142,.12);}
+    .card-info{overflow:hidden;}
+    .card-name{font-size:1.05rem;font-weight:700;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .card-dates{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+    .date-chip{font-size:0.8rem;font-weight:500;padding:3px 10px;border-radius:20px;background:var(--surface);}
+    .date-chip.hijri{color:var(--gold);}.date-chip.miladi{color:var(--subtext);}
+    .diff-block{display:flex;flex-direction:column;gap:5px;}
+    .diff-row{display:flex;align-items:center;gap:7px;font-size:0.82rem;}
+    .diff-cal-label{background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-size:0.72rem;color:var(--muted);font-weight:700;flex-shrink:0;}
+    .diff-val{font-weight:700;font-size:0.88rem;}
+    .diff-val.past.miladi{color:#ff9999;}.diff-val.future.miladi{color:#90f0c4;}
+    .diff-val.past.hijri-diff{color:#8b2020;}.diff-val.future.hijri-diff{color:#1a6644;}
+    .diff-dir{color:var(--muted);font-size:0.78rem;flex-shrink:0;}
+    .today-badge-card{font-size:1rem;font-weight:700;color:var(--gold);margin-top:6px;}
+    .empty{text-align:center;color:var(--muted);padding:48px 0;font-size:1rem;}
+    .del-btn{background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:4px;border-radius:6px;transition:color .15s;align-self:flex-start;}
+    .del-btn:hover{color:var(--past);}
+    .loading{text-align:center;color:var(--muted);padding:32px;font-size:0.95rem;}
+    @media(max-width:500px){header h1{font-size:1.5rem;}}
+  </style>
+</head>
+<body>
+
+<div id="setupScreen">
+  <div class="setup-logo">📅</div>
+  <div class="setup-title">المناسبات <span>والأحداث</span></div>
+  <div class="setup-sub">أدخل اسمك ورقمك السري للدخول<br/>بياناتك خاصة بك ولا يراها أحد غيرك</div>
+  <div class="setup-box">
+    <label>اسمك</label>
+    <input type="text" id="userIdInput" placeholder="مثال: فهد"/>
+    <label>الرقم السري (4 أرقام)</label>
+    <input type="password" id="pinInput" class="pin-input" placeholder="••••" maxlength="4" inputmode="numeric"/>
+    <button class="btn-start" onclick="startApp()">ابدأ ←</button>
+    <div class="setup-note">⚠️ احتفظ بنفس الاسم والرقم السري في كل مرة لاسترجاع بياناتك</div>
+  </div>
+</div>
+
+<div id="appScreen">
+  <header><h1>المناسبات <span>والأحداث</span></h1></header>
+  <div class="user-bar">
+    <div class="user-info">
+      <span class="user-icon">👤</span>
+      <span class="user-name" id="displayName">—</span>
+    </div>
+    <button class="btn-switch" onclick="switchUser()">تغيير المستخدم</button>
+  </div>
+  <div class="today-box">
+    <div class="today-badge"><span class="label">اليوم</span><span class="date-val" id="todayMiladi">—</span></div>
+    <div class="sep"></div>
+    <div class="today-badge"><span class="label">التاريخ الهجري</span><span class="date-val" id="todayHijri">—</span></div>
+  </div>
+  <div class="controls">
+    <input type="text" id="nameInput" placeholder="اسم المناسبة"/>
+    <input type="date" id="dateInput"/>
+    <button onclick="addOccasion()">إضافة ＋</button>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn active"     onclick="setFilter('all')"    id="f-all">الجميع</button>
+    <button class="filter-btn past-btn"   onclick="setFilter('past')"   id="f-past">⬅ السابقة</button>
+    <button class="filter-btn today-btn"  onclick="setFilter('today')"  id="f-today">🎉 اليوم</button>
+    <button class="filter-btn future-btn" onclick="setFilter('future')" id="f-future">اللاحقة ➡</button>
+  </div>
+  <div class="legend">
+    <span><span class="dot past"></span> مناسبة سابقة</span>
+    <span><span class="dot future"></span> مناسبة قادمة</span>
+  </div>
+  <div class="status-bar" id="statusBar"></div>
+  <div class="list" id="list"><div class="loading">⏳ جاري التحميل...</div></div>
+</div>
+
+<script>
+var API = 'https://script.google.com/macros/s/AKfycbxwC6Wi674JHUsGc7j0eY5ISnr_J3AvD404lear3XM4ae2C_yijFpl2uEq2YMHQ3LXk/exec';
+var currentUserId = '';
+var currentFilter = 'all';
+var allOccasions  = [];
+
+function startApp() {
+  var name = document.getElementById('userIdInput').value.trim();
+  var pin  = document.getElementById('pinInput').value.trim();
+  if (!name) { alert('يرجى إدخال اسمك'); return; }
+  if (pin.length !== 4 || isNaN(pin)) { alert('يرجى إدخال رقم سري مكون من 4 أرقام'); return; }
+  // الاسم + الرقم السري معاً هما هوية المستخدم
+  currentUserId = name.replace(/[^a-zA-Z0-9\u0600-\u06FF_-]/g, '_') + '_' + pin;
+  localStorage.setItem('occasionsUserId', currentUserId);
+  localStorage.setItem('occasionsDisplayName', name);
+  showApp(name);
+}
+
+function showApp(name) {
+  document.getElementById('setupScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display   = 'block';
+  document.getElementById('displayName').textContent   = name || currentUserId.split('_')[0];
+  showToday();
+  loadOccasions();
+}
+
+function switchUser() {
+  localStorage.removeItem('occasionsUserId');
+  localStorage.removeItem('occasionsDisplayName');
+  currentUserId = ''; allOccasions = [];
+  document.getElementById('setupScreen').style.display = 'flex';
+  document.getElementById('appScreen').style.display   = 'none';
+  document.getElementById('userIdInput').value = '';
+  document.getElementById('pinInput').value    = '';
+}
+
+function setFilter(f) {
+  currentFilter = f;
+  ['all','past','today','future'].forEach(function(k){
+    document.getElementById('f-'+k).classList.toggle('active', k===f);
+  });
+  render(allOccasions);
+}
+
+function loadOccasions() {
+  setStatus('⏳ جاري تحميل بياناتك...');
+  fetch(API + '?userId=' + encodeURIComponent(currentUserId))
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      allOccasions = data.filter(function(r){ return r.name && r.date; });
+      setStatus('✅ تم التحميل', 'ok');
+      setTimeout(function(){ setStatus(''); }, 2000);
+      render(allOccasions);
+    })
+    .catch(function(){
+      setStatus('⚠️ تعذر الاتصال، تحقق من الإنترنت', 'error');
+      render([]);
+    });
+}
+
+function addOccasion() {
+  var name = document.getElementById('nameInput').value.trim();
+  var date = document.getElementById('dateInput').value;
+  if (!name || !date) { alert('يرجى إدخال اسم المناسبة والتاريخ'); return; }
+  setStatus('⏳ جاري الحفظ...');
+  fetch(API, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({action:'add', userId:currentUserId, name:name, date:date})
+  }).then(function(){
+    document.getElementById('nameInput').value = '';
+    document.getElementById('dateInput').value = '';
+    setStatus('✅ تم الحفظ، جاري التحديث...', 'ok');
+    setTimeout(function(){ loadOccasions(); }, 1500);
+  }).catch(function(){ setStatus('⚠️ خطأ في الحفظ', 'error'); });
+}
+
+function deleteOcc(name, date) {
+  if (!confirm('حذف "' + name + '"؟')) return;
+  setStatus('⏳ جاري الحذف...');
+  fetch(API, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'text/plain'},
+    body: JSON.stringify({action:'delete', userId:currentUserId, name:name, date:date})
+  }).then(function(){
+    setStatus('✅ تم الحذف، جاري التحديث...', 'ok');
+    setTimeout(function(){ loadOccasions(); }, 1500);
+  }).catch(function(){ setStatus('⚠️ خطأ في الحذف', 'error'); });
+}
+
+function toHijri(date) {
+  try { return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(new Date(date)); }
+  catch(e){ return '—'; }
+}
+function formatMiladi(date) {
+  return new Intl.DateTimeFormat('ar',{day:'numeric',month:'long',year:'numeric'}).format(new Date(date));
+}
+function daysDiff(dateStr) {
+  var today=new Date(); today.setHours(0,0,0,0);
+  var d=new Date(dateStr); d.setHours(0,0,0,0);
+  return Math.round((d-today)/86400000);
+}
+function detailedDiff(dateStr) {
+  var today=new Date(); today.setHours(0,0,0,0);
+  var target=new Date(dateStr); target.setHours(0,0,0,0);
+  var from=today<target?today:target, to=today<target?target:today;
+  var y=to.getFullYear()-from.getFullYear(), m=to.getMonth()-from.getMonth(), d=to.getDate()-from.getDate();
+  if(d<0){m--;d+=new Date(to.getFullYear(),to.getMonth(),0).getDate();}
+  if(m<0){y--;m+=12;}
+  var p=[];
+  if(y>0)p.push(y+' سنة'); if(m>0)p.push(m+' شهر'); if(d>0)p.push(d+' يوم');
+  return p.length?p.join(' و '):'اليوم';
+}
+function getHijriParts(date) {
+  var fmt=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{year:'numeric',month:'numeric',day:'numeric'});
+  var parts=fmt.formatToParts(new Date(date));
+  function get(t){return parseInt(parts.find(function(p){return p.type===t;}).value);}
+  return {y:get('year'),m:get('month'),d:get('day')};
+}
+function hijriDiff(dateStr) {
+  var th=getHijriParts(new Date()), tg=getHijriParts(dateStr);
+  function n(h){return h.y*12*30+h.m*30+h.d;}
+  var from=n(th)<n(tg)?th:tg, to=from===th?tg:th;
+  var y=to.y-from.y, m=to.m-from.m, d=to.d-from.d;
+  if(d<0){m--;d+=29;} if(m<0){y--;m+=12;}
+  var p=[];
+  if(y>0)p.push(y+' سنة'); if(m>0)p.push(m+' شهر'); if(d>0)p.push(d+' يوم');
+  return p.length?p.join(' و '):'اليوم';
+}
+var EMOJIS=['🎉','🌟','🎂','🌙','🕌','💐','🏆','📅','🎊','🌹','🤝','🎈'];
+function pickEmoji(name){var h=0;for(var i=0;i<name.length;i++)h=(h*31+name.charCodeAt(i))&0xffff;return EMOJIS[h%EMOJIS.length];}
+function setStatus(msg,type){var el=document.getElementById('statusBar');el.textContent=msg;el.className='status-bar '+(type||'');}
+function showToday(){
+  var now=new Date();
+  document.getElementById('todayMiladi').textContent=formatMiladi(now);
+  document.getElementById('todayHijri').textContent=toHijri(now);
+}
+
+function render(occasions) {
+  var list=document.getElementById('list');
+  list.innerHTML='';
+  var filtered=occasions.filter(function(occ){
+    var d=daysDiff(occ.date);
+    if(currentFilter==='past')   return d<0;
+    if(currentFilter==='today')  return d===0;
+    if(currentFilter==='future') return d>0;
+    return true;
+  });
+  var msgs={all:'لا توجد مناسبات بعد — أضف أول مناسبة أعلاه ✨',past:'لا توجد مناسبات سابقة',today:'لا توجد مناسبات اليوم 🎉',future:'لا توجد مناسبات قادمة'};
+  if(!filtered.length){list.innerHTML='<p class="empty">'+msgs[currentFilter]+'</p>';return;}
+  filtered.sort(function(a,b){return new Date(a.date)-new Date(b.date);});
+  filtered.forEach(function(occ){
+    var diff=daysDiff(occ.date), isPast=diff<0, isToday=diff===0, cls=isPast?'past':'future';
+    var dirLabel=isPast?'مضى':'متبقٍ';
+    var diffBlock=isToday
+      ?'<div class="today-badge-card">🎉 اليوم!</div>'
+      :'<div class="diff-block">'
+        +'<div class="diff-row"><span class="diff-cal-label">م</span><span class="diff-val '+cls+' miladi">'+detailedDiff(occ.date)+'</span><span class="diff-dir">'+dirLabel+'</span></div>'
+        +'<div class="diff-row"><span class="diff-cal-label">هـ</span><span class="diff-val '+cls+' hijri-diff">'+hijriDiff(occ.date)+'</span><span class="diff-dir">'+dirLabel+'</span></div>'
+        +'</div>';
+    var safeName=occ.name.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    var card=document.createElement('div');
+    card.className='card '+cls;
+    card.innerHTML=
+      '<div class="card-icon">'+pickEmoji(occ.name)+'</div>'
+      +'<div class="card-info">'
+        +'<div class="card-name">'+occ.name+'</div>'
+        +'<div class="card-dates">'
+          +'<span class="date-chip hijri">'+toHijri(occ.date)+'</span>'
+          +'<span class="date-chip miladi">'+formatMiladi(occ.date)+'</span>'
+        +'</div>'+diffBlock
+      +'</div>'
+      +'<button class="del-btn" onclick="deleteOcc(\''+safeName+'\',\''+occ.date+'\')" title="حذف">✕</button>';
+    list.appendChild(card);
+  });
+}
+
+var savedId   = localStorage.getItem('occasionsUserId');
+var savedName = localStorage.getItem('occasionsDisplayName');
+if (savedId) { currentUserId = savedId; showApp(savedName); }
+else { document.getElementById('setupScreen').style.display = 'flex'; }
+</script>
+</body>
+</html>
