@@ -9,15 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-deep:#0d1128;
-    --bg-mid:#141a3a;
-    --card:#1a2148;
-    --card-edge:rgba(255,255,255,.07);
-    --gold:#e7b24a;
-    --gold-soft:#f6d98a;
-    --text:#f4efe2;
-    --muted:#93a0c9;
-    --shadow: 0 20px 60px rgba(0,0,0,.45);
+    --bg-deep:#0d1128;--bg-mid:#141a3a;--card:#1a2148;
+    --card-edge:rgba(255,255,255,.07);--gold:#e7b24a;
+    --gold-soft:#f6d98a;--text:#f4efe2;--muted:#93a0c9;
+    --shadow:0 20px 60px rgba(0,0,0,.45);
   }
   *{box-sizing:border-box;}
   html,body{height:100%;margin:0;}
@@ -28,100 +23,86 @@
       radial-gradient(circle at 88% 90%, rgba(91,127,255,.10), transparent 45%),
       var(--bg-deep);
     background-attachment:fixed;
-    font-family:'Tajawal', sans-serif;
+    font-family:'Tajawal',sans-serif;
     color:var(--text);
   }
   body::before{
-    content:"";
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    opacity:.3;
-    z-index:0;
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.3;z-index:0;
     background-image:
-      radial-gradient(1px 1px at 18% 22%, rgba(255,255,255,.5) 0, transparent 100%),
-      radial-gradient(1px 1px at 72% 14%, rgba(255,255,255,.4) 0, transparent 100%),
-      radial-gradient(1.5px 1.5px at 42% 68%, rgba(255,255,255,.35) 0, transparent 100%),
-      radial-gradient(1px 1px at 88% 58%, rgba(255,255,255,.4) 0, transparent 100%),
-      radial-gradient(1px 1px at 58% 88%, rgba(255,255,255,.3) 0, transparent 100%);
+      radial-gradient(1px 1px at 18% 22%,rgba(255,255,255,.5) 0,transparent 100%),
+      radial-gradient(1px 1px at 72% 14%,rgba(255,255,255,.4) 0,transparent 100%),
+      radial-gradient(1.5px 1.5px at 42% 68%,rgba(255,255,255,.35) 0,transparent 100%),
+      radial-gradient(1px 1px at 88% 58%,rgba(255,255,255,.4) 0,transparent 100%),
+      radial-gradient(1px 1px at 58% 88%,rgba(255,255,255,.3) 0,transparent 100%);
   }
 
-  #view-home{ padding:36px 16px 60px; position:relative; z-index:1; }
-  .page{ max-width:520px; margin:0 auto; }
-
-  header{ text-align:center; margin-bottom:34px; }
-  .eyebrow{
-    font-size:12.5px;
-    letter-spacing:.18em;
-    text-transform:uppercase;
-    color:var(--muted);
-    margin:0 0 10px;
-  }
+  /* ── Home ── */
+  #view-home{padding:36px 16px 60px;position:relative;z-index:1;}
+  .page{max-width:520px;margin:0 auto;}
+  header{text-align:center;margin-bottom:34px;}
+  .eyebrow{font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;}
   h1{
-    font-family:'Aref Ruqaa', serif;
-    font-weight:700;
-    font-size:46px;
-    margin:0 0 10px;
-    background:linear-gradient(90deg, var(--gold-soft), #9fb4ff);
-    -webkit-background-clip:text;
-    background-clip:text;
-    color:transparent;
+    font-family:'Aref Ruqaa',serif;font-weight:700;font-size:46px;margin:0 0 10px;
+    background:linear-gradient(90deg,var(--gold-soft),#9fb4ff);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  header p{ margin:0; color:var(--muted); font-size:14px; }
-
-  .shelf{ display:flex; flex-direction:column; gap:16px; }
-
+  header p{margin:0;color:var(--muted);font-size:14px;}
+  .shelf{display:flex;flex-direction:column;gap:16px;}
   .tool-card{
-    display:block;
-    width:100%;
-    text-align:right;
-    text-decoration:none;
-    color:inherit;
-    background:linear-gradient(180deg, var(--card), var(--bg-mid));
-    border:1px solid var(--card-edge);
-    border-radius:20px;
-    padding:20px;
-    box-shadow:var(--shadow);
-    position:relative;
-    overflow:hidden;
-    cursor:pointer;
-    transition:transform .2s ease, border-color .2s ease;
+    display:block;width:100%;text-align:right;text-decoration:none;color:inherit;
+    background:linear-gradient(180deg,var(--card),var(--bg-mid));
+    border:1px solid var(--card-edge);border-radius:20px;padding:20px;
+    box-shadow:var(--shadow);position:relative;overflow:hidden;cursor:pointer;
+    transition:transform .2s ease,border-color .2s ease;
   }
-  .tool-card:hover{ transform:translateY(-3px); border-color:var(--accent); }
-  .tool-card::before{
-    content:"";
-    position:absolute;
-    top:0; right:0; bottom:0;
-    width:4px;
-    background:var(--accent);
-  }
+  .tool-card:hover{transform:translateY(-3px);border-color:var(--accent);}
+  .tool-card::before{content:"";position:absolute;top:0;right:0;bottom:0;width:4px;background:var(--accent);}
+  .tool-top{display:flex;align-items:center;gap:14px;margin-bottom:10px;}
+  .tool-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;background:var(--accent-bg);flex-shrink:0;}
+  .tool-name{font-family:'Aref Ruqaa',serif;font-size:22px;font-weight:700;color:var(--text);}
+  .tool-tag{font-size:11px;color:var(--accent);letter-spacing:.06em;margin-top:2px;}
+  .tool-desc{font-size:13.5px;color:var(--muted);line-height:1.7;margin:0 0 4px;}
+  .tool-cta{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--accent);margin-top:8px;}
+  .tool-card.zamakan{--accent:#28b8a3;--accent-bg:rgba(40,184,163,.15);}
+  .tool-card.occasions{--accent:#5b7fff;--accent-bg:rgba(91,127,255,.15);}
+  .tool-card.currency{--accent:#c8963c;--accent-bg:rgba(200,150,60,.15);}
+  .tool-card.soon{border-style:dashed;opacity:.55;cursor:default;pointer-events:none;}
+  .tool-card.soon::before{background:var(--card-edge);}
+  footer{text-align:center;color:var(--muted);font-size:11.5px;margin-top:30px;opacity:.75;line-height:1.8;}
 
-  .tool-top{ display:flex; align-items:center; gap:14px; margin-bottom:10px; }
-  .tool-icon{
-    width:48px; height:48px;
-    border-radius:14px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:22px;
-    background:var(--accent-bg);
+  /* ── Tool view ── */
+  #view-tool{
+    position:fixed;inset:0;z-index:10;
+    display:none;flex-direction:column;
+    background:var(--bg-deep);
+  }
+  #view-tool.active{display:flex;}
+  .tool-navbar{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 14px;
+    background:var(--bg-mid);
+    border-bottom:1px solid var(--card-edge);
     flex-shrink:0;
+    z-index:11;
   }
-  .tool-name{ font-family:'Aref Ruqaa', serif; font-size:22px; font-weight:700; color:var(--text); }
-  .tool-tag{ font-size:11px; color:var(--accent); letter-spacing:.06em; margin-top:2px; }
-  .tool-desc{ font-size:13.5px; color:var(--muted); line-height:1.7; margin:0 0 4px; }
-  .tool-cta{ display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:700; color:var(--accent); margin-top:8px; }
-
-  .tool-card.zamakan{ --accent:#28b8a3; --accent-bg:rgba(40,184,163,.15); }
-  .tool-card.occasions{ --accent:#5b7fff; --accent-bg:rgba(91,127,255,.15); }
-  .tool-card.currency{ --accent:#c8963c; --accent-bg:rgba(200,150,60,.15); }
-
-  .tool-card.soon{ border-style:dashed; opacity:.55; cursor:default; pointer-events:none; }
-  .tool-card.soon::before{ background:var(--card-edge); }
-
-  footer{ text-align:center; color:var(--muted); font-size:11.5px; margin-top:30px; opacity:.75; line-height:1.8; }
-  footer b{ color:var(--gold-soft); }
+  .back-btn{
+    display:flex;align-items:center;gap:6px;
+    background:transparent;border:1px solid var(--card-edge);
+    color:var(--gold-soft);border-radius:100px;
+    padding:7px 14px;font-family:'Tajawal',sans-serif;
+    font-size:13px;font-weight:700;cursor:pointer;
+    transition:background .2s;
+  }
+  .back-btn:hover{background:rgba(255,255,255,.06);}
+  .tool-navbar .current-name{
+    font-family:'Aref Ruqaa',serif;font-size:17px;color:var(--text);
+  }
+  #toolFrame{flex:1;width:100%;border:none;background:#fff;}
 </style>
 </head>
 <body>
+
+<!-- الصفحة الرئيسية -->
 <div id="view-home">
   <div class="page">
     <header>
@@ -129,9 +110,9 @@
       <h1>أدواتي</h1>
       <p>كل أداة سويناها مع بعض — بمكان واحد</p>
     </header>
-
     <div class="shelf">
-      <a class="tool-card zamakan" href="zamakan.html" target="_blank">
+
+      <button class="tool-card zamakan" onclick="openTool('zamakan','زَمكان')">
         <div class="tool-top">
           <div class="tool-icon">🌙</div>
           <div>
@@ -141,9 +122,9 @@
         </div>
         <p class="tool-desc">احسب عمرك أو تاريخ ميلادك بالهجري والميلادي جنبًا إلى جنب.</p>
         <span class="tool-cta">افتح الأداة ←</span>
-      </a>
+      </button>
 
-      <a class="tool-card occasions" href="occasions.html" target="_blank">
+      <button class="tool-card occasions" onclick="openTool('occasions','المناسبات والأحداث')">
         <div class="tool-top">
           <div class="tool-icon">📅</div>
           <div>
@@ -153,9 +134,9 @@
         </div>
         <p class="tool-desc">تابع مناسباتك القادمة والسابقة بالهجري والميلادي، مع حساب تلقائي للأيام المتبقية.</p>
         <span class="tool-cta">افتح الأداة ←</span>
-      </a>
+      </button>
 
-      <a class="tool-card currency" href="currency.html" target="_blank">
+      <button class="tool-card currency" onclick="openTool('currency','محول العملات')">
         <div class="tool-top">
           <div class="tool-icon">💱</div>
           <div>
@@ -165,7 +146,7 @@
         </div>
         <p class="tool-desc">حوّل بين أكثر من ٣٠ عملة بأسعار محدثة، عربي وإنجليزي.</p>
         <span class="tool-cta">افتح الأداة ←</span>
-      </a>
+      </button>
 
       <div class="tool-card soon">
         <div class="tool-top">
@@ -178,9 +159,60 @@
         <p class="tool-desc">كل أداة نطورها معًا بتنضم هنا تلقائيًا.</p>
       </div>
     </div>
-
     <footer>صُنع بشغف — كل أداة طُورت خطوة بخطوة</footer>
   </div>
 </div>
+
+<!-- شاشة الأداة -->
+<div id="view-tool">
+  <div class="tool-navbar">
+    <button class="back-btn" onclick="closeTool()">→ رجوع</button>
+    <span class="current-name" id="currentToolName"></span>
+  </div>
+  <iframe id="toolFrame" title="tool" allow="storage-access"></iframe>
+</div>
+
+<script>
+var BASE = 'https://fahadbinsaud2020-lab.github.io/Myevents/';
+var TOOLS = {
+  zamakan:   'zamakan.html',
+  occasions: 'occasions.html',
+  currency:  'currency.html'
+};
+
+function openTool(key, name) {
+  var url = BASE + TOOLS[key];
+  document.getElementById('currentToolName').textContent = name;
+  document.getElementById('toolFrame').src = url;
+  document.getElementById('view-tool').classList.add('active');
+  document.title = name;
+  history.pushState({tool: key, name: name}, name, '?tool=' + key);
+}
+
+function closeTool() {
+  document.getElementById('view-tool').classList.remove('active');
+  document.getElementById('toolFrame').src = '';
+  document.title = 'أدواتي';
+  history.pushState({}, 'أدواتي', window.location.pathname);
+}
+
+window.addEventListener('popstate', function(e) {
+  if (e.state && e.state.tool) {
+    openTool(e.state.tool, e.state.name);
+  } else {
+    document.getElementById('view-tool').classList.remove('active');
+    document.getElementById('toolFrame').src = '';
+    document.title = 'أدواتي';
+  }
+});
+
+// Check URL on load
+var params = new URLSearchParams(window.location.search);
+var tool = params.get('tool');
+if (tool && TOOLS[tool]) {
+  var names = {zamakan:'زَمكان', occasions:'المناسبات والأحداث', currency:'محول العملات'};
+  openTool(tool, names[tool]);
+}
+</script>
 </body>
 </html>
