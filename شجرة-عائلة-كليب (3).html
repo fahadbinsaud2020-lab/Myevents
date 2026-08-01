@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>شجرة عائلة كليب</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{width:100%;height:100%;overflow:hidden;background:#f5f0e4;}
+body{font-family:'Tajawal',sans-serif;}
+
+#wrap{
+  position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse at 50% 110%, #d4c9a0 0%, #f5f0e4 60%);
+  overflow:hidden;cursor:grab;
+}
+#wrap:active{cursor:grabbing;}
+
+canvas{position:absolute;top:0;left:0;}
+
+/* إطار */
+#frame{position:fixed;inset:0;pointer-events:none;z-index:50;}
+.fr{position:absolute;background:linear-gradient(90deg,#6b3a1f,#c49a3c,#6b3a1f);}
+.ft{top:0;left:0;right:0;height:28px;}
+.fb{bottom:0;left:0;right:0;height:28px;}
+.fl{top:0;left:0;bottom:0;width:28px;background:linear-gradient(180deg,#6b3a1f,#c49a3c,#6b3a1f);}
+.fr2{top:0;right:0;bottom:0;width:28px;background:linear-gradient(180deg,#6b3a1f,#c49a3c,#6b3a1f);}
+.corner{position:absolute;width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:26px;background:#6b3a1f;color:#c49a3c;}
+.ctl{top:0;left:0;}.ctr{top:0;right:0;}.cbl{bottom:0;left:0;}.cbr{bottom:0;right:0;}
+
+/* عنوان */
+#title{position:fixed;top:34px;left:50%;transform:translateX(-50%);z-index:60;text-align:center;pointer-events:none;}
+#title h1{font-family:'Amiri',serif;font-size:24px;color:#4a2010;text-shadow:1px 1px 3px rgba(200,150,50,.4);}
+
+/* أزرار */
+#btns{position:fixed;bottom:44px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:60;}
+.btn{background:#6b3a1f;color:#c49a3c;border:1px solid #c49a3c;border-radius:8px;padding:8px 16px;font-family:'Tajawal',sans-serif;font-size:14px;font-weight:700;cursor:pointer;}
+.btn:hover{background:#8b5a2e;}
+
+/* legend */
+#leg{position:fixed;bottom:90px;right:40px;background:rgba(245,240,228,.92);border:1px solid #c49a3c;border-radius:10px;padding:10px 14px;font-size:11px;color:#3a2010;z-index:60;}
+#leg div{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+
+#hint{position:fixed;top:70px;left:50%;transform:translateX(-50%);z-index:60;font-size:12px;color:#6b3a1f;background:rgba(245,240,228,.85);padding:4px 12px;border-radius:8px;pointer-events:none;}
+#sync-status{position:fixed;top:100px;left:50%;transform:translateX(-50%);z-index:60;font-size:11px;color:#6b3a1f;pointer-events:none;}
+
+.overlay{position:fixed;inset:0;background:rgba(30,18,8,.55);display:none;align-items:center;justify-content:center;z-index:100;}
+.overlay.show{display:flex;}
+.modal{width:320px;max-width:90vw;max-height:85vh;overflow-y:auto;background:#f5f0e4;border:2px solid #c49a3c;border-radius:12px;padding:20px;}
+.modal h3{font-family:'Amiri',serif;color:#4a2010;font-size:19px;margin-bottom:12px;}
+.modal h4{font-family:'Amiri',serif;color:#6b3a1f;font-size:15px;margin:4px 0 10px;}
+.field{margin-bottom:10px;}
+.field label{display:block;font-size:12px;color:#6b3a1f;margin-bottom:4px;}
+.field input[type=text]{width:100%;padding:8px 10px;border:1px solid #c49a3c;border-radius:6px;font-family:'Tajawal',sans-serif;font-size:14px;background:#fffaf0;}
+.chk{display:flex;align-items:center;gap:6px;font-size:13px;color:#3a2010;margin-bottom:14px;}
+.divider{border-top:1px dashed #c49a3c;margin:16px 0;}
+.modal-actions{display:flex;gap:8px;margin-bottom:6px;}
+.modal .btn{padding:7px 12px;font-size:13px;}
+.modal .btn.primary{background:#3b6d11;color:#eaf3de;border-color:#3b6d11;}
+.modal .btn.primary:hover{background:#4d8a17;}
+.modal .close-btn{width:100%;margin-top:10px;background:transparent;color:#6b3a1f;}
+</style>
+</head>
+<body>
+
+<div id="frame">
+  <div class="fr ft"></div><div class="fr fb"></div>
+  <div class="fl"></div><div class="fr2"></div>
+  <div class="corner ctl">❧</div><div class="corner ctr">❧</div>
+  <div class="corner cbl">❧</div><div class="corner cbr">❧</div>
+</div>
+
+<div id="title"><h1>شجرة عائلة كليب</h1></div>
+
+<div id="wrap"><canvas id="c"></canvas></div>
+
+<div id="leg">
+  <div><svg width="14" height="14"><circle cx="7" cy="7" r="6" fill="#5c3d1e"/></svg> الجذر: كليب</div>
+  <div><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="#8b4513"/></svg> الفرع الرئيسي</div>
+  <div><svg width="14" height="14"><circle cx="7" cy="7" r="4" fill="#c0392b" stroke="#fff" stroke-width="1"/></svg> الأغصان</div>
+  <div><svg width="14" height="14"><ellipse cx="7" cy="8" rx="5" ry="6" fill="#2d7a2d" transform="rotate(-20,7,7)"/></svg> الأوراق (آخر جيل)</div>
+  <div><svg width="14" height="14"><circle cx="7" cy="7" r="5" fill="none" stroke="#888" stroke-width="1.5" stroke-dasharray="3,2"/></svg> متوفى رحمه الله</div>
+</div>
+
+<div id="hint">🖊️ اضغط على أي اسم بالشجرة للتعديل عليه أو لإضافة أبناء له</div>
+<div id="sync-status"></div>
+
+<div id="btns">
+  <button class="btn" onclick="doZoom(1.25)">🔍 تكبير</button>
+  <button class="btn" onclick="doZoom(0.8)">🔎 تصغير</button>
+  <button class="btn" onclick="reset()">⟳ إعادة ضبط العرض</button>
+  <button class="btn" id="reset-data-btn">↺ استعادة الأصل</button>
+</div>
+
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-name-title">تعديل شخص</h3>
+    <div class="field">
+      <label>الاسم</label>
+      <input type="text" id="edit-name">
+    </div>
+    <label class="chk"><input type="checkbox" id="edit-deceased"> متوفى رحمه الله</label>
+    <div class="modal-actions">
+      <button class="btn" id="delete-btn">حذف 🗑️</button>
+      <button class="btn primary" id="save-btn">حفظ التعديل</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <h4>إضافة ابن/ابنة جديد</h4>
+    <div class="field">
+      <label>الاسم</label>
+      <input type="text" id="new-child-name" placeholder="اسم الابن أو الابنة">
+    </div>
+    <label class="chk"><input type="checkbox" id="new-child-deceased"> متوفى رحمه الله</label>
+    <div class="modal-actions">
+      <button class="btn primary" id="add-child-btn">+ إضافة</button>
+    </div>
+
+    <button class="btn close-btn" id="close-modal-btn">إغلاق</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════
+//  البيانات
+// ════════════════════════════════
+var RAW_TEXT = [
+  ['مزيد&','علي&','غازي&','ذيب&','غازي'],
+  ['مزيد&','علي&','غازي&','ذيب&','عبدالاله'],
+  ['مزيد&','علي&','غازي&','ذيب&','جاسم'],
+  ['مزيد&','علي&','غازي&','بدر&','خالد'],
+  ['مزيد&','علي&','غازي&','بدر&','غازي'],
+  ['مزيد&','علي&','غازي&','بدر&','بسام'],
+  ['مزيد&','علي&','غازي&','بدر&','مازن'],
+  ['مزيد&','علي&','غازي&','بندر&','عيسى'],
+  ['مزيد&','علي&','غازي&','بندر&','غازي'],
+  ['مزيد&','علي&','غازي&','بندر&','عامر'],
+  ['مزيد&','علي&','غازي&','مطلق',''],
+  ['مزيد&','علي&','غازي&','شبيب',''],
+  ['مزيد&','علي&','غازي&','فهد',''],
+  ['مزيد&','علي&','غازي&','صالح',''],
+  ['مزيد&','علي&','غازي&','خالد',''],
+  ['مزيد&','علي&','غازي&','نواف',''],
+  ['مزيد&','علي&','حجاج&','',''],
+  ['مزيد&','علي&','مطلق&','علي','عبدالملك'],
+  ['مزيد&','علي&','مطلق&','علي','معاذ'],
+  ['مزيد&','علي&','مطلق&','علي','أنس'],
+  ['مزيد&','علي&','مطلق&','غازي','عمر'],
+  ['مزيد&','علي&','مطلق&','محمد',''],
+  ['مزيد&','علي&','مطلق&','يوسف',''],
+  ['مزيد&','علي&','سعود&','سليمان',''],
+  ['مزيد&','علي&','سعود&','أسامة',''],
+  ['مزيد&','علي&','سعود&','ياسر',''],
+  ['مزيد&','علي&','سعود&','سيف',''],
+  ['مزيد&','علي&','سعد&','سلمان',''],
+  ['مزيد&','علي&','مساعد&','',''],
+  ['مزيد&','علي&','عبدالعزيز','',''],
+  ['مزيد&','ظافر&','شبيب&','ظافر',''],
+  ['مزيد&','ظافر&','شبيب&','خالد',''],
+  ['مزيد&','ظافر&','شبيب&','محمد',''],
+  ['مزيد&','ظافر&','شبيب&','احمد',''],
+  ['مزيد&','ظافر&','شبيب&','راكان',''],
+  ['مزيد&','ظافر&','شبيب&','عبدالعزيز',''],
+  ['مزيد&','ظافر&','شباب&','مشعل',''],
+  ['مزيد&','ظافر&','شباب&','موسى',''],
+  ['مزيد&','ظافر&','شباب&','عمر',''],
+  ['مزيد&','ظافر&','شباب&','معتز',''],
+  ['مزيد&','ظافر&','مشبب&','مهنا',''],
+  ['مزيد&','ظافر&','مشبب&','فارس',''],
+  ['مزيد&','ظافر&','مشبب&','نواف',''],
+  ['مزيد&','سعد&','عيد&','ناصر',''],
+  ['مزيد&','سعد&','عيد&','سعود',''],
+  ['مزيد&','سعد&','مزيد&','ريان',''],
+  ['مزيد&','سعد&','مزيد&','سعد',''],
+  ['مزيد&','سعد&','عايد&','سعد',''],
+  ['مزيد&','سعد&','عايد&','عيد',''],
+  ['مزيد&','سعد&','عايد&','سعود',''],
+  ['مزيد&','سعد&','عايد&','فيصل',''],
+  ['مزيد&','سعود&','فهد&','سعود&','فهد'],
+  ['مزيد&','سعود&','فهد&','سعود&','عبدالله'],
+  ['مزيد&','سعود&','فهد&','فيصل',''],
+  ['مزيد&','سعود&','فهد&','عبدالعزيز&','تميم'],
+  ['مزيد&','سعود&','فايز&','صالح',''],
+  ['مزيد&','سعود&','فايز&','سالم',''],
+  ['مزيد&','سعود&','فايز&','فهد',''],
+  ['مزيد&','سعود&','زايد&','تركي',''],
+  ['مزيد&','سعود&','عبدالله','',''],
+  ['مزيد&','سعود&','ابراهيم','',''],
+  ['مزيد&','سعود&','فواز','',''],
+  ['مزيد&','سعود&','أنس','',''],
+  // ── فرع محمد ──
+  ['محمد&','ضيف الله&','رجا&','محمد','رجا'],
+  ['محمد&','ضيف الله&','رجا&','محمود','محمد'],
+  ['محمد&','ضيف الله&','رجا&','محمود','حمد'],
+  ['محمد&','ضيف الله&','رجا&','راشد','رجا'],
+  ['محمد&','ضيف الله&','رجا&','أحمد','يوسف'],
+  ['محمد&','ضيف الله&','رجا&','أحمد','راشد'],
+  ['محمد&','ضيف الله&','رجا&','مشاري',''],
+  ['محمد&','ضيف الله&','رجا&','عبدالعزيز',''],
+  ['محمد&','ضيف الله&','رجا&','ضيف الله',''],
+  ['محمد&','ضيف الله&','رجا&','ثامر',''],
+  ['محمد&','ضيف الله&','رجا&','عبدالرحمن',''],
+  ['محمد&','ضيف الله&','رجا&','عبدالمجيد',''],
+  ['محمد&','ضيف الله&','رجا&','حامد',''],
+  ['محمد&','ضيف الله&','رجا&','عساف',''],
+  ['محمد&','ضيف الله&','زايد&','فيصل',''],
+  ['محمد&','ضيف الله&','ضيدان&','راكان',''],
+  ['محمد&','ضيف الله&','ضيدان&','سلمان',''],
+  ['محمد&','ضيف الله&','ضيدان&','مالك',''],
+  ['محمد&','ضيف الله&','مزيد&','وليد',''],
+  ['محمد&','ضيف الله&','محمد&','',''],
+  ['محمد&','ضيف الله&','سامي&','',''],
+  ['محمد&','محماس&','','',''],
+  ['محمد&','مشبب&','','',''],
+  ['محمد&','زيد&','محمد&','زيد',''],
+  ['محمد&','زيد&','محمد&','عبدالله',''],
+  ['محمد&','زيد&','محمد&','طلال',''],
+  ['محمد&','زيد&','محمد&','خالد',''],
+  ['محمد&','زيد&','محمد&','مشعل',''],
+  ['محمد&','زيد&','مشبب&','محمد',''],
+  ['محمد&','زيد&','مشبب&','زيد',''],
+  ['محمد&','زيد&','فايز&','نايف',''],
+  ['محمد&','زيد&','فايز&','زيد',''],
+  ['محمد&','زيد&','سعود&','خالد',''],
+  ['محمد&','زيد&','خالد&','',''],
+  ['محمد&','زيد&','ضيف الله&','',''],
+  ['محمد&','شبيب&','زيد&','سعود',''],
+  ['محمد&','شبيب&','زيد&','شبيب',''],
+  ['محمد&','شبيب&','جازي&','',''],
+  ['محمد&','شبيب&','محمد&','',''],
+  ['محمد&','شبيب&','عبدالله&','',''],
+  ['محمد&','شبيب&','مبارك&','',''],
+  ['محمد&','سميح&','هاني&','فهد',''],
+  ['محمد&','سميح&','هاني&','مهند',''],
+  ['محمد&','سميح&','هاني&','يزيد',''],
+  ['محمد&','سميح&','هاني&','تميم',''],
+  ['محمد&','سميح&','محمد&','طلال',''],
+  ['محمد&','سميح&','مطر&','',''],
+  ['محمد&','سميح&','شبيب&','سلطان',''],
+  ['محمد&','سميح&','وليد&','',''],
+  ['محمد&','سميح&','','',''],
+  // ── فرع زايد ──
+  ['زايد&','مرزوق','عبدالرحمن','خالد'],
+  ['زايد&','مرزوق','عبدالرحمن','أحمد'],
+  ['زايد&','مرزوق','مقبل','تركي'],
+  ['زايد&','مرزوق','مقبل','محمد'],
+  ['زايد&','مرزوق','شبيب','حازم'],
+  ['زايد&','مرزوق','شبيب','سلطان'],
+  ['زايد&','مرزوق','زايد','ياسر'],
+  ['زايد&','مرزوق','زايد','وليد'],
+  ['زايد&','مرزوق','زايد','فيصل'],
+  ['زايد&','مرزوق','مطلق',''],
+  ['زايد&','مرزوق','عايد',''],
+  ['زايد&','مرزوق','رايد',''],
+  ['زايد&','مرزوق','عبدالله',''],
+  ['زايد&','مرزوق','ابراهيم',''],
+  ['زايد&','مرزوق','عبدالعزيز',''],
+  ['زايد&','مرزوق','عزام',''],
+  ['زايد&','عبدالعزيز','عجب','عبدالعزيز'],
+  ['زايد&','عبدالعزيز','عجب','مزيد'],
+  ['زايد&','عبدالعزيز','عبدالله',''],
+  ['زايد&','عبدالعزيز','راضي',''],
+  ['زايد&','عبدالعزيز','سعد',''],
+  ['زايد&','عبدالعزيز','مزيد&',''],
+  ['زايد&','عبدالله','يوسف','عبدالله'],
+  ['زايد&','عبدالله','يوسف','أوس'],
+  ['زايد&','عبدالله','محمد',''],
+  ['زايد&','عبدالله','زايد',''],
+  ['زايد&','عبدالله','عبدالرحمن',''],
+  ['زايد&','محمد','ابراهيم',''],
+  ['زايد&','محمد','يوسف',''],
+  ['زايد&','محمد','ايوب',''],
+  ['زايد&','محمد','سليمان',''],
+  ['زايد&','ضيف الله','عبدالمجيد',''],
+  ['زايد&','ضيف الله','وليد',''],
+  ['زايد&','صالح','زايد',''],
+  ['زايد&','صالح','عبدالله',''],
+  ['زايد&','عبدالرحمن','عمر',''],
+  ['زايد&','عبدالرحمن','ريان',''],
+  ['زايد&','عبدالرحمن','هتان',''],
+  ['زايد&','عبدالرحمن','يزن',''],
+];
+
+// ════════════════════════════════
+//  بناء الشجرة
+// ════════════════════════════════
+function parseName(raw){
+  if(!raw) return null;
+  var d = raw.endsWith('&');
+  var n = d ? raw.slice(0,-1).trim() : raw.trim();
+  if(!n) return null;
+  return {name:n, deceased:d};
+}
+
+function buildInitialTree(){
+  var root={name:'كليب',children:{},deceased:false};
+  RAW_TEXT.forEach(function(row){
+    var parsed = row.map(parseName).filter(function(p){return p;});
+    var node = root;
+    parsed.forEach(function(p){
+      if(!node.children[p.name]){
+        // deceased is tracked per node (i.e. per person at this exact
+        // position in the tree), never by name alone — so two different
+        // relatives who happen to share a name (e.g. two "خالد") don't
+        // affect each other's status
+        node.children[p.name]={name:p.name,children:{},deceased:p.deceased};
+      } else if(p.deceased){
+        node.children[p.name].deceased = true;
+      }
+      node=node.children[p.name];
+    });
+  });
+  function conv(n){
+    var ch=Object.values(n.children).map(conv);
+    return {id:'n'+(nextId++), name:n.name, deceased:n.deceased, children:ch};
+  }
+  return conv(root);
+}
+
+// every node gets a stable id so edits/additions/deletions can target the
+// exact person, independent of name (two siblings can now safely share a name)
+var nextId = 1;
+var STORAGE_KEY = 'kulaib-tree-v2';
+
+function loadSavedTree(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return null;
+}
+function saveTree(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(tree)); }catch(e){}
+  syncToSheet();
+}
+
+// ════════════════════════════════
+//  مزامنة اختيارية مع Google Sheets
+// ════════════════════════════════
+// أنشئ Google Sheet، أضف كود Apps Script المرفق، انشره كـ Web App
+// (Execute as: Me, Who has access: Anyone)، والصق رابط النشر هنا.
+// اتركه فارغاً للاكتفاء بالتخزين المحلي فقط.
+var SHEET_URL = 'https://script.google.com/macros/s/AKfycbwsNuMXpk8XupqmmYYfBIMjrhoCcqzNmBwT2LZJGmpWE4oPq8I71RIsqGMufYf7U5qFjA/exec';
+
+function treeToRows(node, parentId, out){
+  out = out || [];
+  out.push({id:node.id, parentId:parentId, name:node.name, deceased:!!node.deceased});
+  (node.children||[]).forEach(function(c){ treeToRows(c, node.id, out); });
+  return out;
+}
+
+function rowsToTree(rows){
+  var byId = {};
+  rows.forEach(function(r){ byId[r.id] = {id:r.id, name:r.name, deceased:!!r.deceased, children:[]}; });
+  var root = null;
+  rows.forEach(function(r){
+    var node = byId[r.id];
+    if(r.parentId && byId[r.parentId]){
+      byId[r.parentId].children.push(node);
+    } else {
+      root = node;
+    }
+  });
+  return root;
+}
+
+function setSyncStatus(msg){
+  var el = document.getElementById('sync-status');
+  if(el) el.textContent = msg;
+}
+
+function syncToSheet(){
+  if(!SHEET_URL) return;
+  var rows = treeToRows(tree, null);
+  setSyncStatus('☁️ جارٍ الحفظ بقوقل شيت...');
+  // body sent without an explicit Content-Type so the browser treats it as
+  // text/plain — this avoids a CORS preflight request against Apps Script
+  fetch(SHEET_URL, { method:'POST', body: JSON.stringify(rows) })
+    .then(function(){ setSyncStatus('✅ محفوظ بقوقل شيت'); })
+    .catch(function(){ setSyncStatus('⚠️ تعذّر الحفظ بقوقل شيت — محفوظ محلياً فقط'); });
+}
+
+function loadFromSheet(){
+  if(!SHEET_URL) return;
+  setSyncStatus('☁️ جارٍ التحميل من قوقل شيت...');
+  fetch(SHEET_URL).then(function(r){ return r.json(); }).then(function(rows){
+    if(rows && rows.length){
+      var loaded = rowsToTree(rows);
+      if(loaded){
+        tree = loaded;
+        bumpIdCounterFrom(tree);
+        try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(tree)); }catch(e){}
+        rebuildAndRedraw();
+        setSyncStatus('☁️ محمّلة من قوقل شيت');
+      }
+    }
+  }).catch(function(){ setSyncStatus('⚠️ غير متصل بقوقل شيت — تعمل النسخة المحلية'); });
+}
+// when a saved tree is loaded, make sure new ids handed out later don't
+// collide with ids already used in the saved data
+function bumpIdCounterFrom(node){
+  var m = parseInt(String(node.id).replace('n',''),10);
+  if(!isNaN(m)) nextId = Math.max(nextId, m+1);
+  (node.children||[]).forEach(bumpIdCounterFrom);
+}
+
+var savedTree = loadSavedTree();
+var tree = savedTree || buildInitialTree();
+if(savedTree){ bumpIdCounterFrom(tree); } else { saveTree(); }
+
+// ════════════════════════════════
+//  حساب مواضع العقد (مروحة)
+// ════════════════════════════════
+var nodes=[], links=[];
+
+function countLeaves(n){
+  if(!n.children||n.children.length===0) return 1;
+  return n.children.reduce(function(s,c){return s+countLeaves(c);},0);
+}
+
+// الشجرة تنمو من الأسفل للأعلى بشكل مروحة
+var CX, CY;
+function maxDepthOf(n, d){
+  if(!n.children || n.children.length===0) return d;
+  var m=d;
+  n.children.forEach(function(c){ m=Math.max(m, maxDepthOf(c, d+1)); });
+  return m;
+}
+// radius per generation, computed from the tree's actual size (leaf count
+// and depth) instead of a fixed formula — so as people are added through
+// the new add-mechanism, the ring spacing grows with the data instead of
+// getting more crowded every time
+var ringStep = 70;
+function recomputeRingStep(){
+  var totalLeaves = countLeaves(tree);
+  var depth = Math.max(1, maxDepthOf(tree,0));
+  var arcSpanRad = 180*Math.PI/180; // matches the -90..90 fan used in rebuildAndRedraw()
+  var minArcPerLeaf = 28; // px of circumference reserved per leaf label
+  var neededOuterRadius = Math.max(220, (totalLeaves*minArcPerLeaf)/arcSpanRad);
+  ringStep = neededOuterRadius/depth;
+}
+function ringRadius(depth){
+  return depth*ringStep;
+}
+
+function layout(node, a0, a1, depth, parentIdx, parentRef){
+  var idx = nodes.length;
+  var angle = (a0+a1)/2;
+  var r = ringRadius(depth);
+  // تحويل القطبي لمستطيل (الشجرة تنبثق للأعلى)
+  var rad = (angle - 90) * Math.PI / 180;
+  var x = CX + r * Math.cos(rad);
+  var y = CY + r * Math.sin(rad);
+  if(depth===0){x=CX; y=CY;}
+
+  var isLeaf = !node.children || node.children.length===0;
+  nodes.push({idx:idx, id:node.id, name:node.name, x:x, y:y, depth:depth,
+              deceased:node.deceased, isLeaf:isLeaf, angle:angle,
+              nodeRef:node, parentRef:parentRef||null});
+  if(parentIdx!==null) links.push({s:parentIdx,t:idx});
+
+  if(node.children && node.children.length>0){
+    var total = countLeaves(node);
+    var cur = a0;
+    node.children.forEach(function(ch){
+      var leaves = countLeaves(ch);
+      var span = (a1-a0) * leaves/total;
+      layout(ch, cur, cur+span, depth+1, idx, node);
+      cur += span;
+    });
+  }
+}
+
+function rebuildAndRedraw(){
+  recomputeRingStep();
+  nodes=[]; links=[];
+  // angle 0 = up, 90 = right, -90 = left (see layout()). Restricting the
+  // span to exactly -90..90 keeps every added person at or above the
+  // root's height — the root كليب never ends up above a branch, only
+  // level with it (at the ±90 edges) or below it.
+  layout(tree, -90, 90, 0, null, null);
+  draw();
+}
+
+// ════════════════════════════════
+//  رسم Canvas
+// ════════════════════════════════
+var canvas = document.getElementById('c');
+var ctx = canvas.getContext('2d');
+var W, H;
+var tx=0, ty=0, scale=1;
+var dragging=false, mx0, my0, tx0, ty0;
+
+function resize(){
+  W=window.innerWidth; H=window.innerHeight;
+  canvas.width=W; canvas.height=H;
+  CX=W/2; CY=H-100;
+  rebuildAndRedraw();
+}
+
+function leaf(ctx, x, y, angle, size, deceased){
+  ctx.save();
+  ctx.translate(x,y);
+  var rot = (angle-90)*Math.PI/180;
+  // keep the leaf pointing outward, and keep it right-side up on the
+  // lower half of the circle — a plain radial rotation there would
+  // render the shape (and the name label) upside-down
+  var flip = (angle > 90 && angle < 270);
+  ctx.rotate(flip ? rot + Math.PI : rot);
+  var dir = flip ? -1 : 1;
+
+  // elongated (طولي) along the stem direction, in line with the branch
+  // reaching it, instead of the previous shape which was wider sideways
+  // than it was long
+  var lx = dir*size*1.4;
+  ctx.beginPath();
+  ctx.ellipse(lx, 0, size*0.75, size*0.3, 0, 0, Math.PI*2);
+  if(deceased){
+    ctx.fillStyle='rgba(180,220,180,0.5)';
+    ctx.strokeStyle='#2d7a2d';
+    ctx.lineWidth=1;
+    ctx.setLineDash([3,2]);
+    ctx.fill(); ctx.stroke();
+    ctx.setLineDash([]);
+  } else {
+    // تدرج أخضر للورقة
+    var grd = ctx.createRadialGradient(lx-dir*size*0.2,0,1,lx,0,size*0.8);
+    grd.addColorStop(0,'#5db85d');
+    grd.addColorStop(0.5,'#2d7a2d');
+    grd.addColorStop(1,'#1a4d1a');
+    ctx.fillStyle=grd;
+    ctx.strokeStyle='#1a4d1a';
+    ctx.lineWidth=0.5;
+    ctx.fill(); ctx.stroke();
+    // عرق الورقة، ممتد على طول الساق نفسه
+    ctx.beginPath();
+    ctx.moveTo(dir*size*0.3,0); ctx.lineTo(dir*size*2.1,0);
+    ctx.strokeStyle='rgba(255,255,255,0.35)';
+    ctx.lineWidth=0.7;
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+
+  // ظل خفيف للخلفية
+  ctx.save();
+  ctx.fillStyle='rgba(212,195,150,0.15)';
+  ctx.fillRect(0,0,W,H);
+  ctx.restore();
+
+  ctx.save();
+  // تحويل إحداثيات
+  ctx.translate(W/2 - CX*scale + tx*scale, H/2 - CY*scale + ty*scale);
+  ctx.scale(scale,scale);
+
+  // رسم الجذع
+  ctx.beginPath();
+  ctx.moveTo(CX, CY+60);
+  ctx.lineTo(CX, CY);
+  ctx.strokeStyle='#5c3d1e';
+  ctx.lineWidth=10;
+  ctx.lineCap='round';
+  ctx.stroke();
+  // العشب
+  for(var gi=-20;gi<=20;gi+=5){
+    ctx.beginPath();
+    ctx.moveTo(CX+gi, CY+60);
+    ctx.quadraticCurveTo(CX+gi+2, CY+48, CX+gi, CY+45);
+    ctx.strokeStyle='#3a8a3a';
+    ctx.lineWidth=1.5;
+    ctx.stroke();
+  }
+
+  // رسم الروابط
+  links.forEach(function(lk){
+    var s=nodes[lk.s], t=nodes[lk.t];
+    ctx.beginPath();
+    ctx.moveTo(s.x,s.y);
+    // خط منحنٍ
+    var mx=(s.x+t.x)/2, my=(s.y+t.y)/2;
+    ctx.quadraticCurveTo(mx,my,t.x,t.y);
+    // سماكة حسب العمق
+    var lw = s.depth===0?5:s.depth===1?3:s.depth===2?1.8:1;
+    ctx.strokeStyle = s.depth===0?'#5c3d1e':s.depth===1?'#7a5230':'#a07850';
+    ctx.lineWidth=lw;
+    ctx.stroke();
+  });
+
+  // رسم العقد
+  nodes.forEach(function(n){
+    if(n.isLeaf){
+      // ورقة
+      leaf(ctx, n.x, n.y, n.angle, 14, n.deceased);
+      // اسم مائل يسبق الورقة، بمحاذاة الساق القادم من الأسماء الأعلى
+      ctx.save();
+      ctx.translate(n.x, n.y);
+      var rot=(n.angle-90)*Math.PI/180;
+      var flip = (n.angle > 90 && n.angle < 270);
+      ctx.rotate(flip ? rot + Math.PI : rot);
+      var dir = flip ? -1 : 1;
+      ctx.font='bold 9px Tajawal';
+      ctx.fillStyle='#1a3a1a';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      ctx.fillText(n.name, dir*9, 0);
+      ctx.restore();
+    } else {
+      // عقدة داخلية
+      var r = n.depth===0?14:n.depth===1?10:n.depth===2?7:6;
+      var colors=['#5c3d1e','#8b4513','#c0392b','#e67e22'];
+      var col = colors[Math.min(n.depth,colors.length-1)];
+
+      ctx.beginPath();
+      ctx.arc(n.x,n.y,r,0,Math.PI*2);
+      if(n.deceased){
+        ctx.fillStyle='#f5f0e4';
+        ctx.strokeStyle=col;
+        ctx.lineWidth=2;
+        ctx.setLineDash([4,3]);
+        ctx.fill(); ctx.stroke();
+        ctx.setLineDash([]);
+      } else {
+        var grd=ctx.createRadialGradient(n.x-r*.3,n.y-r*.3,1,n.x,n.y,r);
+        grd.addColorStop(0,'#fff9');
+        grd.addColorStop(1,col);
+        ctx.fillStyle=grd;
+        ctx.strokeStyle='#fff';
+        ctx.lineWidth=1.5;
+        ctx.fill(); ctx.stroke();
+      }
+
+      // الاسم
+      ctx.font=(n.depth===0?'bold 13px':'bold 10px')+' Amiri';
+      ctx.fillStyle=n.depth===0?'#2c1000':'#2c1810';
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      var ty2 = n.y < CY-100 ? n.y+r+10 : n.y-r-10;
+      ctx.fillText(n.name, n.x, ty2);
+    }
+  });
+
+  ctx.restore();
+}
+
+// ════════════════════════════════
+//  تفاعل
+// ════════════════════════════════
+function doZoom(f){scale=Math.max(.2,Math.min(4,scale*f));draw();}
+function reset(){scale=1;tx=0;ty=0;draw();}
+
+function handleCanvasClick(clientX, clientY){
+  var rect = canvas.getBoundingClientRect();
+  var sx = clientX - rect.left;
+  var sy = clientY - rect.top;
+  // inverse of the transform used in draw(): translate(...); scale(scale)
+  var wx = (sx - (W/2 - CX*scale + tx*scale)) / scale;
+  var wy = (sy - (H/2 - CY*scale + ty*scale)) / scale;
+
+  var best=null, bestDist=Infinity;
+  nodes.forEach(function(n){
+    var cx=n.x, cy=n.y;
+    var hitR;
+    if(n.isLeaf){
+      // the leaf shape sits offset outward from n.x,n.y along its stem —
+      // move the hit-test center to match (see leaf() for the same lx calc)
+      var rot=(n.angle-90)*Math.PI/180;
+      var flip=(n.angle>90 && n.angle<270);
+      var effRot = flip ? rot+Math.PI : rot;
+      var dir = flip ? -1 : 1;
+      var lx = dir*14*1.4;
+      cx = n.x + lx*Math.cos(effRot);
+      cy = n.y + lx*Math.sin(effRot);
+      hitR = 30;
+    } else {
+      var r = n.depth===0?14:n.depth===1?10:n.depth===2?7:6;
+      hitR = Math.max(18, r*2.4);
+    }
+    var d = Math.hypot(wx-cx, wy-cy);
+    if(d<hitR && d<bestDist){ bestDist=d; best=n; }
+  });
+  if(best) openEditor(best);
+}
+
+// ════════════════════════════════
+//  محرر الإضافة والتعديل
+// ════════════════════════════════
+var currentEntry=null;
+var overlay=document.getElementById('modal-overlay');
+
+function openEditor(entry){
+  currentEntry = entry;
+  document.getElementById('modal-name-title').textContent = 'تعديل: '+entry.nodeRef.name;
+  document.getElementById('edit-name').value = entry.nodeRef.name;
+  document.getElementById('edit-deceased').checked = !!entry.nodeRef.deceased;
+  document.getElementById('new-child-name').value='';
+  document.getElementById('new-child-deceased').checked=false;
+  document.getElementById('delete-btn').style.display = entry.parentRef ? 'inline-block' : 'none';
+  overlay.classList.add('show');
+}
+function closeEditor(){ overlay.classList.remove('show'); currentEntry=null; }
+
+document.getElementById('close-modal-btn').addEventListener('click', closeEditor);
+overlay.addEventListener('click', function(e){ if(e.target===overlay) closeEditor(); });
+
+document.getElementById('save-btn').addEventListener('click', function(){
+  if(!currentEntry) return;
+  var name = document.getElementById('edit-name').value.trim();
+  if(!name){ alert('اكتب اسماً'); return; }
+  currentEntry.nodeRef.name = name;
+  currentEntry.nodeRef.deceased = document.getElementById('edit-deceased').checked;
+  saveTree();
+  rebuildAndRedraw();
+  closeEditor();
+});
+
+document.getElementById('delete-btn').addEventListener('click', function(){
+  if(!currentEntry || !currentEntry.parentRef) return;
+  var kidsCount = (currentEntry.nodeRef.children||[]).length;
+  var msg = kidsCount>0
+    ? ('"'+currentEntry.nodeRef.name+'" لديه '+kidsCount+' من الأبناء المسجّلين في الشجرة. حذفه سيحذفهم جميعاً مع ذريتهم. متابعة؟')
+    : ('هل تريد حذف "'+currentEntry.nodeRef.name+'"؟');
+  if(!confirm(msg)) return;
+  var siblings = currentEntry.parentRef.children;
+  var i = siblings.indexOf(currentEntry.nodeRef);
+  if(i>-1) siblings.splice(i,1);
+  saveTree();
+  rebuildAndRedraw();
+  closeEditor();
+});
+
+document.getElementById('add-child-btn').addEventListener('click', function(){
+  if(!currentEntry) return;
+  var name = document.getElementById('new-child-name').value.trim();
+  if(!name){ alert('اكتب اسم الابن أو الابنة'); return; }
+  var deceased = document.getElementById('new-child-deceased').checked;
+  currentEntry.nodeRef.children = currentEntry.nodeRef.children || [];
+  currentEntry.nodeRef.children.push({id:'n'+(nextId++), name:name, deceased:deceased, children:[]});
+  saveTree();
+  rebuildAndRedraw();
+  document.getElementById('new-child-name').value='';
+  document.getElementById('new-child-deceased').checked=false;
+  document.getElementById('new-child-name').focus();
+  // المربع الحواري يظل مفتوحاً حتى تقدر تضيف أكثر من ابن بضغطة واحدة
+});
+
+document.getElementById('reset-data-btn').addEventListener('click', function(){
+  if(!confirm('سيتم حذف كل التعديلات والإضافات وإرجاع الشجرة للنسخة الأصلية. متابعة؟')) return;
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  tree = buildInitialTree();
+  saveTree();
+  rebuildAndRedraw();
+});
+
+var wrap=document.getElementById('wrap');
+var downX=0, downY=0;
+wrap.addEventListener('mousedown',function(e){
+  dragging=true;mx0=e.clientX;my0=e.clientY;tx0=tx;ty0=ty;
+  downX=e.clientX; downY=e.clientY;
+  wrap.style.cursor='grabbing';
+});
+window.addEventListener('mousemove',function(e){
+  if(!dragging)return;
+  tx=tx0+(e.clientX-mx0)/scale;
+  ty=ty0+(e.clientY-my0)/scale;
+  draw();
+});
+window.addEventListener('mouseup',function(e){
+  dragging=false;wrap.style.cursor='grab';
+  var dist = Math.hypot(e.clientX-downX, e.clientY-downY);
+  if(dist<6){ handleCanvasClick(e.clientX, e.clientY); }
+});
+wrap.addEventListener('wheel',function(e){
+  e.preventDefault();
+  doZoom(e.deltaY<0?1.12:0.88);
+},{passive:false});
+
+// touch
+var td=false,tmx,tmy,ttx,tty,tld=null;
+var touchStartX=0, touchStartY=0, touchLastX=0, touchLastY=0;
+wrap.addEventListener('touchstart',function(e){
+  if(e.touches.length===1){
+    td=true;tmx=e.touches[0].clientX;tmy=e.touches[0].clientY;ttx=tx;tty=ty;
+    touchStartX=tmx; touchStartY=tmy; touchLastX=tmx; touchLastY=tmy;
+  }
+},{passive:true});
+wrap.addEventListener('touchmove',function(e){
+  if(e.touches.length===1&&td){
+    tx=ttx+(e.touches[0].clientX-tmx)/scale;
+    ty=tty+(e.touches[0].clientY-tmy)/scale;
+    touchLastX=e.touches[0].clientX; touchLastY=e.touches[0].clientY;
+    draw();
+  } else if(e.touches.length===2){
+    var dx=e.touches[0].clientX-e.touches[1].clientX;
+    var dy=e.touches[0].clientY-e.touches[1].clientY;
+    var d=Math.sqrt(dx*dx+dy*dy);
+    if(tld)doZoom(d/tld);
+    tld=d;
+  }
+},{passive:true});
+wrap.addEventListener('touchend',function(){
+  if(td){
+    var dist=Math.hypot(touchLastX-touchStartX, touchLastY-touchStartY);
+    if(dist<6){ handleCanvasClick(touchStartX, touchStartY); }
+  }
+  td=false;tld=null;
+});
+
+window.addEventListener('resize',resize);
+resize();
+loadFromSheet();
+// canvas text is baked in at draw() time using whatever font is currently
+// loaded — if Amiri/Tajawal haven't finished downloading yet, the first
+// draw silently uses the fallback font forever (no auto re-render on
+// font load). Redraw once the web fonts are actually ready.
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(function(){ draw(); });
+}
+</script>
+</body>
+</html>
