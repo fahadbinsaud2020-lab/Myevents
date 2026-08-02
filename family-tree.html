@@ -356,14 +356,22 @@ function rowsToTree(rows){
   var byId = {};
   rows.forEach(function(r){ byId[r.id] = {id:r.id, name:r.name, deceased:!!r.deceased, children:[]}; });
   var root = null;
+  var orphans = [];
   rows.forEach(function(r){
     var node = byId[r.id];
-    if(r.parentId && byId[r.parentId]){
+    if(!r.parentId){
+      root = node; // the true root: exported with parentId explicitly null
+    } else if(byId[r.parentId]){
       byId[r.parentId].children.push(node);
     } else {
-      root = node;
+      // parentId points to an id that isn't in this dataset — this is a
+      // sign of partial/corrupted data (e.g. an interrupted or
+      // overlapping save), not a second root. Attach it under the real
+      // root instead of silently letting it masquerade as the root.
+      orphans.push(node);
     }
   });
+  if(root && orphans.length) root.children = root.children.concat(orphans);
   return root;
 }
 
@@ -375,14 +383,38 @@ function setSyncStatus(msg){
 function syncToSheet(){
   if(!SHEET_URL) return;
   var rows = treeToRows(tree, null);
+  var localCount = countAllNodes(tree);
   setSyncStatus('☁️ جارٍ الحفظ بقوقل شيت...');
+  // check what's already saved before overwriting it — if this tab's data
+  // is suspiciously smaller than what's on the sheet, that's the exact
+  // stale-tab situation that caused data loss before; ask for confirmation
+  // instead of silently overwriting
+  fetch(SHEET_URL).then(function(r){ return r.json(); }).then(function(existingRows){
+    var existingCount = existingRows ? existingRows.length : 0;
+    if(existingCount > 5 && localCount < existingCount*0.5){
+      var ok = confirm(
+        'عدد الأشخاص بنسختك الحالية ('+localCount+') أقل بكثير من العدد المحفوظ حالياً بقوقل شيت ('+existingCount+').\n' +
+        'هذا يشبه فتح تبويب قديم لم يحمّل آخر التحديثات. هل أنت متأكد إنك تريد الاستبدال؟ (قد يمسح بيانات لم تصل لهذا الجهاز)'
+      );
+      if(!ok){ setSyncStatus('⏸️ تم إلغاء الحفظ لحماية بياناتك — حدّث الصفحة أولاً'); return; }
+    }
+    doPostSave(rows);
+  }).catch(function(){ doPostSave(rows); }); // couldn't check size — proceed anyway
+}
+
+function doPostSave(rows){
   // plain text body (no explicit Content-Type) avoids a CORS preflight;
-  // reading the response gives us the *real* success/failure instead of
-  // the false "success" that no-cors mode was silently producing
+  // reading the response gives us the *real* success/failure
   fetch(SHEET_URL, { method:'POST', body: JSON.stringify(rows) })
     .then(function(r){ return r.text(); })
     .then(function(txt){ setSyncStatus('✅ محفوظ بقوقل شيت'); })
     .catch(function(err){ setSyncStatus('⚠️ تعذّر الحفظ بقوقل شيت — محفوظ محلياً فقط'); });
+}
+
+function countAllNodes(n){
+  var c = 1;
+  (n.children||[]).forEach(function(ch){ c += countAllNodes(ch); });
+  return c;
 }
 
 function loadFromSheet(){
@@ -392,6 +424,15 @@ function loadFromSheet(){
     if(rows && rows.length){
       var loaded = rowsToTree(rows);
       if(loaded){
+        var currentCount = countAllNodes(tree);
+        var loadedCount = countAllNodes(loaded);
+        // guard against overwriting a fuller local tree with a much
+        // smaller one from the sheet — a sign of a partial/corrupted save
+        // (e.g. two tabs saving at once), not an intentional mass-deletion
+        if(currentCount > 5 && loadedCount < currentCount*0.5){
+          setSyncStatus('⚠️ بيانات قوقل شيت أقل بكثير من نسختك المحلية — لم تُستبدل تلقائياً لحماية بياناتك');
+          return;
+        }
         tree = loaded;
         bumpIdCounterFrom(tree);
         try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(tree)); }catch(e){}
