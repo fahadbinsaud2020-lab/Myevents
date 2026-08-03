@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>شجرة عائلة كليب بن عور</title>
+<title>شجرة عائلة كليب</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -357,19 +357,22 @@ function rowsToTree(rows){
   rows.forEach(function(r){ byId[r.id] = {id:r.id, name:r.name, deceased:!!r.deceased, children:[]}; });
   var root = null;
   var orphans = [];
+  // guard against duplicate rows for the same id — without this, a
+  // stray duplicate row causes that person to be attached twice in the
+  // tree, and every subsequent save would then write out that doubled
+  // structure, compounding the duplication further on each save
+  var attached = {};
   rows.forEach(function(r){
+    if(attached[r.id]) return;
     var node = byId[r.id];
     if(!r.parentId){
-      root = node; // the true root: exported with parentId explicitly null
+      if(!root) root = node;
     } else if(byId[r.parentId]){
       byId[r.parentId].children.push(node);
     } else {
-      // parentId points to an id that isn't in this dataset — this is a
-      // sign of partial/corrupted data (e.g. an interrupted or
-      // overlapping save), not a second root. Attach it under the real
-      // root instead of silently letting it masquerade as the root.
       orphans.push(node);
     }
+    attached[r.id] = true;
   });
   if(root && orphans.length) root.children = root.children.concat(orphans);
   return root;
@@ -678,13 +681,26 @@ function draw(){
         ctx.fill(); ctx.stroke();
       }
 
-      // الاسم
+      // الاسم — يتبع اتجاه الساق نفسه لتقليل التزاحم بين الأسماء المتجاورة
+      // (نفس أسلوب أسماء الأوراق: مائل بمحاذاة الفرع، ويبقى مستقيماً
+      // ومقروءاً بالنصف السفلي من الدائرة بدل ما ينقلب)
+      ctx.save();
       ctx.font=(n.depth===0?'bold 13px':'bold 10px')+' Amiri';
       ctx.fillStyle=n.depth===0?'#2c1000':'#2c1810';
       ctx.textAlign='center';
       ctx.textBaseline='middle';
-      var ty2 = n.y < CY-100 ? n.y+r+10 : n.y-r-10;
-      ctx.fillText(n.name, n.x, ty2);
+      if(n.depth===0){
+        // الجذر بلا اتجاه شعاعي حقيقي (كل الأفرع تنطلق منه) — يبقى أفقياً فوقه
+        ctx.fillText(n.name, n.x, n.y-r-10);
+      } else {
+        ctx.translate(n.x, n.y);
+        var nrot=(n.angle-90)*Math.PI/180;
+        var nflip=(n.angle>90 && n.angle<270);
+        ctx.rotate(nflip ? nrot+Math.PI : nrot);
+        var ndir = nflip ? -1 : 1;
+        ctx.fillText(n.name, ndir*(r+16), 0);
+      }
+      ctx.restore();
     }
   });
 
