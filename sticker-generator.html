@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>مولّد الملصقات</title>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --panel:#211f1a;
+    --panel-ink:#faf6ea;
+    --field:#141310;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:#33322e;
+    font-family:'Tajawal',sans-serif;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+  }
+
+  /* ---------- control panel ---------- */
+  .panel{
+    background:var(--panel);
+    color:var(--panel-ink);
+    border-radius:12px;
+    padding:16px 20px;
+    width:100%;
+    max-width:900px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+    gap:14px 20px;
+  }
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field.wide{ grid-column: 1 / -1; }
+  .field label{ font-size:12.5px; color:#cfc9b8; font-weight:500; }
+  .field input[type=text], .field textarea{
+    font-family:'Tajawal',sans-serif;
+    padding:8px 10px;
+    border-radius:6px;
+    border:1px solid #4a483f;
+    background:var(--field);
+    color:var(--panel-ink);
+    font-size:14px;
+    resize:vertical;
+  }
+  .field textarea{ min-height:44px; }
+  .row2{ display:flex; gap:10px; }
+  .row2 .field{ flex:1; }
+  .field input[type=number]{
+    font-family:'Tajawal',sans-serif;
+    padding:8px 10px;
+    border-radius:6px;
+    border:1px solid #4a483f;
+    background:var(--field);
+    color:var(--panel-ink);
+    width:100%;
+  }
+
+  .swatches{ display:flex; gap:8px; flex-wrap:wrap; }
+  .swatch{
+    width:30px; height:30px;
+    border-radius:50%;
+    cursor:pointer;
+    border:2px solid transparent;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .swatch.active{ border-color:#fff; }
+  .colorpickers{ display:flex; gap:10px; align-items:center; }
+  .colorpickers label{ display:flex; align-items:center; gap:6px; font-size:12px; color:#cfc9b8; }
+  .colorpickers input[type=color]{
+    width:34px; height:34px; border:none; border-radius:6px; padding:0; background:none; cursor:pointer;
+  }
+
+  .actions{ display:flex; align-items:flex-end; gap:10px; }
+  .actions button{
+    font-family:'Tajawal',sans-serif;
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    font-weight:700;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .actions .print-btn{ background:#c9a227; color:#171512; }
+  .actions .print-btn:hover{ background:#e6cd7a; }
+
+  /* ---------- sheet & sticker ---------- */
+  .sheet{
+    background:#fff;
+    width:210mm;
+    padding:10mm;
+    display:grid;
+    gap:6mm;
+    box-shadow:0 10px 40px rgba(0,0,0,.4);
+  }
+
+  .sticker{
+    position:relative;
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .sticker .frame{
+    position:absolute; inset:3mm;
+    border:0.9pt solid var(--accent);
+  }
+  .sticker .frame::before{
+    content:"";
+    position:absolute; inset:1.6mm;
+    border:0.4pt solid var(--accent);
+    opacity:.5;
+  }
+  .sticker .corner{
+    position:absolute;
+    width:6mm; height:6mm;
+    border:0.9pt solid var(--accent);
+  }
+  .sticker .corner.tl{ top:1.4mm; left:1.4mm; border-left:none; border-top:none; transform:rotate(180deg); }
+  .sticker .corner.tr{ top:1.4mm; right:1.4mm; border-right:none; border-top:none; transform:rotate(90deg); }
+  .sticker .corner.bl{ bottom:1.4mm; left:1.4mm; border-left:none; border-bottom:none; transform:rotate(270deg); }
+  .sticker .corner.br{ bottom:1.4mm; right:1.4mm; border-right:none; border-bottom:none; }
+
+  .content{
+    position:relative;
+    z-index:2;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:1.6mm;
+    max-width:82%;
+  }
+  .content .main{
+    font-family:'Aref Ruqaa',serif;
+    font-weight:700;
+    font-size:var(--main-size, 13pt);
+    line-height:1.25;
+    color:var(--fg-main);
+  }
+  .content .sub{
+    font-family:'Tajawal',sans-serif;
+    font-weight:500;
+    font-size:var(--sub-size, 7.6pt);
+    line-height:1.5;
+    color:var(--fg-sub);
+  }
+  .content .name{
+    font-family:'Aref Ruqaa',serif;
+    font-weight:700;
+    font-size:var(--name-size, 8.4pt);
+    padding-top:0.6mm;
+    margin-top:0.6mm;
+    border-top:0.4pt solid var(--accent);
+    color:var(--fg-name);
+  }
+
+  @media print{
+    body{ background:#fff; padding:0; }
+    .panel{ display:none; }
+    .sheet{ box-shadow:none; margin:0; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="panel">
+
+    <div class="field wide">
+      <label>العبارة الرئيسية</label>
+      <input type="text" id="mainText" value="وَقْفٌ لِلَّهِ تَعَالَى">
+      <label style="margin-top:4px">حجم الخط: <span id="mainSizeVal">13</span>pt</label>
+      <input type="range" id="mainSize" min="8" max="24" value="13">
+    </div>
+
+    <div class="field wide">
+      <label>العبارة الفرعية (وصف / تفاصيل)</label>
+      <textarea id="subText">صدقة جارية لي ولوالديّ وزوجتي وأولادي</textarea>
+      <label style="margin-top:4px">حجم الخط: <span id="subSizeVal">7.6</span>pt</label>
+      <input type="range" id="subSize" min="5" max="18" step="0.2" value="7.6">
+    </div>
+
+    <div class="field">
+      <label>الاسم (اختياري — يظهر فقط عند التعبئة)</label>
+      <input type="text" id="nameInput" placeholder="مثال: فهد بن سعود">
+      <label style="margin-top:4px">حجم الخط: <span id="nameSizeVal">8.4</span>pt</label>
+      <input type="range" id="nameSize" min="6" max="18" step="0.2" value="8.4">
+    </div>
+
+    <div class="field">
+      <label>اللون</label>
+      <div class="swatches" id="swatches"></div>
+    </div>
+
+    <div class="field">
+      <label>تخصيص الألوان (خلفية / إطار ونص)</label>
+      <div class="colorpickers">
+        <label>الخلفية <input type="color" id="bgColor" value="#0d3b2e"></label>
+        <label>البارز <input type="color" id="accentColor" value="#b8912e"></label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>المقاس (مم)</label>
+      <div class="row2">
+        <div class="field"><input type="number" id="wInput" value="100"></div>
+        <div class="field"><input type="number" id="hInput" value="50"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>عدد التكرارات (كم ملصق تبي)</label>
+      <input type="number" id="repeatInput" min="1" value="10">
+    </div>
+
+    <div class="field actions">
+      <button class="print-btn" onclick="window.print()">طباعة 🖨️</button>
+    </div>
+
+  </div>
+
+  <div class="sheet" id="sheet"></div>
+
+<script>
+const presets = [
+  { name:"زمردي وذهبي", bg:"#0d3b2e", accent:"#b8912e", mainColor:"#e6cd7a", subColor:"#faf6ea" },
+  { name:"أبيض وأسود",  bg:"#ffffff", accent:"#161613", mainColor:"#161613", subColor:"#161613" },
+  { name:"عنابي وذهبي", bg:"#4a1620", accent:"#c9a227", mainColor:"#e6cd7a", subColor:"#f3e9dd" },
+  { name:"كحلي وفضي",   bg:"#12213b", accent:"#b9c2cf", mainColor:"#e8edf3", subColor:"#cdd6e0" },
+  { name:"كريمي وبني",  bg:"#f5efdd", accent:"#5b4327", mainColor:"#5b4327", subColor:"#5b4327" },
+];
+
+function buildSwatches(){
+  const box = document.getElementById('swatches');
+  box.innerHTML = "";
+  presets.forEach((p, i) => {
+    const el = document.createElement('div');
+    el.className = 'swatch' + (i===0 ? ' active' : '');
+    el.style.background = `linear-gradient(135deg, ${p.bg} 50%, ${p.accent} 50%)`;
+    el.title = p.name;
+    el.onclick = () => applyPreset(p, el);
+    box.appendChild(el);
+  });
+}
+
+function applyPreset(p, el){
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('bgColor').value = p.bg;
+  document.getElementById('accentColor').value = p.accent;
+  currentPreset = p;
+  render();
+}
+
+let currentPreset = presets[0];
+let userSetRepeat = false;
+document.getElementById('repeatInput').addEventListener('input', () => {
+  userSetRepeat = true;
+  render();
+});
+
+function stickerHTML(){
+  const name = document.getElementById('nameInput').value.trim();
+  const main = document.getElementById('mainText').value.trim();
+  const sub = document.getElementById('subText').value.trim();
+  const nameLine = name ? `<div class="name">${name}</div>` : "";
+  const subLine = sub ? `<div class="sub">${sub.split("\n").join("<br>")}</div>` : "";
+  return `
+  <div class="sticker">
+    <div class="frame"></div>
+    <div class="corner tl"></div>
+    <div class="corner tr"></div>
+    <div class="corner bl"></div>
+    <div class="corner br"></div>
+    <div class="content">
+      <div class="main">${main}</div>
+      ${subLine}
+      ${nameLine}
+    </div>
+  </div>`;
+}
+
+function render(){
+  const w = parseFloat(document.getElementById('wInput').value) || 100;
+  const h = parseFloat(document.getElementById('hInput').value) || 50;
+  const bg = document.getElementById('bgColor').value;
+  const accent = document.getElementById('accentColor').value;
+
+  const sheet = document.getElementById('sheet');
+  sheet.style.gridTemplateColumns = `repeat(auto-fill, minmax(${w}mm, 1fr))`;
+
+  // approximate how many fit on an A4 sheet (190mm x 277mm usable)
+  const cols = Math.max(1, Math.floor(190 / w));
+  const rows = Math.max(1, Math.floor(277 / h));
+
+  if(!userSetRepeat){
+    document.getElementById('repeatInput').value = cols * rows;
+  }
+  const count = Math.max(1, parseInt(document.getElementById('repeatInput').value) || 1);
+
+  sheet.innerHTML = "";
+  for(let i=0;i<count;i++){
+    sheet.innerHTML += stickerHTML();
+  }
+
+  document.querySelectorAll('.sticker').forEach(el => {
+    el.style.setProperty('--accent', accent);
+    el.style.background = bg;
+    el.style.aspectRatio = `${w}/${h}`;
+    el.style.setProperty('--fg-main', currentPreset.mainColor);
+    el.style.setProperty('--fg-sub', currentPreset.subColor);
+    el.style.setProperty('--fg-name', currentPreset.mainColor);
+    el.style.setProperty('--main-size', `${document.getElementById('mainSize').value}pt`);
+    el.style.setProperty('--sub-size', `${document.getElementById('subSize').value}pt`);
+    el.style.setProperty('--name-size', `${document.getElementById('nameSize').value}pt`);
+  });
+}
+
+// live-update when custom colors changed manually
+document.getElementById('bgColor').addEventListener('input', () => {
+  currentPreset = {...currentPreset, bg:document.getElementById('bgColor').value};
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+  render();
+});
+document.getElementById('accentColor').addEventListener('input', () => {
+  currentPreset = {...currentPreset, accent:document.getElementById('accentColor').value};
+  document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
+  render();
+});
+['mainText','subText','nameInput','wInput','hInput','mainSize','subSize','nameSize'].forEach(id => {
+  document.getElementById(id).addEventListener('input', () => {
+    document.getElementById('mainSizeVal').textContent = document.getElementById('mainSize').value;
+    document.getElementById('subSizeVal').textContent = document.getElementById('subSize').value;
+    document.getElementById('nameSizeVal').textContent = document.getElementById('nameSize').value;
+    render();
+  });
+});
+
+buildSwatches();
+render();
+</script>
+
+</body>
+</html>
