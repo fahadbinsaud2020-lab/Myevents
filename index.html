@@ -66,6 +66,7 @@
   .tool-card.zamakan{--accent:#28b8a3;--accent-bg:rgba(40,184,163,.15);}
   .tool-card.occasions{--accent:#5b7fff;--accent-bg:rgba(91,127,255,.15);}
   .tool-card.currency{--accent:#c8963c;--accent-bg:rgba(200,150,60,.15);}
+  .tool-card.sticker{--accent:#b8912e;--accent-bg:rgba(184,145,46,.15);}
   .tool-card.soon{border-style:dashed;opacity:.55;cursor:default;pointer-events:none;}
   .tool-card.soon::before{background:var(--card-edge);}
   footer{text-align:center;color:var(--muted);font-size:11.5px;margin-top:30px;opacity:.75;line-height:1.8;}
@@ -148,7 +149,7 @@
         <span class="tool-cta">افتح الأداة ←</span>
       </button>
 
-      <button class="tool-card sticker" data-tool="sticker" data-name="مولد الملصقات">
+      <button class="tool-card sticker" onclick="openTool('sticker','مولد الملصقات')">
         <div class="tool-top">
           <div class="tool-icon">🏷️</div>
           <div>
@@ -195,7 +196,13 @@ var TOOLS = {
   };
 
 function openTool(key, name) {
-  var url = BASE + TOOLS[key];
+  var toolValue = TOOLS[key];
+  var url;
+  if (toolValue && typeof toolValue === 'object' && toolValue.b64) {
+    url = 'data:text/html;base64,' + toolValue.b64;
+  } else {
+    url = BASE + toolValue;
+  }
   document.getElementById('currentToolName').textContent = name;
   document.getElementById('toolFrame').src = url;
   document.getElementById('view-tool').classList.add('active');
@@ -224,7 +231,7 @@ window.addEventListener('popstate', function(e) {
 var params = new URLSearchParams(window.location.search);
 var tool = params.get('tool');
 if (tool && TOOLS[tool]) {
-  var names = {zamakan:'زَمكان', occasions:'المناسبات والأحداث', currency:'محول العملات'};
+  var names = {zamakan:'زَمكان', occasions:'المناسبات والأحداث', currency:'محول العملات', sticker:'مولد الملصقات'};
   openTool(tool, names[tool]);
 }
 </script>
