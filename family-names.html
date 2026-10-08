@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أسماء العائلة</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--g:#0f5132;--g2:#1b7a4c;--gold:#b8860b;--bg:#f6f3ea;--card:#fff;--tx:#1f2a24;--mu:#6b7770;--bd:#e4ded0;--rd:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:Tajawal,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:linear-gradient(135deg,var(--g),var(--g2));color:#fff;padding:18px 16px 14px;border-bottom:4px solid var(--gold)}
+header h1{margin:0;font-size:20px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px}.tree{background:var(--gold);color:#fff;text-decoration:none;border-radius:20px;padding:6px 14px;font:700 13px Tajawal;white-space:nowrap}header p{margin:4px 0 0;font-size:13px;opacity:.85}
+.seg{display:flex;gap:6px;margin-top:12px}.seg button{flex:1;border:1px solid #ffffff66;background:#ffffff1a;color:#fff;border-radius:10px;padding:8px;font:500 14px Tajawal;cursor:pointer}.seg button.on{background:#fff;color:var(--g);font-weight:700}
+nav{display:flex;background:#fff;border-bottom:1px solid var(--bd);position:sticky;top:0;z-index:5}
+nav button{flex:1;border:0;background:none;padding:12px;font:500 14px Tajawal;color:var(--mu);border-bottom:3px solid transparent;cursor:pointer}
+nav button.on{color:var(--g);border-color:var(--gold);font-weight:700}
+main{max-width:760px;margin:auto;padding:14px}
+.tab{display:none}.tab.on{display:block}
+.bar{display:flex;gap:8px;margin-bottom:10px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--bd);border-radius:10px;font:400 15px Tajawal;background:#fff}
+.btn{border:0;border-radius:10px;padding:10px 16px;font:700 14px Tajawal;cursor:pointer;background:var(--g);color:#fff;white-space:nowrap}
+.btn.alt{background:#fff;color:var(--g);border:1px solid var(--g)}
+.row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:9px 12px;margin-bottom:7px}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}.nm{flex:1;font-weight:500}.nm small{display:block;color:var(--mu);font-weight:400;font-size:12px}
+.row button{border:0;background:#f1eee4;border-radius:8px;width:34px;height:34px;cursor:pointer;font-size:15px}.row .del{background:#fdeceb}
+.meta{font-size:13px;color:var(--mu);margin:2px 2px 10px}.empty{text-align:center;color:var(--mu);padding:30px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;text-align:center}
+.stat b{display:block;font-size:22px;color:var(--g)}.stat span{font-size:12px;color:var(--mu)}
+.br{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:10px 12px;margin-bottom:8px}
+.br div:first-child{display:flex;justify-content:space-between;font-weight:500;font-size:14px;margin-bottom:6px}
+.trk{height:9px;background:#efeadc;border-radius:9px;overflow:hidden}.trk i{display:block;height:100%;border-radius:9px}
+.set{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:12px}
+.set h3{margin:0 0 10px;font-size:15px;color:var(--g)}.set label{font-size:13px;color:var(--mu);display:block;margin:8px 0 4px}
+.fab{position:fixed;bottom:18px;left:18px;width:56px;height:56px;border-radius:50%;font-size:28px;border:0;background:var(--gold);color:#fff;box-shadow:0 4px 14px #0004;cursor:pointer;z-index:6}
+dialog{border:0;border-radius:16px;padding:18px;width:min(92vw,420px);font-family:Tajawal}dialog::backdrop{background:#0006}
+dialog h3{margin:0 0 12px;color:var(--g)}dialog .bar{margin:12px 0 0}
+#toast{position:fixed;bottom:84px;right:50%;transform:translateX(50%);background:#222;color:#fff;padding:9px 18px;border-radius:20px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:9}
+#toast.on{opacity:1}#load{position:fixed;top:0;left:0;right:0;height:3px;background:var(--gold);display:none;z-index:10}
+@media print{nav,.fab,.bar,.btn,#toast,.row button{display:none!important}.tab{display:none!important}#t-sum{display:block!important}}
+</style>
+</head>
+<body>
+<div id="load"></div>
+<header><div class="top"><h1>🌿 إدارة أسماء العائلة</h1><a id="tree" class="tree" target="_blank" rel="noopener" hidden>🌳 شجرة العائلة</a></div><p id="sub">تحديث بيانات أفراد العائلة ١٤٤٨</p>
+<div class="seg"><button class="on" data-s="emp">👥 الموظفون</button><button data-s="birth">👶 المواليد</button></div></header>
+<nav>
+  <button class="on" data-t="mem">الأفراد</button>
+  <button data-t="sum">الملخص</button>
+  <button data-t="set">الإعدادات</button>
+</nav>
+<main>
+  <section class="tab on" id="t-mem">
+    <div class="bar"><input id="q" placeholder="ابحث عن اسم..." oninput="S.q=this.value;rList()"><select id="f" style="max-width:150px" onchange="S.f=this.value;rList()"></select></div>
+    <div class="meta" id="cnt"></div>
+    <div id="list"></div>
+  </section>
+  <section class="tab" id="t-sum">
+    <div class="cards"><div class="stat"><b id="s1">0</b><span>إجمالي الأفراد</span></div><div class="stat"><b id="s2">0</b><span>عدد الفروع</span></div><div class="stat"><b id="s3">-</b><span>أكبر فرع</span></div></div>
+    <div id="brs"></div>
+    <div class="bar" style="margin-top:12px"><button class="btn" onclick="csv()">⬇ تصدير Excel</button><button class="btn alt" onclick="window.print()">🖨 طباعة</button></div>
+  </section>
+  <section class="tab" id="t-set">
+    <div class="set"><h3>الربط والحماية</h3>
+      <label>رابط السكربت (Web App URL)</label><input id="u" dir="ltr" placeholder="https://script.google.com/macros/s/.../exec">
+      <label>الرقم السري للتعديل</label><input id="p" type="password" inputmode="numeric">
+      <div class="bar"><button class="btn" onclick="saveSet()">حفظ وتحديث</button></div></div>
+    <div class="set"><h3>أسماء الفروع (في الورقة المعروضة)</h3><div id="rn"></div></div>
+  </section>
+</main>
+<button class="fab" onclick="openM()" title="إضافة">+</button>
+<dialog id="dlg">
+  <h3 id="dt">إضافة</h3>
+  <label style="font-size:13px;color:var(--mu)">الفرع</label><select id="mb"></select>
+  <label style="font-size:13px;color:var(--mu);display:block;margin-top:10px" id="ml">الأسماء (اسم في كل سطر)</label>
+  <textarea id="mn" rows="5"></textarea>
+  <div class="bar"><button class="btn" style="flex:1" onclick="save()">حفظ</button><button class="btn alt" onclick="dlg.close()">إلغاء</button></div>
+</dialog>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const DEFAULT_URL='https://script.google.com/macros/s/AKfycbz0vH3tBY6PJuhyVATCwoCBkS-najsUylA6Tr7kc4GkoKwvkq2lh9H2oN0ASqgYK7S7vQ/exec';
+const S={url:DEFAULT_URL,pin:'',data:null,q:'',f:'all',sheet:'emp'};let E=null;
+try{S.url=localStorage.getItem('fm_url')||DEFAULT_URL;S.pin=localStorage.getItem('fm_pin')||''}catch(e){}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const col=c=>`hsl(${c*40+120},45%,38%)`;
+const norm=s=>s.replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').toLowerCase();
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2400)}
+function busy(b){$('#load').style.display=b?'block':'none'}
+function go(t){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.id=='t-'+t))}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.t));
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{S.sheet=b.dataset.s;S.f='all';S.q='';$('#q').value='';
+  document.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x==b));
+  $('#sub').textContent=S.sheet=='emp'?'تحديث بيانات أفراد العائلة ١٤٤٨':'تسجيل المواليد ١٤٤٨';load()});
+
+function setData(d){if(d.tree){$('#tree').href=d.tree;$('#tree').hidden=false}
+  d.total=d.branches.reduce((a,b)=>a+b.members.length,0);S.data=d;
+  const opts=d.branches.map(b=>`<option value="${b.col}">${esc(b.name)}</option>`).join('');
+  $('#f').innerHTML='<option value="all">كل الفروع</option>'+opts;$('#f').value=S.f;$('#mb').innerHTML=opts;
+  rList();rSum();rSet()}
+function all(){const o=[];S.data.branches.forEach(b=>b.members.forEach((n,i)=>o.push({c:b.col,i,n,b:b.name})));return o}
+function rList(){const L=all().filter(m=>(S.f=='all'||m.c==S.f)&&norm(m.n).includes(norm(S.q)));
+  $('#cnt').textContent=L.length+' من '+S.data.total+' فرد';
+  $('#list').innerHTML=L.map(m=>`<div class="row"><span class="dot" style="background:${col(m.c)}"></span><div class="nm">${esc(m.n)}<small>${esc(m.b)}</small></div><button onclick="openM(${m.c},${m.i})">✎</button><button class="del" onclick="del(${m.c},${m.i})">🗑</button></div>`).join('')||'<p class="empty">لا توجد نتائج</p>'}
+function rSum(){const d=S.data,mx=Math.max(...d.branches.map(b=>b.members.length),1),top=[...d.branches].sort((a,b)=>b.members.length-a.members.length)[0];
+  $('#s1').textContent=d.total;$('#s2').textContent=d.branches.length;$('#s3').textContent=top.name.replace('ذوي ','');
+  $('#brs').innerHTML=d.branches.map(b=>{const n=b.members.length,pc=d.total?Math.round(n*100/d.total):0,amt=parseFloat(b.amount)>0?` · ${esc(b.amount)} ر.س`:'';
+    return `<div class="br"><div><span>${esc(b.name)}</span><span>${n} (${pc}%)${amt}</span></div><div class="trk"><i style="width:${n*100/mx}%;background:${col(b.col)}"></i></div></div>`}).join('')}
+function rSet(){$('#u').value=S.url;$('#p').value=S.pin;
+  $('#rn').innerHTML=S.data.branches.map(b=>`<div class="bar"><input id="r${b.col}" value="${esc(b.name)}"><button class="btn alt" onclick="ren(${b.col})">حفظ</button></div>`).join('')}
+
+async function load(){if(!S.url){go('set');return toast('أضف رابط السكربت أولاً')}
+  busy(1);try{const r=await fetch(S.url+'?action=r&s='+S.sheet);setData(await r.json())}catch(e){toast('تعذّر تحميل البيانات')}finally{busy(0)}}
+async function W(p){if(!S.url){go('set');toast('أضف رابط السكربت أولاً');return false}
+  if(!S.pin)S.pin=prompt('أدخل الرقم السري')||'';p.pin=S.pin;p.s=S.sheet;busy(1);
+  try{const r=await(await fetch(S.url+'?action=w&payload='+encodeURIComponent(JSON.stringify(p)))).json();
+    if(r.error){toast(r.error);if(/السري/.test(r.error))S.pin='';return false}
+    try{localStorage.setItem('fm_pin',S.pin)}catch(e){}setData(r);return true}
+  catch(e){toast('تعذّر الاتصال بالخادم');return false}finally{busy(0)}}
+
+function openM(c,i){E=null;$('#mn').value='';
+  if(c!==undefined){const n=S.data.branches[c].members[i];E={c,i,n};$('#dt').textContent='تعديل الاسم';$('#ml').textContent='الاسم';$('#mn').value=n;$('#mn').rows=1;$('#mb').value=c}
+  else{$('#dt').textContent='إضافة أفراد';$('#ml').textContent='الأسماء (اسم في كل سطر)';$('#mn').rows=5;$('#mb').value=S.f=='all'?0:S.f}
+  $('#dlg').showModal()}
+async function save(){const to=+$('#mb').value,L=$('#mn').value.split('\n').map(x=>x.trim()).filter(Boolean);
+  if(!L.length)return toast('اكتب الاسم');
+  const ok=E?await W({op:'edit',c:E.c,i:E.i,old:E.n,name:L[0],to}):await W({op:'add',c:to,names:L});
+  if(ok){$('#dlg').close();toast('تم الحفظ ✓')}}
+async function del(c,i){const n=S.data.branches[c].members[i];if(confirm('حذف «'+n+'» نهائياً؟')&&await W({op:'del',c,i,old:n}))toast('تم الحذف')}
+async function ren(c){const v=$('#r'+c).value.trim();if(v&&await W({op:'rename',c,name:v}))toast('تم تغيير الاسم')}
+function saveSet(){S.url=$('#u').value.trim();S.pin=$('#p').value.trim();
+  try{localStorage.setItem('fm_url',S.url);localStorage.setItem('fm_pin',S.pin)}catch(e){}load()}
+function csv(){let t='\uFEFFالفرع,الاسم\n'+all().map(m=>`"${m.b}","${m.n}"`).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv;charset=utf-8'}));a.download=(S.sheet=='emp'?'الموظفون':'المواليد')+'.csv';a.click()}
+load();
+</script>
+</body>
+</html>
