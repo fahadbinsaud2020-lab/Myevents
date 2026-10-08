@@ -51,7 +51,7 @@ dialog h3{margin:0 0 12px;color:var(--g)}dialog .bar{margin:12px 0 0}
 </nav>
 <main>
   <section class="tab on" id="t-mem">
-    <div class="bar"><input id="q" placeholder="ابحث عن اسم..." oninput="S.q=this.value;rList()"><select id="f" style="max-width:150px" onchange="S.f=this.value;rList()"></select></div>
+    <div class="bar"><input id="q" placeholder="ابحث: فهد  ·  *فهد لأي موضع" oninput="S.q=this.value;rList()"><select id="f" style="max-width:150px" onchange="S.f=this.value;rList()"></select></div>
     <div class="meta" id="cnt"></div>
     <div id="list"></div>
   </section>
@@ -99,7 +99,8 @@ function setData(d){if(d.tree){$('#tree').href=d.tree;$('#tree').hidden=false}
   $('#f').innerHTML='<option value="all">كل الفروع</option>'+opts;$('#f').value=S.f;$('#mb').innerHTML=opts;
   rList();rSum();rSet()}
 function all(){const o=[];S.data.branches.forEach(b=>b.members.forEach((n,i)=>o.push({c:b.col,i,n,b:b.name})));return o}
-function rList(){const L=all().filter(m=>(S.f=='all'||m.c==S.f)&&norm(m.n).includes(norm(S.q)));
+function hit(n){const q=norm(S.q.trim()),w=q.replace(/\*/g,'').trim();if(!w)return true;n=norm(n);return q.startsWith('*')?n.includes(w):n.startsWith(w)}
+function rList(){const L=all().filter(m=>(S.f=='all'||m.c==S.f)&&hit(m.n));
   $('#cnt').textContent=L.length+' من '+S.data.total+' فرد';
   $('#list').innerHTML=L.map(m=>`<div class="row"><span class="dot" style="background:${col(m.c)}"></span><div class="nm">${esc(m.n)}<small>${esc(m.b)}</small></div><button onclick="openM(${m.c},${m.i})">✎</button><button class="del" onclick="del(${m.c},${m.i})">🗑</button></div>`).join('')||'<p class="empty">لا توجد نتائج</p>'}
 function rSum(){const d=S.data,mx=Math.max(...d.branches.map(b=>b.members.length),1),top=[...d.branches].sort((a,b)=>b.members.length-a.members.length)[0];
