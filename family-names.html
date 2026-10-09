@@ -120,13 +120,13 @@ async function W(p){if(!S.url){go('set');toast('أضف رابط السكربت �
   catch(e){toast('تعذّر الاتصال بالخادم');return false}finally{busy(0)}}
 
 function openM(c,i){E=null;$('#mn').value='';
-  if(c!==undefined){const n=S.data.branches[c].members[i];E={c,i,n};$('#dt').textContent='تعديل الاسم';$('#ml').textContent='الاسم';$('#mn').value=n;$('#mn').rows=1;$('#mb').value=c}
-  else{$('#dt').textContent='إضافة أفراد';$('#ml').textContent='الأسماء (اسم في كل سطر)';$('#mn').rows=5;$('#mb').value=S.f=='all'?0:S.f}
+  if(c!==undefined){const n=S.data.branches[c].members[i];E={c,i,n};$('#dt').textContent='✏️ تعديل اسم '+(S.sheet=='emp'?'موظف':'مولود');$('#ml').textContent='الاسم';$('#mn').value=n;$('#mn').rows=1;$('#mb').value=c}
+  else{$('#dt').textContent=S.sheet=='emp'?'👥 إضافة موظف':'👶 إضافة مولود';$('#ml').textContent=(S.sheet=='emp'?'أسماء الموظفين':'أسماء المواليد')+' (اسم في كل سطر)';$('#mn').rows=5;$('#mb').value=S.f=='all'?0:S.f}
   $('#dlg').showModal()}
 async function save(){const to=+$('#mb').value,L=$('#mn').value.split('\n').map(x=>x.trim()).filter(Boolean);
   if(!L.length)return toast('اكتب الاسم');
   const ok=E?await W({op:'edit',c:E.c,i:E.i,old:E.n,name:L[0],to}):await W({op:'add',c:to,names:L});
-  if(ok){$('#dlg').close();toast('تم الحفظ ✓')}}
+  if(ok){$('#dlg').close();toast(E?'تم التعديل ✓':(S.sheet=='emp'?'تمت إضافة الموظف ✓':'تمت إضافة المولود ✓'))}}
 async function del(c,i){const n=S.data.branches[c].members[i];if(confirm('حذف «'+n+'» نهائياً؟')&&await W({op:'del',c,i,old:n}))toast('تم الحذف')}
 async function ren(c){const v=$('#r'+c).value.trim();if(v&&await W({op:'rename',c,name:v}))toast('تم تغيير الاسم')}
 function saveSet(){S.url=$('#u').value.trim();S.pin=$('#p').value.trim();
