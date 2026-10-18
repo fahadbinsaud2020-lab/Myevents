@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>متابعة الإيجارات</title>
+<meta name="theme-color" content="#0f3d33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pine:#0f3d33; --pine-2:#16584a; --brass:#a77b2a; --brass-soft:#f1e6cc;
+  --stone:#eef1ee; --card:#fff; --ink:#14201c; --muted:#5f6f69; --line:#dbe2de;
+  --red:#a8362a; --red-soft:#f8e3df; --green:#1f7a4f; --green-soft:#dff1e7; --amber:#9a6a0b; --amber-soft:#faefd2;
+  --font:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--stone);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.55}
+body{min-height:100vh;padding-bottom:calc(86px + env(safe-area-inset-bottom,0px))}
+.num{direction:ltr;unicode-bidi:isolate;display:inline-block}
+button,input,select,textarea{font-family:inherit;font-size:1rem;color:inherit}
+
+/* header */
+header{background:var(--pine);color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 18px 18px;position:sticky;top:0;z-index:20;
+  background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.035) 0 2px,transparent 2px 14px),repeating-linear-gradient(-45deg,rgba(255,255,255,.035) 0 2px,transparent 2px 14px);
+  border-bottom:3px solid var(--brass)}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:880px;margin:0 auto}
+header h1{margin:0;font-size:1.25rem;font-weight:700;letter-spacing:0}
+#sync{font-size:.78rem;display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);padding:4px 10px;border-radius:99px;border:0;color:#fff;cursor:pointer}
+#sync i{width:8px;height:8px;border-radius:50%;background:#aab;display:inline-block}
+#sync.ok i{background:#5fd49a}#sync.err i{background:#ff8a7a}#sync.pending i,#sync.loading i{background:#f2c35b}
+
+main{max-width:880px;margin:0 auto;padding:16px 14px}
+h2{font-size:1.02rem;margin:22px 4px 10px;font-weight:600}
+.banner{background:var(--amber-soft);border:1px solid #e6cf92;color:#6b4a06;border-radius:12px;padding:12px 14px;margin-bottom:14px;font-size:.92rem}
+.banner.red{background:var(--red-soft);border-color:#e8b9b2;color:#7c241a}
+.banner button{margin-top:8px}
+
+/* stats */
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;text-align:right;cursor:pointer;font:inherit}
+.stat small{display:block;color:var(--muted);font-size:.8rem}
+.stat b{display:block;font-size:1.35rem;font-weight:700;margin-top:2px}
+.stat span{font-size:.78rem;color:var(--muted)}
+.stat.late{border-color:#e8b9b2;background:linear-gradient(0deg,#fff,var(--red-soft))}
+.stat.late b{color:var(--red)}
+.stat.ok b{color:var(--green)}
+
+/* list rows */
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:13px 14px;border-bottom:1px solid var(--line);cursor:pointer;width:100%;background:none;border-left:0;border-right:0;border-top:0;text-align:right}
+.row:last-child{border-bottom:0}
+.row:active{background:#f4f7f5}
+.r-main{min-width:0}
+.r-main b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-main small{color:var(--muted);font-size:.84rem}
+.r-side{text-align:left;flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.r-side b{font-weight:700}
+.tag{font-size:.74rem;padding:2px 9px;border-radius:99px;font-weight:600;white-space:nowrap}
+.tag.paid{background:var(--green-soft);color:var(--green)}
+.tag.overdue{background:var(--red-soft);color:var(--red)}
+.tag.upcoming{background:#e8edf0;color:#41525c}
+.tag.partial{background:var(--amber-soft);color:var(--amber)}
+.tag.vacant{background:var(--brass-soft);color:#7a5a17}
+.prow{display:block}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.fig{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}
+.fig div{background:#f1f5f3;border-radius:9px;padding:5px 9px;text-align:right}
+.fig small{display:block;font-size:.68rem;color:var(--muted);line-height:1.3}
+.fig b{font-size:.93rem;font-weight:700}
+.fig .pd b{color:var(--green)} .fig .rm.late b{color:var(--red)} .fig .rm.zero b{color:var(--green)}
+.pnote{display:block;color:var(--amber);font-size:.78rem;margin-top:6px}
+.bar.mini{height:5px;margin:8px 0 0}
+.empty{padding:26px 18px;text-align:center;color:var(--muted)}
+.empty b{display:block;color:var(--ink);margin-bottom:4px}
+
+/* chips + search */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px;scrollbar-width:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--card);padding:7px 15px;border-radius:99px;cursor:pointer;font-size:.92rem}
+.chip.on{background:var(--pine);color:#fff;border-color:var(--pine)}
+.search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--card);margin-bottom:10px}
+
+/* buttons */
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:600;cursor:pointer;background:var(--pine);color:#fff}
+.btn.gold{background:var(--brass)}
+.btn.ghost{background:#e6ece9;color:var(--ink)}
+.btn.danger{background:var(--red-soft);color:var(--red)}
+.btn.block{width:100%}
+.btn.sm{padding:8px 13px;font-size:.88rem}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.btns .btn{flex:1 1 auto}
+.fab{position:fixed;left:16px;bottom:calc(84px + env(safe-area-inset-bottom,0px));width:54px;height:54px;border-radius:50%;border:0;background:var(--brass);color:#fff;font-size:1.9rem;line-height:1;box-shadow:0 6px 16px rgba(15,61,51,.35);cursor:pointer;z-index:15}
+
+/* bottom nav */
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;z-index:25;padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:none;padding:9px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--muted);font-size:.72rem;cursor:pointer}
+nav button svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--pine);font-weight:700}
+nav button.on svg{stroke:var(--brass)}
+
+/* sheet */
+#overlay{position:fixed;inset:0;background:rgba(10,25,20,.5);display:none;align-items:flex-end;justify-content:center;z-index:50}
+#overlay.open{display:flex}
+#sheet{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 18px calc(22px + env(safe-area-inset-bottom,0px));animation:up .22s ease}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){#sheet{animation:none}}
+#sheet h3{margin:0 0 12px;font-size:1.1rem}
+.grab{width:42px;height:4px;background:var(--line);border-radius:4px;margin:-6px auto 12px}
+label{display:block;font-size:.84rem;color:var(--muted);margin:12px 0 4px}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--brass);outline-offset:1px}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.hint{font-size:.85rem;color:var(--pine-2);background:#e8f2ee;border-radius:10px;padding:8px 12px;margin-top:10px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:.94rem;margin:6px 0 4px}
+.kv span{color:var(--muted)}
+.bar{height:8px;background:#e3e9e6;border-radius:6px;overflow:hidden;margin:8px 0 2px}
+.bar i{display:block;height:100%;background:var(--green)}
+#rc{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+.printonly{display:none}
+@media print{header,nav,.fab,.noprint,#toast,#overlay{display:none!important}body{padding:0;background:#fff}.printonly{display:block;margin-bottom:10px}.row{break-inside:avoid}}
+#toast{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:.9rem;z-index:80;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<header><div class="hrow"><h1>متابعة الإيجارات</h1><button id="sync" class="local" onclick="syncNow()"><i></i><span>محلي</span></button></div></header>
+<main id="app"></main>
+<button class="fab" id="fab" onclick="fabAction()" aria-label="إضافة" style="display:none">+</button>
+<nav id="nav"></nav>
+<div id="overlay" onclick="if(event.target===this)closeSheet()"><div id="sheet"><div class="grab"></div><div id="sheet-body"></div></div></div>
+<div id="toast"></div>
+
+<script>
+'use strict';
+/* ========== أدوات ========== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const pad = n => String(n).padStart(2, '0');
+const iso = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const todayISO = () => iso(new Date());
+const fmtD = s => { if (!s) return '—'; const [y,m,d] = s.split('-'); return `${d}/${m}/${y}`; };
+const addMonths = (s, n) => { const [y,m,d] = s.split('-').map(Number); const t = new Date(y, m-1+n, 1); const dim = new Date(t.getFullYear(), t.getMonth()+1, 0).getDate(); return iso(new Date(t.getFullYear(), t.getMonth(), Math.min(d, dim))); };
+const addDays = (s, n) => { const [y,m,d] = s.split('-').map(Number); return iso(new Date(y, m-1, d+n)); };
+const diffDays = (a, b) => Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 864e5);
+const r2 = n => Math.round((+n + Number.EPSILON) * 100) / 100;
+const money = n => (+n || 0).toLocaleString('en-US', {maximumFractionDigits: 2});
+const N = v => `<span class="num">${esc(v)}</span>`;
+const cur = () => DB.settings.currency || 'ريال';
+
+const FREQ = { monthly:{m:1,l:'شهري'}, quarterly:{m:3,l:'ربع سنوي'}, semi:{m:6,l:'نصف سنوي'}, annual:{m:12,l:'سنوي'} };
+const METHODS = ['نقداً','تحويل بنكي','شيك','أخرى'];
+const UTYPES = ['شقة','فيلا','دور','محل','مكتب','مستودع','غرفة','أرض','أخرى'];
+const SHEETNAME = { units:'Units', contracts:'Contracts', payments:'Payments', receipts:'Receipts', settings:'Settings' };
+
+/* ========== الحالة ========== */
+let DB = { units:[], contracts:[], payments:[], receipts:[], settings:{} };
+let CFG = { url:'', key:'' };
+let loaded = false, tab = 'home', payFilter = 'due', payQuery = '', payContract = '';
+const dirty = new Set();
+let pushTimer = null;
+
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+
+function normalize(d) {
+  const out = { units:[], contracts:[], payments:[], receipts:[], settings:{} };
+  (d.Units || d.units || []).forEach(u => out.units.push({ id:String(u.id), property:String(u.property||''), unit:String(u.unit||''), type:String(u.type||''), notes:String(u.notes||'') }));
+  (d.Contracts || d.contracts || []).forEach(c => out.contracts.push({ id:String(c.id), unitId:String(c.unitId||''), tenant:String(c.tenant||''), phone:String(c.phone||''), idNo:String(c.idNo||''), start:String(c.start||''), end:String(c.end||''), annualRent:+c.annualRent||0, freq:FREQ[c.freq]?c.freq:'annual', status:c.status==='ended'?'ended':'active', notes:String(c.notes||''), endType:String(c.endType||''), endReason:String(c.endReason||''), endDate:String(c.endDate||''), renewedFrom:String(c.renewedFrom||'') }));
+  (d.Payments || d.payments || []).forEach(p => out.payments.push({ id:String(p.id), contractId:String(p.contractId||''), due:String(p.due||''), amount:+p.amount||0, paid:+p.paid||0, paidDate:String(p.paidDate||''), lastAmount:+p.lastAmount||0, method:String(p.method||''), receiptNo:String(p.receiptNo||''), notes:String(p.notes||'') }));
+  (d.Receipts || d.receipts || []).forEach(r => {
+    let al = r.allocations; if (typeof al === 'string') { try { al = JSON.parse(al); } catch (e) { al = []; } }
+    out.receipts.push({ id:String(r.id), receiptNo:String(r.receiptNo||''), contractId:String(r.contractId||''), date:String(r.date||''), amount:+r.amount||0, method:String(r.method||''), notes:String(r.notes||''),
+      allocations:(al || []).map(a => ({ id:String(a.id||''), due:String(a.due||''), total:+a.total||0, before:+a.before||0, a:+a.a||0, left:+a.left||0 })) });
+  });
+  const s = d.Settings || d.settings || [];
+  if (Array.isArray(s)) s.forEach(r => { if (r.key) out.settings[r.key] = String(r.value ?? ''); }); else out.settings = s;
+  return out;
+}
+const isEmptyDB = d => !d.units.length && !d.contracts.length && !d.payments.length;
+const cacheSave = () => lsSet('rt_cache', DB);
+const rowsOf = k => k === 'settings' ? Object.entries(DB.settings).map(([key, value]) => ({ key, value })) : k === 'receipts' ? DB.receipts.map(r => Object.assign({}, r, { allocations:JSON.stringify(r.allocations) })) : DB[k];
+
+/* ========== المزامنة ========== */
+function setSync(state) {
+  const el = $('#sync'); el.className = state;
+  const t = { local:'محلي', loading:'جارٍ التحميل…', ok:'متزامن', pending:'جارٍ الحفظ…', err:'غير متصل' }[state] || '';
+  el.querySelector('span').textContent = t;
+}
+function guard() {
+  if (CFG.url && !loaded) { toast('لم تُحمَّل البيانات من السحابة بعد — اضغط على حالة الاتصال لإعادة المحاولة'); return false; }
+  return true;
+}
+function commit(...keys) {
+  keys.forEach(k => dirty.add(k)); cacheSave();
+  if (CFG.url) { setSync('pending'); clearTimeout(pushTimer); pushTimer = setTimeout(push, 700); } else setSync('local');
+  render();
+}
+async function push() {
+  if (!CFG.url || !loaded) return;
+  const keys = [...dirty]; dirty.clear();
+  try {
+    for (const k of keys) {
+      await fetch(CFG.url, { method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body: JSON.stringify({ key:CFG.key, sheet:SHEETNAME[k], rows:rowsOf(k) }) });
+    }
+    setSync('ok');
+  } catch (e) { keys.forEach(k => dirty.add(k)); setSync('err'); }
+}
+function migrate() {
+  let ch = false;
+  DB.payments.forEach(p => {
+    if (p.receiptNo && p.paid > 0 && !DB.receipts.some(r => r.receiptNo === p.receiptNo)) {
+      const a = p.lastAmount || p.paid;
+      DB.receipts.push({ id:uid(), receiptNo:p.receiptNo, contractId:p.contractId, date:p.paidDate || todayISO(), amount:a, method:p.method, notes:'', allocations:[{ id:p.id, due:p.due, total:p.amount, before:r2(p.paid - a), a, left:remain(p) }] });
+      ch = true;
+    }
+  });
+  if (ch) { dirty.add('receipts'); cacheSave(); if (CFG.url && loaded) { setSync('pending'); push(); } }
+}
+async function load() {
+  const cached = lsGet('rt_cache', null); if (cached) DB = normalize(cached);
+  CFG = lsGet('rt_cfg', { url:'', key:'' });
+  if (!CFG.url) { loaded = true; migrate(); setSync('local'); render(); return; }
+  setSync('loading'); render();
+  try {
+    const r = await fetch(CFG.url + (CFG.url.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(CFG.key || ''));
+    const j = await r.json();
+    if (!j.ok) throw new Error(j.error || 'خطأ');
+    const remote = normalize(j.data);
+    if (isEmptyDB(remote) && !isEmptyDB(DB)) { loaded = true; ['units','contracts','payments','receipts','settings'].forEach(k => dirty.add(k)); push(); }
+    else { DB = remote; loaded = true; cacheSave(); setSync('ok'); }
+  } catch (e) { loaded = false; setSync('err'); toast('تعذّر الاتصال بالسحابة: ' + (e.message || e)); }
+  if (loaded) migrate();
+  render();
+}
+function syncNow() { if (!CFG.url) { go('settings'); return; } load(); }
+
+/* ========== منطق الإيجار ========== */
+const unitOf = id => DB.units.find(u => u.id === id);
+const contractOf = id => DB.contracts.find(c => c.id === id);
+const unitLabel = u => u ? [u.property, u.unit].filter(Boolean).join(' - ') : 'وحدة محذوفة';
+function genSchedule(c) {
+  const step = FREQ[c.freq].m, amount = r2(c.annualRent * step / 12), out = [];
+  for (let k = 0; k < 600; k++) { const d = addMonths(c.start, k * step); if (d > c.end) break; out.push({ due:d, amount }); }
+  return out;
+}
+function regen(c) {
+  const keep = DB.payments.filter(p => p.contractId !== c.id || p.paid > 0);
+  const have = new Set(keep.filter(p => p.contractId === c.id).map(p => p.due));
+  DB.payments = keep;
+  genSchedule(c).forEach(s => { if (!have.has(s.due)) DB.payments.push({ id:uid(), contractId:c.id, due:s.due, amount:s.amount, paid:0, paidDate:'', lastAmount:0, method:'', receiptNo:'', notes:'' }); });
+}
+const remain = p => r2(p.amount - p.paid);
+function pStatus(p) { if (remain(p) <= 0.005) return 'paid'; if (p.due < todayISO()) return 'overdue'; return p.paid > 0 ? 'partial' : 'upcoming'; }
+const STAT_L = { paid:'مسددة', overdue:'متأخرة', partial:'مسددة جزئياً', upcoming:'قادمة' };
+const isActive = c => c.status !== 'ended';
+function unitOccupant(u) { const t = todayISO(); return DB.contracts.find(c => c.unitId === u.id && isActive(c) && c.start <= t && c.end >= t); }
+function nextReceipt() { const num = x => parseInt((x || '').replace(/\D/g, '')) || 0; const m = Math.max(DB.payments.reduce((a, p) => Math.max(a, num(p.receiptNo)), 0), DB.receipts.reduce((a, r) => Math.max(a, num(r.receiptNo)), 0)); return 'R-' + String(m + 1).padStart(4, '0'); }
+
+/* ========== الواجهة العامة ========== */
+const ICONS = {
+  home:'<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>',
+  pays:'<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 9v0M18 15v0"/></svg>',
+  contracts:'<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h7"/></svg>',
+  units:'<svg viewBox="0 0 24 24"><path d="M4 21V5l8-2v18M12 8l8 2v11M2 21h20M8 9v0M8 13v0M8 17v0M16 14v0M16 18v0"/></svg>',
+  report:'<svg viewBox="0 0 24 24"><path d="M4 20V4M4 20h16M8 16v-5M12 16V8M16 16v-3"/></svg>',
+  settings:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3.9a7 7 0 0 0-2-1.2L14 3h-4l-.6 2.6a7 7 0 0 0-2 1.2l-2.3-.9-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-.9a7 7 0 0 0 2 1.2L10 21h4l.6-2.6a7 7 0 0 0 2-1.2l2.3.9 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></svg>'
+};
+const TABS = [['home','الرئيسية'],['pays','الدفعات'],['contracts','العقود'],['units','الوحدات'],['report','التقارير'],['settings','الإعدادات']];
+function go(t) { tab = t; window.scrollTo(0, 0); render(); }
+function render() {
+  $('#nav').innerHTML = TABS.map(([k, l]) => `<button class="${tab===k?'on':''}" onclick="go('${k}')">${ICONS[k]}<span>${l}</span></button>`).join('');
+  $('#fab').style.display = ['pays','contracts','units'].includes(tab) ? 'block' : 'none';
+  const v = { home:viewHome, pays:viewPays, contracts:viewContracts, units:viewUnits, report:viewReport, settings:viewSettings }[tab];
+  const warn = (CFG.url && !loaded) ? `<div class="banner red"><b>تعذّر تحميل البيانات من السحابة.</b> التعديل متوقف حتى لا تُفقد بيانات. <br><button class="btn sm" onclick="load()">إعادة المحاولة</button></div>` : '';
+  $('#app').innerHTML = warn + v();
+}
+function fabAction() { ({ pays:()=>payForm(), contracts:()=>contractForm(), units:()=>unitForm() })[tab](); }
+function toast(m) { const t = $('#toast'); t.textContent = m; t.style.display = 'block'; clearTimeout(toast.t); toast.t = setTimeout(() => t.style.display = 'none', 3200); }
+function sheet(html) { $('#sheet-body').innerHTML = html; $('#overlay').classList.add('open'); $('#sheet').scrollTop = 0; }
+function closeSheet() { $('#overlay').classList.remove('open'); }
+let unitSel = '';
+function matchUnit(cid) {
+  if (!unitSel) return true; const c = contractOf(cid), u = c && unitOf(c.unitId); if (!u) return false;
+  return unitSel.startsWith('u:') ? u.id === unitSel.slice(2) : u.property === unitSel.slice(2);
+}
+function selLabel() {
+  if (!unitSel) return ''; if (unitSel.startsWith('u:')) { const u = unitOf(unitSel.slice(2)); return u ? unitLabel(u) : ''; }
+  return 'كل وحدات ' + (unitSel.slice(2) || 'العقار');
+}
+function unitPicker() {
+  if (DB.units.length < 2) return '';
+  if (unitSel && !selLabel()) unitSel = '';
+  const props = [...new Set(DB.units.map(u => u.property))];
+  const opts = props.map(pr => `<optgroup label="${esc(pr || 'بدون اسم عقار')}"><option value="p:${esc(pr)}" ${unitSel === 'p:' + pr ? 'selected' : ''}>كل وحدات ${esc(pr || 'العقار')}</option>${DB.units.filter(u => u.property === pr).map(u => `<option value="u:${u.id}" ${unitSel === 'u:' + u.id ? 'selected' : ''}>${esc(unitLabel(u))}</option>`).join('')}</optgroup>`).join('');
+  return `<div class="noprint"><label style="margin:0 2px 4px">الوحدة</label><select onchange="unitSel=this.value;render()" style="margin-bottom:12px"><option value="">كل الوحدات</option>${opts}</select></div>`;
+}
+const empty = (t, s) => `<div class="empty"><b>${t}</b>${s || ''}</div>`;
+
+/* ========== الرئيسية ========== */
+function payRow(p, showStatus = true) {
+  const c = contractOf(p.contractId), u = c && unitOf(c.unitId), st = pStatus(p), part = p.paid > 0 && st !== 'paid', rem = remain(p);
+  const late = st === 'overdue' ? ` · متأخرة ${diffDays(p.due, todayISO())} يوم` : '';
+  const pct = p.amount ? Math.min(100, p.paid / p.amount * 100) : 0;
+  const tags = `<span class="tag ${st}">${STAT_L[st]}</span>` + (part && st === 'overdue' ? '<span class="tag partial">سداد جزئي</span>' : '');
+  return `<button class="row prow" onclick="payDetail('${p.id}')"><div class="ph"><div class="r-main"><b>${esc(c ? c.tenant : 'عقد محذوف')}</b><small>${esc(unitLabel(u))} · استحقاق ${N(fmtD(p.due))}${late}</small></div><div class="r-side">${tags}</div></div>
+  <div class="fig"><div><small>قيمة الدفعة</small><b>${N(money(p.amount))}</b></div><div class="pd"><small>المسدد</small><b>${N(money(p.paid))}</b></div><div class="rm ${rem <= 0.005 ? 'zero' : st === 'overdue' ? 'late' : ''}"><small>المتبقي</small><b>${N(money(rem))}</b></div></div>
+  <div class="bar mini"><i style="width:${pct}%"></i></div>${p.notes ? `<small class="pnote">ملاحظة: ${esc(p.notes)}</small>` : ''}</button>`;
+}
+function viewHome() {
+  const t = todayISO(), m = t.slice(0, 7);
+  const act = DB.payments.filter(p => { const c = contractOf(p.contractId); return c && isActive(c); });
+  const overdue = act.filter(p => pStatus(p) === 'overdue').sort((a, b) => a.due.localeCompare(b.due));
+  const soon = act.filter(p => remain(p) > 0.005 && p.due >= t && diffDays(t, p.due) <= 30).sort((a, b) => a.due.localeCompare(b.due));
+  const sum = l => l.reduce((a, p) => a + remain(p), 0);
+  const collected = DB.payments.filter(p => p.paidDate.slice(0, 7) === m).reduce((a, p) => a + (p.lastAmount || p.paid), 0);
+  const expiring = DB.contracts.filter(c => isActive(c) && c.end >= t && diffDays(t, c.end) <= 60).sort((a, b) => a.end.localeCompare(b.end));
+  if (!DB.units.length) return `<div class="list">${empty('ابدأ بإضافة أول وحدة عقارية','ثم أضف عقد المستأجر وسيُنشأ جدول الدفعات تلقائياً.')}<div style="padding:0 18px 20px"><button class="btn block" onclick="go('units');unitForm()">إضافة وحدة</button></div></div>`;
+  return `<div class="stats">
+    <button class="stat late" onclick="payFilter='overdue';go('pays')"><small>المتأخر</small><b>${N(money(sum(overdue)))}</b><span>${overdue.length} دفعة${overdue.some(p => p.paid > 0) ? ' (منها ' + overdue.filter(p => p.paid > 0).length + ' جزئية)' : ''} · ${esc(cur())}</span></button>
+    <button class="stat" onclick="payFilter='due';go('pays')"><small>مستحق خلال ٣٠ يوماً</small><b>${N(money(sum(soon)))}</b><span>${soon.length} دفعة · ${esc(cur())}</span></button>
+    <button class="stat ok" onclick="payFilter='paid';go('pays')"><small>المحصّل هذا الشهر</small><b>${N(money(collected))}</b><span>${esc(cur())}</span></button>
+    <button class="stat" onclick="go('contracts')"><small>عقود تنتهي خلال ٦٠ يوماً</small><b>${expiring.length}</b><span>${expiring.length ? 'أقربها ' + fmtD(expiring[0].end) : 'لا يوجد'}</span></button></div>
+  <h2>الدفعات المتأخرة</h2><div class="list">${overdue.length ? overdue.slice(0, 8).map(p => payRow(p, false)).join('') : empty('لا توجد دفعات متأخرة')}</div>
+  <h2>القادمة خلال ٣٠ يوماً</h2><div class="list">${soon.length ? soon.slice(0, 8).map(p => payRow(p, false)).join('') : empty('لا توجد دفعات قادمة قريباً')}</div>
+  ${expiring.length ? `<h2>عقود قاربت على الانتهاء</h2><div class="list">${expiring.map(c => `<button class="row" onclick="contractDetail('${c.id}')"><div class="r-main"><b>${esc(c.tenant)}</b><small>${esc(unitLabel(unitOf(c.unitId)))}</small></div><div class="r-side"><b>${N(fmtD(c.end))}</b><span class="tag partial">بعد ${diffDays(t, c.end)} يوم</span></div></button>`).join('')}</div>` : ''}`;
+}
+
+/* ========== الدفعات ========== */
+function viewPays() {
+  let l = DB.payments.slice();
+  if (payContract) l = l.filter(p => p.contractId === payContract);
+  l = l.filter(p => matchUnit(p.contractId));
+  const q = payQuery.trim();
+  if (q) l = l.filter(p => { const c = contractOf(p.contractId); return c && (c.tenant + ' ' + unitLabel(unitOf(c.unitId))).includes(q); });
+  const f = { due: p => remain(p) > 0.005, overdue: p => pStatus(p) === 'overdue', part: p => p.paid > 0 && remain(p) > 0.005, paid: p => p.paid > 0, all: () => true }[payFilter];
+  l = l.filter(f).sort((a, b) => payFilter === 'paid' ? (b.paidDate || '').localeCompare(a.paidDate || '') : a.due.localeCompare(b.due));
+  const chips = [['due','غير مسددة'],['overdue','متأخرة'],['part','جزئية'],['paid','مسددة'],['all','الكل']].map(([k, n]) => `<button class="chip ${payFilter===k?'on':''}" onclick="payFilter='${k}';render()">${n}</button>`).join('');
+  const cc = payContract ? `<div class="chips"><button class="chip on" onclick="payContract='';render()">عقد: ${esc((contractOf(payContract) || {}).tenant || '')} ✕</button></div>` : '';
+  return unitPicker() + `<input class="search" placeholder="بحث باسم المستأجر أو الوحدة" value="${esc(payQuery)}" oninput="payQuery=this.value;renderListOnly()"><div class="chips">${chips}</div>${cc}<div class="list" id="pl">${plist(l)}</div>`;
+}
+const plist = l => l.length ? l.slice(0, 200).map(p => payRow(p)).join('') : empty('لا توجد دفعات في هذا العرض');
+function renderListOnly() { const pos = document.activeElement; const prev = $('#app').innerHTML; render(); const s = document.querySelector('.search'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }
+
+function payDetail(id) {
+  const p = DB.payments.find(x => x.id === id); if (!p) return;
+  const c = contractOf(p.contractId), u = c && unitOf(c.unitId), st = pStatus(p);
+  const logs = DB.receipts.filter(r => r.allocations.some(a => a.id === id)).sort((x, y) => y.date.localeCompare(x.date) || y.receiptNo.localeCompare(x.receiptNo));
+  const mine = r => r.allocations.filter(a => a.id === id).reduce((t, a) => t + a.a, 0);
+  const unlogged = r2(p.paid - logs.reduce((t, r) => t + mine(r), 0));
+  const logHtml = (logs.length || unlogged > 0.005) ? `<h2 style="margin:16px 2px 8px">سجل السداد</h2><div class="list">${logs.map(r => `<button class="row" onclick="showReceipt('${r.id}')"><div class="r-main"><b>${N(fmtD(r.date))} · ${esc(r.method || '—')}</b><small>سند ${N(r.receiptNo)}${r.allocations.length > 1 ? ' · مشترك مع دفعات أخرى' : ''}</small></div><div class="r-side"><b>${N(money(mine(r)))}</b><span class="tag paid">عرض السند</span></div></button>`).join('')}${unlogged > 0.005 ? `<div class="row" style="cursor:default"><div class="r-main"><b>سداد سابق غير مفصّل</b><small>مُدخل يدوياً بدون سند</small></div><div class="r-side"><b>${N(money(unlogged))}</b></div></div>` : ''}</div>` : '';
+  sheet(`<h3>${esc(c ? c.tenant : 'عقد محذوف')} <span class="tag ${st}">${STAT_L[st]}</span></h3>
+  <div class="kv"><span>الوحدة</span><b>${esc(unitLabel(u))}</b><span>الاستحقاق</span><b>${N(fmtD(p.due))}</b><span>قيمة الدفعة</span><b>${N(money(p.amount))} ${esc(cur())}</b><span>المسدد</span><b>${N(money(p.paid))}</b><span>المتبقي</span><b>${N(money(remain(p)))}</b>${p.notes ? `<span>ملاحظات</span><b>${esc(p.notes)}</b>` : ''}</div>
+  <div class="bar"><i style="width:${p.amount ? Math.min(100, p.paid / p.amount * 100) : 0}%"></i></div>
+  <div class="btns">${remain(p) > 0.005 && c ? `<button class="btn" onclick="receiveForm('${p.contractId}','${p.id}')">تسجيل سداد</button>` : ''}<button class="btn ghost" onclick="editPayment('${p.id}')">تعديل</button><button class="btn danger" onclick="delPayment('${p.id}')">حذف</button></div>${logHtml}`);
+}
+function payForm() {
+  const cs = DB.contracts.filter(isActive); if (!cs.length) { toast('أضف عقداً أولاً'); return; }
+  sheet(`<h3>إضافة دفعة يدوية</h3><label>العقد</label><select id="m-c">${cs.map(c => `<option value="${c.id}" ${c.id===payContract?'selected':''}>${esc(c.tenant)} — ${esc(unitLabel(unitOf(c.unitId)))}</option>`).join('')}</select>
+  <div class="two"><div><label>تاريخ الاستحقاق</label><input type="date" id="m-d" value="${todayISO()}"></div><div><label>المبلغ</label><input type="number" inputmode="decimal" id="m-a"></div></div>
+  <label>ملاحظات (مثل: رسوم، تأمين)</label><input id="m-n"><div class="btns"><button class="btn" onclick="saveManual()">إضافة</button></div>`);
+}
+const openPays = cid => DB.payments.filter(p => p.contractId === cid && remain(p) > 0.005).sort((a, b) => a.due.localeCompare(b.due));
+function allocate(cid, amt, onlyId) {
+  let left = r2(amt); const out = [];
+  for (const p of openPays(cid).filter(x => !onlyId || x.id === onlyId)) { if (left <= 0.005) break; const a = r2(Math.min(left, remain(p))); out.push({ paymentId:p.id, due:p.due, amount:a }); left = r2(left - a); }
+  return { out, left };
+}
+function receiveForm(cid, pid) {
+  const c = contractOf(cid), open = openPays(cid); if (!c || !open.length) return toast('لا توجد دفعات مستحقة على هذا العقد');
+  const fp = pid ? open.find(x => x.id === pid) : null, tot = open.reduce((a, p) => a + remain(p), 0), pidv = fp ? fp.id : '';
+  sheet(`<h3>تسجيل سداد</h3><div class="kv"><span>المستأجر</span><b>${esc(c.tenant)}</b><span>إجمالي المتبقي على العقد</span><b>${N(money(tot))} ${esc(cur())}</b>${fp ? `<span>الدفعة المحددة</span><b>${N(fmtD(fp.due))} · المتبقي ${N(money(remain(fp)))}</b>` : ''}</div>
+  <div class="two"><div><label>المبلغ المستلم</label><input type="number" inputmode="decimal" id="f-a" value="${fp ? remain(fp) : remain(open[0])}" oninput="hintRcv('${cid}','${pidv}')"></div><div><label>تاريخ السداد</label><input type="date" id="f-d" value="${todayISO()}"></div></div>
+  <label>طريقة الدفع</label><select id="f-m">${METHODS.map(m => `<option>${m}</option>`).join('')}</select>
+  ${fp ? `<label style="display:flex;gap:10px;align-items:center;color:var(--ink);font-size:.92rem;margin-top:14px"><input type="checkbox" id="f-only" checked style="width:auto" onchange="hintRcv('${cid}','${pidv}')"> حصر السداد في هذه الدفعة فقط <span style="color:var(--muted);font-size:.8rem">(أزل العلامة ليُوزّع على الأقدم أولاً)</span></label>` : '<div style="color:var(--muted);font-size:.84rem;margin-top:10px">يُوزَّع المبلغ تلقائياً على الدفعات من الأقدم إلى الأحدث.</div>'}
+  <label>ملاحظات</label><input id="f-n"><div class="hint" id="f-after"></div><div class="btns"><button class="btn" onclick="doReceive('${cid}','${pidv}')">حفظ وإصدار السند</button></div>`);
+  hintRcv(cid, pidv);
+}
+function hintRcv(cid, pid) {
+  const a = r2($('#f-a').value), only = pid && $('#f-only') && $('#f-only').checked, el = $('#f-after');
+  if (!(a > 0)) { el.style.background = '#e8f2ee'; el.style.color = 'var(--pine-2)'; el.textContent = 'أدخل المبلغ'; return; }
+  const { out, left } = allocate(cid, a, only ? pid : ''); let anyPart = left > 0.005;
+  const lines = out.map(o => { const p = DB.payments.find(x => x.id === o.paymentId), l = r2(remain(p) - o.amount); if (l > 0.005) anyPart = true; return `دفعة ${N(fmtD(o.due))}: ${N(money(o.amount))} — ${l > 0.005 ? `<b>جزئي</b>، يتبقى ${N(money(l))}` : '<b>تُغلق</b>'}`; });
+  el.style.background = anyPart ? 'var(--amber-soft)' : '#e8f2ee'; el.style.color = anyPart ? '#6b4a06' : 'var(--pine-2)';
+  el.innerHTML = lines.join('<br>') + (left > 0.005 ? `<br><b>المبلغ يزيد عن المتبقي بمقدار ${N(money(left))}</b>` : '');
+}
+function doReceive(cid, pid) {
+  if (!guard()) return; const amt = r2($('#f-a').value), d = $('#f-d').value;
+  if (!(amt > 0)) return toast('أدخل مبلغاً صحيحاً'); if (!d) return toast('حدّد تاريخ السداد');
+  const only = pid && $('#f-only') && $('#f-only').checked, { out, left } = allocate(cid, amt, only ? pid : '');
+  if (left > 0.005) return toast(only ? 'المبلغ أكبر من المتبقي من هذه الدفعة' : 'المبلغ أكبر من إجمالي المتبقي على العقد');
+  const method = $('#f-m').value, notes = $('#f-n').value.trim(), no = nextReceipt(), allocs = [];
+  out.forEach(o => { const p = DB.payments.find(x => x.id === o.paymentId), before = p.paid; p.paid = r2(p.paid + o.amount); p.lastAmount = o.amount; p.paidDate = d; p.method = method; p.receiptNo = no; allocs.push({ id:p.id, due:p.due, total:p.amount, before, a:o.amount, left:remain(p) }); });
+  const r = { id:uid(), receiptNo:no, contractId:cid, date:d, amount:amt, method, notes, allocations:allocs };
+  DB.receipts.push(r); commit('payments', 'receipts'); showReceipt(r.id);
+}
+function voidReceipt(rid) {
+  if (!guard()) return; const r = DB.receipts.find(x => x.id === rid); if (!r) return;
+  if (!confirm('إلغاء هذا السند وإرجاع المبالغ إلى الدفعات؟')) return;
+  r.allocations.forEach(a => { const p = DB.payments.find(x => x.id === a.id); if (p) p.paid = r2(Math.max(0, p.paid - a.a)); });
+  DB.receipts = DB.receipts.filter(x => x.id !== rid);
+  r.allocations.forEach(a => {
+    const p = DB.payments.find(x => x.id === a.id); if (!p) return;
+    const last = DB.receipts.filter(x => x.allocations.some(y => y.id === p.id)).sort((x, y) => y.date.localeCompare(x.date) || y.receiptNo.localeCompare(x.receiptNo))[0];
+    if (last) { const y = last.allocations.find(z => z.id === p.id); Object.assign(p, { lastAmount:y.a, paidDate:last.date, method:last.method, receiptNo:last.receiptNo }); }
+    else if (p.paid <= 0.005) Object.assign(p, { paidDate:'', method:'', receiptNo:'', lastAmount:0 });
+  });
+  commit('payments', 'receipts'); closeSheet(); toast('تم إلغاء السند');
+}
+function saveManual() {
+  if (!guard()) return; const a = r2($('#m-a').value), d = $('#m-d').value;
+  if (!(a > 0) || !d) return toast('أدخل التاريخ والمبلغ');
+  DB.payments.push({ id:uid(), contractId:$('#m-c').value, due:d, amount:a, paid:0, paidDate:'', lastAmount:0, method:'', receiptNo:'', notes:$('#m-n').value.trim() });
+  commit('payments'); closeSheet(); toast('تمت إضافة الدفعة');
+}
+function editPayment(id) {
+  const p = DB.payments.find(x => x.id === id);
+  sheet(`<h3>تعديل الدفعة</h3>
+  <div class="two"><div><label>تاريخ الاستحقاق</label><input type="date" id="e-d" value="${p.due}"></div><div><label>قيمة الدفعة (المبلغ الأساسي)</label><input type="number" inputmode="decimal" id="e-a" value="${p.amount}" oninput="hintEdit()"></div></div>
+  <div class="two"><div><label>المسدد حتى الآن</label><input type="number" inputmode="decimal" id="e-p" value="${p.paid}" oninput="hintEdit()"></div><div><label>تاريخ آخر سداد</label><input type="date" id="e-pd" value="${p.paidDate}"></div></div>
+  <div class="hint" id="e-hint"></div>
+  <label>ملاحظات</label><input id="e-n" value="${esc(p.notes)}"><div class="btns"><button class="btn" onclick="saveEditPay('${id}')">حفظ</button></div>`);
+  hintEdit();
+}
+function hintEdit() { const a = r2($('#e-a').value), q = r2($('#e-p').value || 0); $('#e-hint').innerHTML = `المتبقي: <b>${N(money(r2(a - q)))}</b> ${esc(cur())}`; }
+function saveEditPay(id) {
+  if (!guard()) return; const p = DB.payments.find(x => x.id === id), a = r2($('#e-a').value), q = r2($('#e-p').value || 0), d = $('#e-d').value, pdt = $('#e-pd').value;
+  if (!(a > 0) || !d) return toast('أدخل التاريخ والقيمة'); if (q < 0) return toast('المسدد لا يمكن أن يكون سالباً'); if (q > a + 0.005) return toast('المسدد أكبر من قيمة الدفعة');
+  if (q > p.paid + 0.005) { p.lastAmount = r2(q - p.paid); p.paidDate = pdt || todayISO(); }
+  else if (q < p.paid - 0.005) { if (q <= 0.005) Object.assign(p, { paidDate:'', method:'', receiptNo:'', lastAmount:0 }); else { p.lastAmount = Math.min(p.lastAmount, q); if (pdt) p.paidDate = pdt; } }
+  else if (pdt && q > 0) p.paidDate = pdt;
+  p.paid = q; p.amount = a; p.due = d; p.notes = $('#e-n').value.trim(); commit('payments'); closeSheet();
+}
+function delPayment(id) { if (!guard()) return; if (!confirm('حذف هذه الدفعة نهائياً؟')) return; DB.payments = DB.payments.filter(p => p.id !== id); commit('payments'); closeSheet(); }
+
+/* ========== العقود ========== */
+function viewContracts() {
+  if (!DB.contracts.length) return `<div class="list">${empty('لا توجد عقود', DB.units.length ? 'اضغط + لإضافة عقد مستأجر.' : 'أضف وحدة أولاً من تبويب الوحدات.')}</div>`;
+  const t = todayISO(), l = DB.contracts.filter(c => matchUnit(c.id)).sort((a, b) => (isActive(b) - isActive(a)) || a.tenant.localeCompare(b.tenant, 'ar'));
+  if (!l.length) return unitPicker() + `<div class="list">${empty('لا توجد عقود لهذه الوحدة')}</div>`;
+  return unitPicker() + `<div class="list">${l.map(c => {
+    const ps = DB.payments.filter(p => p.contractId === c.id), od = ps.filter(p => pStatus(p) === 'overdue').length, done = ps.filter(p => pStatus(p) === 'paid').length;
+    const tag = !isActive(c) ? (c.endType === 'renewal' ? '<span class="tag partial">مُجدَّد</span>' : '<span class="tag upcoming">منتهٍ</span>') : c.end < t ? '<span class="tag partial">انتهت مدته</span>' : od ? `<span class="tag overdue">${od} متأخرة</span>` : '<span class="tag paid">ساري</span>';
+    return `<button class="row" onclick="contractDetail('${c.id}')"><div class="r-main"><b>${esc(c.tenant)}</b><small>${esc(unitLabel(unitOf(c.unitId)))} · ${FREQ[c.freq].l}</small></div><div class="r-side"><b>${N(money(c.annualRent))}</b>${tag}<small style="color:var(--muted);font-size:.74rem">${done}/${ps.length} مسددة</small></div></button>`;
+  }).join('')}</div>`;
+}
+const END_REASONS = ['انتهاء المدة وعدم الرغبة في التجديد','طلب المستأجر','تأخر في السداد','إخلال بشروط العقد','بيع العقار أو إعادة استخدامه','اتفاق ودّي','أخرى'];
+const RENEW_REASONS = ['تجديد بنفس القيمة','تجديد مع زيادة في الإيجار','تجديد مع تخفيض في الإيجار','تجديد مع تغيير دورة السداد','أخرى'];
+const successorOf = id => DB.contracts.find(c => c.renewedFrom === id);
+const reasonText = (sel, note) => note ? `${sel} — ${note}` : sel;
+function endImpact(c, d) {
+  const ps = DB.payments.filter(p => p.contractId === c.id);
+  const cut = ps.filter(p => p.paid <= 0 && p.due > d), left = ps.filter(p => p.due <= d && remain(p) > 0.005);
+  return { cut, left, leftSum: left.reduce((a, p) => a + remain(p), 0) };
+}
+function contractDetail(id) {
+  const c = contractOf(id), ps = DB.payments.filter(p => p.contractId === id), paid = ps.reduce((a, p) => a + p.paid, 0), total = ps.reduce((a, p) => a + p.amount, 0);
+  const pred = c.renewedFrom && contractOf(c.renewedFrom), succ = successorOf(id), act = isActive(c);
+  const endInfo = !act ? `<div class="hint" style="background:${c.endType==='renewal'?'var(--amber-soft)':'var(--red-soft)'};color:${c.endType==='renewal'?'#6b4a06':'#7c241a'}"><b>${c.endType==='renewal'?'جُدِّد':'أُنهي'}</b> بتاريخ ${N(fmtD(c.endDate))}${c.endType!=='renewal'&&c.endDate&&c.endDate<c.end?' (إنهاء قبل نهاية المدة)':''}<br>السبب: ${esc(c.endReason||'—')}</div>` : '';
+  const predInfo = pred ? `<div class="hint"><b>جُدِّد من عقد سابق</b> ${N(fmtD(pred.start))} ← ${N(fmtD(pred.end))} · الإيجار السابق ${N(money(pred.annualRent))}${pred.annualRent!==c.annualRent?` (${c.annualRent>pred.annualRent?'+':''}${N(money(r2(c.annualRent-pred.annualRent)))})`:''}<br>السبب: ${esc(pred.endReason||'—')}</div>` : '';
+  sheet(`<h3>${esc(c.tenant)}</h3><div class="kv"><span>الوحدة</span><b>${esc(unitLabel(unitOf(c.unitId)))}</b><span>الجوال</span><b>${c.phone ? N(c.phone) : '—'}</b>${c.idNo ? `<span>الهوية</span><b>${N(c.idNo)}</b>` : ''}
+  <span>المدة</span><b>${N(fmtD(c.start))} ← ${N(fmtD(c.end))}</b><span>الإيجار السنوي</span><b>${N(money(c.annualRent))} ${esc(cur())}</b><span>السداد</span><b>${FREQ[c.freq].l} · ${N(money(r2(c.annualRent * FREQ[c.freq].m / 12)))}</b>${c.notes ? `<span>ملاحظات</span><b>${esc(c.notes)}</b>` : ''}</div>
+  ${endInfo}${predInfo}
+  <div class="bar"><i style="width:${total ? Math.min(100, paid / total * 100) : 0}%"></i></div><small style="color:var(--muted)">المسدد ${N(money(paid))} من ${N(money(total))}</small>
+  <div class="btns">${ps.some(p => remain(p) > 0.005) ? `<button class="btn gold" onclick="receiveForm('${id}','')">تسجيل سداد</button>` : ''}<button class="btn" onclick="payContract='${id}';payFilter='all';closeSheet();go('pays')">عرض الدفعات</button><button class="btn ghost" onclick="contractForm('${id}')">تعديل</button></div>
+  <div class="btns">${act ? `<button class="btn gold" onclick="renewForm('${id}')">تجديد العقد</button><button class="btn ghost" onclick="endForm('${id}')">إنهاء العقد</button>` : succ ? `<button class="btn gold" onclick="contractDetail('${succ.id}')">عرض العقد الجديد</button>` : `<button class="btn ghost" onclick="reopenContract('${id}')">إعادة تفعيل</button>`}${pred ? `<button class="btn ghost" onclick="contractDetail('${pred.id}')">العقد السابق</button>` : ''}</div>
+  <div class="btns"><button class="btn danger" onclick="delContract('${id}')">حذف العقد</button></div>`);
+}
+function contractForm(id) {
+  if (!DB.units.length) { toast('أضف وحدة عقارية أولاً'); return; }
+  const c = id ? contractOf(id) : { unitId:'', tenant:'', phone:'', idNo:'', start:todayISO(), end:'', annualRent:'', freq:'annual', notes:'' };
+  if (!c.end) c.end = addDays(addMonths(c.start, 12), -1);
+  const vac = DB.units.filter(u => !DB.contracts.some(x => x.unitId === u.id && isActive(x) && x.id !== id && x.end >= todayISO()));
+  const opts = (id ? DB.units : vac.length ? vac : DB.units).map(u => `<option value="${u.id}" ${u.id===c.unitId?'selected':''}>${esc(unitLabel(u))}</option>`).join('');
+  sheet(`<h3>${id ? 'تعديل العقد' : 'عقد جديد'}</h3><label>الوحدة</label><select id="c-unit">${opts}</select>
+  <label>اسم المستأجر</label><input id="c-tenant" value="${esc(c.tenant)}">
+  <div class="two"><div><label>الجوال</label><input id="c-phone" inputmode="tel" value="${esc(c.phone)}" placeholder="05xxxxxxxx"></div><div><label>رقم الهوية</label><input id="c-idNo" inputmode="numeric" value="${esc(c.idNo)}"></div></div>
+  <div class="two"><div><label>بداية العقد</label><input type="date" id="c-start" value="${c.start}" onchange="hintC(true)"></div><div><label>نهاية العقد</label><input type="date" id="c-end" value="${c.end}" onchange="hintC()"></div></div>
+  <div class="two"><div><label>الإيجار السنوي</label><input type="number" inputmode="decimal" id="c-rent" value="${c.annualRent}" oninput="hintC()"></div><div><label>دورة السداد</label><select id="c-freq" onchange="hintC()">${Object.entries(FREQ).map(([k, v]) => `<option value="${k}" ${k===c.freq?'selected':''}>${v.l}</option>`).join('')}</select></div></div>
+  <div class="hint" id="c-hint"></div><label>ملاحظات</label><input id="c-notes" value="${esc(c.notes)}">
+  <div class="btns"><button class="btn" onclick="saveContract('${id || ''}')">حفظ</button></div>`);
+  hintC();
+}
+function hintC(startChanged) {
+  if (startChanged && $('#c-start').value) $('#c-end').value = addDays(addMonths($('#c-start').value, 12), -1);
+  const rent = +$('#c-rent').value || 0, f = FREQ[$('#c-freq').value], s = $('#c-start').value, e = $('#c-end').value;
+  const n = s && e ? genSchedule({ start:s, end:e, annualRent:rent, freq:$('#c-freq').value }).length : 0;
+  $('#c-hint').innerHTML = `قيمة الدفعة: <b>${N(money(r2(rent * f.m / 12)))}</b> ${esc(cur())} · عدد الدفعات: <b>${n}</b>`;
+}
+function saveContract(id) {
+  if (!guard()) return; const g = k => $('#c-' + k).value.trim();
+  const o = { unitId:g('unit'), tenant:g('tenant'), phone:g('phone'), idNo:g('idNo'), start:g('start'), end:g('end'), annualRent:+g('rent'), freq:g('freq'), notes:g('notes') };
+  if (!o.tenant) return toast('أدخل اسم المستأجر'); if (!o.start || !o.end) return toast('حدّد بداية العقد ونهايته');
+  if (o.end < o.start) return toast('نهاية العقد قبل بدايته'); if (!(o.annualRent > 0)) return toast('أدخل الإيجار السنوي');
+  if (id) { const c = contractOf(id); const ch = ['start','end','annualRent','freq'].some(k => c[k] !== o[k]); Object.assign(c, o); if (ch) regen(c); }
+  else { const c = Object.assign({ id:uid(), status:'active', endType:'', endReason:'', endDate:'', renewedFrom:'' }, o); DB.contracts.push(c); regen(c); }
+  commit('contracts', 'payments'); closeSheet(); toast('تم حفظ العقد وجدول الدفعات');
+}
+function endForm(id) {
+  const c = contractOf(id);
+  sheet(`<h3>إنهاء العقد</h3><div class="kv"><span>المستأجر</span><b>${esc(c.tenant)}</b><span>الوحدة</span><b>${esc(unitLabel(unitOf(c.unitId)))}</b><span>نهاية العقد</span><b>${N(fmtD(c.end))}</b></div>
+  <div class="two"><div><label>تاريخ الإنهاء</label><input type="date" id="x-d" value="${todayISO()}" oninput="hintEnd('${id}')"></div><div><label>السبب</label><select id="x-r">${END_REASONS.map(r => `<option>${r}</option>`).join('')}</select></div></div>
+  <label>تفاصيل إضافية (اختياري)</label><input id="x-n"><div class="hint" id="x-hint"></div>
+  <div class="btns"><button class="btn danger" onclick="doEnd('${id}')">تأكيد الإنهاء</button></div>`);
+  hintEnd(id);
+}
+function hintEnd(id) {
+  const c = contractOf(id), d = $('#x-d').value; if (!d) { $('#x-hint').textContent = ''; return; }
+  const im = endImpact(c, d);
+  $('#x-hint').innerHTML = `ستُحذف <b>${im.cut.length}</b> دفعة قادمة غير مسددة.` + (im.left.length ? `<br>يبقى على المستأجر <b>${N(money(im.leftSum))}</b> ${esc(cur())} (${im.left.length} دفعة) حتى تاريخ الإنهاء.` : '<br>لا توجد مبالغ متبقية حتى تاريخ الإنهاء.');
+}
+function doEnd(id) {
+  if (!guard()) return; const c = contractOf(id), d = $('#x-d').value;
+  if (!d) return toast('حدّد تاريخ الإنهاء'); if (d < c.start) return toast('تاريخ الإنهاء قبل بداية العقد');
+  const im = endImpact(c, d), cutIds = new Set(im.cut.map(p => p.id));
+  Object.assign(c, { status:'ended', endType:'termination', endDate:d, endReason:reasonText($('#x-r').value, $('#x-n').value.trim()) });
+  DB.payments = DB.payments.filter(p => !cutIds.has(p.id));
+  commit('contracts', 'payments'); contractDetail(id); toast('تم إنهاء العقد');
+}
+function renewForm(id) {
+  const c = contractOf(id), ns = addDays(c.end, 1), ne = addDays(addMonths(ns, 12), -1);
+  sheet(`<h3>تجديد العقد</h3><div class="kv"><span>المستأجر</span><b>${esc(c.tenant)}</b><span>الوحدة</span><b>${esc(unitLabel(unitOf(c.unitId)))}</b><span>العقد الحالي</span><b>${N(fmtD(c.start))} ← ${N(fmtD(c.end))}</b><span>الإيجار الحالي</span><b>${N(money(c.annualRent))} ${esc(cur())}</b></div>
+  <div class="two"><div><label>بداية العقد الجديد</label><input type="date" id="n-start" value="${ns}" onchange="hintRenew('${id}',true)"></div><div><label>نهايته</label><input type="date" id="n-end" value="${ne}" onchange="hintRenew('${id}')"></div></div>
+  <div class="two"><div><label>الإيجار السنوي الجديد</label><input type="number" inputmode="decimal" id="n-rent" value="${c.annualRent}" oninput="hintRenew('${id}')"></div><div><label>دورة السداد</label><select id="n-freq" onchange="hintRenew('${id}')">${Object.entries(FREQ).map(([k, v]) => `<option value="${k}" ${k===c.freq?'selected':''}>${v.l}</option>`).join('')}</select></div></div>
+  <label>سبب التجديد</label><select id="n-r">${RENEW_REASONS.map(r => `<option>${r}</option>`).join('')}</select>
+  <label>تفاصيل إضافية (اختياري)</label><input id="n-n"><div class="hint" id="n-hint"></div>
+  <div class="btns"><button class="btn gold" onclick="doRenew('${id}')">تأكيد التجديد</button></div>`);
+  hintRenew(id);
+}
+function hintRenew(id, startChanged) {
+  const c = contractOf(id), st = $('#n-start').value;
+  if (startChanged && st) $('#n-end').value = addDays(addMonths(st, 12), -1);
+  const rent = +$('#n-rent').value || 0, f = $('#n-freq').value, e = $('#n-end').value, diff = r2(rent - c.annualRent);
+  const n = st && e ? genSchedule({ start:st, end:e, annualRent:rent, freq:f }).length : 0;
+  const im = st ? endImpact(c, addDays(st, -1)) : { cut:[] };
+  $('#n-hint').innerHTML = `قيمة الدفعة: <b>${N(money(r2(rent * FREQ[f].m / 12)))}</b> ${esc(cur())} · عدد الدفعات: <b>${n}</b>` +
+    (diff ? `<br>التغيّر في الإيجار: <b>${diff > 0 ? '+' : ''}${N(money(diff))}</b> (${N((diff / c.annualRent * 100).toFixed(1))}%)` : '') +
+    `<br>يُنهى العقد الحالي بتاريخ ${N(fmtD(st ? addDays(st, -1) : ''))}${im.cut.length ? ` وتُحذف ${im.cut.length} دفعة غير مسددة بعده` : ''}.`;
+}
+function doRenew(id) {
+  if (!guard()) return; const c = contractOf(id), st = $('#n-start').value, e = $('#n-end').value, rent = +$('#n-rent').value, f = $('#n-freq').value;
+  if (!st || !e) return toast('حدّد بداية العقد الجديد ونهايته'); if (e < st) return toast('نهاية العقد قبل بدايته');
+  if (st <= c.start) return toast('بداية العقد الجديد يجب أن تكون بعد بداية العقد الحالي'); if (!(rent > 0)) return toast('أدخل الإيجار السنوي');
+  const endD = addDays(st, -1), cutIds = new Set(endImpact(c, endD).cut.map(p => p.id));
+  Object.assign(c, { status:'ended', endType:'renewal', endDate:endD, endReason:reasonText($('#n-r').value, $('#n-n').value.trim()) });
+  DB.payments = DB.payments.filter(p => !cutIds.has(p.id));
+  const n = { id:uid(), status:'active', unitId:c.unitId, tenant:c.tenant, phone:c.phone, idNo:c.idNo, start:st, end:e, annualRent:rent, freq:f, notes:c.notes, endType:'', endReason:'', endDate:'', renewedFrom:c.id };
+  DB.contracts.push(n); regen(n);
+  commit('contracts', 'payments'); contractDetail(n.id); toast('تم تجديد العقد وإنشاء جدول الدفعات');
+}
+function reopenContract(id) {
+  if (!guard()) return; const c = contractOf(id);
+  if (successorOf(id)) return toast('لا يمكن إعادة تفعيل عقد تم تجديده');
+  if (!confirm('إعادة تفعيل العقد واستعادة جدول الدفعات غير المسددة؟')) return;
+  Object.assign(c, { status:'active', endType:'', endReason:'', endDate:'' }); regen(c); commit('contracts', 'payments'); contractDetail(id);
+}
+function delContract(id) { if (!guard()) return; if (!confirm('حذف العقد وجميع دفعاته نهائياً؟')) return; DB.contracts = DB.contracts.filter(c => c.id !== id); DB.payments = DB.payments.filter(p => p.contractId !== id); DB.receipts = DB.receipts.filter(r => r.contractId !== id); commit('contracts', 'payments', 'receipts'); closeSheet(); }
+
+/* ========== الوحدات ========== */
+function viewUnits() {
+  if (!DB.units.length) return `<div class="list">${empty('لا توجد وحدات بعد', 'اضغط + لإضافة وحدة عقارية.')}</div>`;
+  return `<div class="list">${DB.units.slice().sort((a, b) => unitLabel(a).localeCompare(unitLabel(b), 'ar')).map(u => { const o = unitOccupant(u);
+    return `<button class="row" onclick="unitForm('${u.id}')"><div class="r-main"><b>${esc(unitLabel(u))}</b><small>${esc(u.type || 'وحدة')}${o ? ' · ' + esc(o.tenant) : ''}</small></div><div class="r-side">${o ? `<b>${N(money(o.annualRent))}</b><small style="color:var(--muted);font-size:.74rem">${FREQ[o.freq].l}</small>` : '<span class="tag vacant">شاغرة</span>'}</div></button>`; }).join('')}</div>`;
+}
+function unitForm(id) {
+  const u = id ? unitOf(id) : { property:'', unit:'', type:'شقة', notes:'' };
+  const props = [...new Set(DB.units.map(x => x.property).filter(Boolean))];
+  sheet(`<h3>${id ? 'تعديل الوحدة' : 'وحدة جديدة'}</h3><label>اسم العقار</label><input id="u-prop" list="plist" value="${esc(u.property)}" placeholder="مثال: عمارة الروضة"><datalist id="plist">${props.map(p => `<option value="${esc(p)}">`).join('')}</datalist>
+  <div class="two"><div><label>رقم / اسم الوحدة</label><input id="u-unit" value="${esc(u.unit)}"></div><div><label>النوع</label><select id="u-type">${UTYPES.map(t => `<option ${t===u.type?'selected':''}>${t}</option>`).join('')}</select></div></div>
+  <label>ملاحظات (المساحة، العداد، الموقع…)</label><textarea id="u-notes" rows="3">${esc(u.notes)}</textarea>
+  <div class="btns"><button class="btn" onclick="saveUnit('${id || ''}')">حفظ</button>${id ? `<button class="btn danger" onclick="delUnit('${id}')">حذف</button>` : ''}</div>`);
+}
+function saveUnit(id) {
+  if (!guard()) return; const o = { property:$('#u-prop').value.trim(), unit:$('#u-unit').value.trim(), type:$('#u-type').value, notes:$('#u-notes').value.trim() };
+  if (!o.property && !o.unit) return toast('أدخل اسم العقار أو رقم الوحدة');
+  if (id) Object.assign(unitOf(id), o); else DB.units.push(Object.assign({ id:uid() }, o));
+  commit('units'); closeSheet();
+}
+function delUnit(id) { if (!guard()) return; if (DB.contracts.some(c => c.unitId === id)) return toast('لا يمكن حذف وحدة مرتبطة بعقود'); if (!confirm('حذف الوحدة؟')) return; DB.units = DB.units.filter(u => u.id !== id); if (unitSel === 'u:' + id) unitSel = ''; commit('units'); closeSheet(); }
+
+/* ========== التقارير ========== */
+const BYS = [['utype','نوع الوحدة'],['freq','دورة السداد'],['prop','العقار'],['status','الحالة'],['method','طريقة الدفع']];
+let rep = { by:'utype', from:'', to:'', preset:'year', init:false }, repGroups = [];
+function setPreset(k) {
+  const t = new Date(), y = t.getFullYear(), m = t.getMonth();
+  if (k === 'month') { rep.from = iso(new Date(y, m, 1)); rep.to = iso(new Date(y, m + 1, 0)); }
+  else if (k === 'year') { rep.from = `${y}-01-01`; rep.to = `${y}-12-31`; } else { rep.from = ''; rep.to = ''; }
+  rep.preset = k;
+}
+const inRange = d => (!rep.from || d >= rep.from) && (!rep.to || d <= rep.to);
+function repKey(p) {
+  const c = contractOf(p.contractId), u = c && unitOf(c.unitId);
+  return rep.by === 'utype' ? ((u && u.type) || 'غير محدد') : rep.by === 'freq' ? (c ? FREQ[c.freq].l : 'غير محدد') : rep.by === 'prop' ? ((u && u.property) || 'غير محدد') : STAT_L[pStatus(p)];
+}
+function repData() {
+  if (rep.by === 'method') {
+    const m = new Map();
+    DB.receipts.filter(r => inRange(r.date) && matchUnit(r.contractId)).forEach(r => { const k = r.method || 'غير محدد', g = m.get(k) || { name:k, n:0, due:0, paid:0, rem:0, items:[], kind:'r' }; g.n++; g.paid += r.amount; g.items.push(r); m.set(k, g); });
+    const gs = [...m.values()].sort((a, b) => b.paid - a.paid), tot = { n:0, due:0, paid:0, rem:0 };
+    gs.forEach(g => { tot.n += g.n; tot.paid += g.paid; }); return { gs, tot, kind:'r' };
+  }
+  const m = new Map();
+  DB.payments.filter(p => inRange(p.due) && matchUnit(p.contractId)).forEach(p => { const k = repKey(p), g = m.get(k) || { name:k, n:0, due:0, paid:0, rem:0, items:[], kind:'p' }; g.n++; g.due += p.amount; g.paid += p.paid; g.rem += remain(p); g.items.push(p); m.set(k, g); });
+  let gs = [...m.values()];
+  if (rep.by === 'status') { const o = ['مسددة','متأخرة','مسددة جزئياً','قادمة']; gs.sort((a, b) => o.indexOf(a.name) - o.indexOf(b.name)); } else gs.sort((a, b) => b.due - a.due);
+  const tot = { n:0, due:0, paid:0, rem:0 }; gs.forEach(g => { tot.n += g.n; tot.due += g.due; tot.paid += g.paid; tot.rem += g.rem; });
+  return { gs, tot, kind:'p' };
+}
+const periodText = () => ((rep.from || rep.to) ? `${fmtD(rep.from)} — ${fmtD(rep.to)}` : 'كل الفترات') + (selLabel() ? ` · ${selLabel()}` : '');
+function viewReport() {
+  if (!rep.init) { setPreset('year'); rep.init = true; }
+  const { gs, tot, kind } = repData(); repGroups = gs;
+  const by = BYS.map(([k, l]) => `<button class="chip ${rep.by===k?'on':''}" onclick="rep.by='${k}';render()">${l}</button>`).join('');
+  const pre = [['month','هذا الشهر'],['year','هذا العام'],['all','الكل']].map(([k, l]) => `<button class="chip ${rep.preset===k?'on':''}" onclick="setPreset('${k}');render()">${l}</button>`).join('');
+  const title = BYS.find(x => x[0] === rep.by)[1];
+  const head = unitPicker() + `<div class="noprint"><div class="chips">${pre}</div><div class="two" style="margin-bottom:12px"><div><label style="margin-top:0">من</label><input type="date" value="${rep.from}" onchange="rep.from=this.value;rep.preset='custom';render()"></div><div><label style="margin-top:0">إلى</label><input type="date" value="${rep.to}" onchange="rep.to=this.value;rep.preset='custom';render()"></div></div>
+  <label style="margin:0 2px 6px">تجميع حسب</label><div class="chips">${by}</div></div><div class="printonly"><b>تقرير الدفعات حسب ${title}</b> — ${periodText()}</div>`;
+  if (!gs.length) return head + `<div class="list">${empty('لا توجد بيانات في هذه الفترة', kind === 'r' ? 'لم تُصدر سندات خلال الفترة المحددة.' : 'جرّب توسيع الفترة الزمنية.')}</div>`;
+  const pct = tot.due ? Math.min(100, tot.paid / tot.due * 100) : 0;
+  const summary = kind === 'p'
+    ? `<div class="stats"><div class="stat"><small>إجمالي المستحق</small><b>${N(money(tot.due))}</b><span>${tot.n} دفعة · ${esc(cur())}</span></div><div class="stat ok"><small>المسدد</small><b>${N(money(tot.paid))}</b><span>${N(pct.toFixed(0))}% من المستحق</span></div><div class="stat late"><small>المتبقي</small><b>${N(money(tot.rem))}</b><span>${esc(cur())}</span></div><div class="stat"><small>عدد المجموعات</small><b>${gs.length}</b><span>حسب ${title}</span></div></div>`
+    : `<div class="stats"><div class="stat ok"><small>إجمالي المحصّل</small><b>${N(money(tot.paid))}</b><span>${esc(cur())}</span></div><div class="stat"><small>عدد السندات</small><b>${tot.n}</b><span>في الفترة</span></div></div>`;
+  const cards = gs.map((g, i) => {
+    if (kind === 'r') { const sh = tot.paid ? g.paid / tot.paid * 100 : 0; return `<button class="row prow" onclick="repOpen(${i})"><div class="ph"><div class="r-main"><b>${esc(g.name)}</b><small>${g.n} سند</small></div><div class="r-side"><b>${N(money(g.paid))}</b><span class="tag upcoming">${N(sh.toFixed(0))}%</span></div></div><div class="bar mini"><i style="width:${sh}%"></i></div></button>`; }
+    const pc = g.due ? Math.min(100, g.paid / g.due * 100) : 0;
+    return `<button class="row prow" onclick="repOpen(${i})"><div class="ph"><div class="r-main"><b>${esc(g.name)}</b><small>${g.n} دفعة</small></div><div class="r-side"><span class="tag ${pc >= 99.9 ? 'paid' : 'upcoming'}">${N(pc.toFixed(0))}% محصّل</span></div></div>
+    <div class="fig"><div><small>المستحق</small><b>${N(money(g.due))}</b></div><div class="pd"><small>المسدد</small><b>${N(money(g.paid))}</b></div><div class="rm ${g.rem <= 0.005 ? 'zero' : ''}"><small>المتبقي</small><b>${N(money(g.rem))}</b></div></div><div class="bar mini"><i style="width:${pc}%"></i></div></button>`;
+  }).join('');
+  return head + summary + `<h2>${title}</h2><div class="list">${cards}</div>
+  <div class="btns noprint"><button class="btn" onclick="repCSV()">تصدير Excel (CSV)</button><button class="btn ghost" onclick="repShare()">مشاركة الملخص</button><button class="btn gold" onclick="repPDF()">تصدير PDF</button></div>`;
+}
+function repOpen(i) {
+  const g = repGroups[i]; if (!g) return;
+  const body = g.kind === 'r'
+    ? g.items.slice().sort((a, b) => b.date.localeCompare(a.date)).map(r => { const c = contractOf(r.contractId); return `<button class="row" onclick="showReceipt('${r.id}')"><div class="r-main"><b>${esc(c ? c.tenant : '—')}</b><small>${N(fmtD(r.date))} · سند ${N(r.receiptNo)}</small></div><div class="r-side"><b>${N(money(r.amount))}</b></div></button>`; }).join('')
+    : g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).slice(0, 150).map(p => payRow(p)).join('');
+  sheet(`<h3>${esc(g.name)}</h3><div class="list">${body}</div>`);
+}
+/* ===== PDF: يُرسم التقرير كصفحات A4 ثم تُجمع في ملف PDF بدون أي مكتبات ===== */
+let lastPDF = null;
+async function buildReportPages() {
+  try { await document.fonts.load('700 30px "IBM Plex Sans Arabic"'); await document.fonts.load('400 30px "IBM Plex Sans Arabic"'); } catch (e) {}
+  const { gs, tot, kind } = repData(), t = BYS.find(z => z[0] === rep.by)[1], S = DB.settings, W = 1240, H = 1754, M = 70, CW = W - 2 * M, cu = cur();
+  const F = (w, z) => `${w} ${z}px "IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif`;
+  const PINE = '#0f3d33', BRASS = '#a77b2a', MUTED = '#5f6f69', INK = '#14201c';
+  const pages = []; let x, y;
+  const T = (s2, px, py, z, w, col, al = 'right') => { x.font = F(w, z); x.fillStyle = col; x.textAlign = al; x.textBaseline = 'middle'; x.fillText(s2, px, py); };
+  const fit = (s2, maxW, z, w) => { x.font = F(w, z); s2 = String(s2); if (x.measureText(s2).width <= maxW) return s2; while (s2.length > 1 && x.measureText(s2 + '…').width > maxW) s2 = s2.slice(0, -1); return s2 + '…'; };
+  const title = `تقرير الدفعات حسب ${t}`;
+  const newPage = () => {
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; x = cv.getContext('2d'); x.direction = 'rtl'; x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H); pages.push({ cv, x });
+    if (pages.length === 1) {
+      x.fillStyle = PINE; x.fillRect(0, 0, W, 190); x.fillStyle = BRASS; x.fillRect(0, 190, W, 8);
+      T(title, W / 2, 70, 56, 700, '#ffffff', 'center'); T(periodText(), W / 2, 130, 28, 400, '#e9d9ae', 'center');
+      if (S.owner) T(S.owner, W - M, 160, 24, 600, '#ffffff'); T('تاريخ التقرير: ' + fmtD(todayISO()), M, 160, 24, 400, '#ffffff', 'left'); y = 235;
+    } else { x.fillStyle = PINE; x.fillRect(0, 0, W, 80); x.fillStyle = BRASS; x.fillRect(0, 80, W, 5); T(title, W - M, 42, 28, 600, '#ffffff'); T(periodText(), M, 42, 22, 400, '#e9d9ae', 'left'); y = 120; }
+  };
+  const ensure = h => { if (y + h > H - 100) newPage(); };
+  const drawRow = (cols, vals, h, o = {}) => {
+    const z = o.size || 24, w = o.weight || 400; ensure(h);
+    if (o.bg) { x.fillStyle = o.bg; x.fillRect(M, y, CW, h); }
+    x.strokeStyle = '#e1e7e4'; x.lineWidth = 1; x.beginPath(); x.moveTo(M, y + h); x.lineTo(W - M, y + h); x.stroke();
+    let cx = W - M; cols.forEach((c, i) => { const v = fit(vals[i] ?? '', c.w - 22, z, w); if (c.al === 'c') T(v, cx - c.w / 2, y + h / 2, z, w, o.fg || INK, 'center'); else T(v, cx - 12, y + h / 2, z, w, o.fg || INK, 'right'); cx -= c.w; });
+    y += h;
+  };
+  newPage();
+  const boxes = kind === 'p' ? [['إجمالي المستحق', money(tot.due), INK], ['المسدد', money(tot.paid), '#1f7a4f'], ['المتبقي', money(tot.rem), '#a8362a'], ['نسبة التحصيل', (tot.due ? Math.round(tot.paid / tot.due * 100) : 0) + '%', PINE]] : [['إجمالي المحصّل', money(tot.paid), '#1f7a4f'], ['عدد السندات', String(tot.n), PINE]];
+  const bw = (CW - 20 * (boxes.length - 1)) / boxes.length;
+  boxes.forEach((b, i) => { const bx = W - M - (i + 1) * bw - i * 20; x.fillStyle = '#f1f5f3'; x.strokeStyle = '#dbe2de'; x.lineWidth = 2; x.beginPath(); x.roundRect(bx, y, bw, 130, 16); x.fill(); x.stroke(); T(b[0], bx + bw - 22, y + 36, 24, 400, MUTED); T(b[1], bx + bw / 2, y + 88, 40, 700, b[2], 'center'); });
+  y += 170;
+  T(`المجموعات حسب ${t}`, W - M, y + 6, 32, 700, PINE); y += 44;
+  const gcols = kind === 'p' ? [{ w:340 }, { w:100, al:'c' }, { w:170, al:'c' }, { w:170, al:'c' }, { w:170, al:'c' }, { w:150, al:'c' }] : [{ w:500 }, { w:240, al:'c' }, { w:360, al:'c' }];
+  drawRow(gcols, kind === 'p' ? [t, 'العدد', 'المستحق', 'المسدد', 'المتبقي', 'التحصيل'] : [t, 'عدد السندات', 'المبلغ'], 56, { bg:PINE, fg:'#ffffff', weight:700 });
+  gs.forEach((g, i) => drawRow(gcols, kind === 'p' ? [g.name, g.n, money(g.due), money(g.paid), money(g.rem), (g.due ? Math.round(g.paid / g.due * 100) : 0) + '%'] : [g.name, g.n, money(g.paid)], 54, { bg:i % 2 ? '#f6f9f7' : '#ffffff', size:25 }));
+  drawRow(gcols, kind === 'p' ? ['الإجمالي', tot.n, money(tot.due), money(tot.paid), money(tot.rem), (tot.due ? Math.round(tot.paid / tot.due * 100) : 0) + '%'] : ['الإجمالي', tot.n, money(tot.paid)], 58, { bg:'#f1e6cc', weight:700, size:26 });
+  y += 50; ensure(200); T('التفاصيل', W - M, y + 6, 34, 700, PINE); y += 46;
+  const dcols = kind === 'p' ? [{ w:230 }, { w:230 }, { w:130, al:'c' }, { w:120, al:'c' }, { w:120, al:'c' }, { w:120, al:'c' }, { w:150, al:'c' }] : [{ w:170, al:'c' }, { w:150, al:'c' }, { w:330 }, { w:300 }, { w:150, al:'c' }];
+  const dhead = kind === 'p' ? ['المستأجر', 'الوحدة', 'الاستحقاق', 'القيمة', 'المسدد', 'المتبقي', 'الحالة'] : ['السند', 'التاريخ', 'المستأجر', 'الوحدة', 'المبلغ'];
+  gs.forEach(g => {
+    ensure(150); drawRow([{ w:CW }], [`${g.name} — ${g.n} ${kind === 'p' ? 'دفعة' : 'سند'}`], 52, { bg:'#dcebe4', fg:PINE, weight:700, size:27 });
+    drawRow(dcols, dhead, 44, { bg:'#eef2f0', fg:MUTED, size:21, weight:600 });
+    const items = g.items.slice().sort((a, b) => kind === 'p' ? a.due.localeCompare(b.due) : a.date.localeCompare(b.date));
+    items.forEach((it, i) => {
+      const c = contractOf(it.contractId), u = c && unitOf(c.unitId);
+      drawRow(dcols, kind === 'p' ? [c ? c.tenant : '—', unitLabel(u), fmtD(it.due), money(it.amount), money(it.paid), money(remain(it)), STAT_L[pStatus(it)]] : [it.receiptNo, fmtD(it.date), c ? c.tenant : '—', unitLabel(u), money(it.amount)], 44, { size:21, bg:i % 2 ? '#fafcfb' : '#ffffff' });
+    });
+    y += 22;
+  });
+  pages.forEach((pg, i) => { x = pg.x; T(`صفحة ${i + 1} من ${pages.length}`, W / 2, H - 46, 22, 400, MUTED, 'center'); T(`${cu}`, M, H - 46, 22, 400, MUTED, 'left'); if (S.owner) T(S.owner, W - M, H - 46, 22, 400, MUTED); });
+  return pages.map(p => p.cv);
+}
+function buildPDF(pgs) {
+  const enc = new TextEncoder(), parts = [], offs = []; let off = 0;
+  const push = d => { const b = typeof d === 'string' ? enc.encode(d) : d; parts.push(b); off += b.length; };
+  const n = pgs.length, PW = 595.28, PH = 841.89;
+  push('%PDF-1.4\n');
+  offs[1] = off; push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+  offs[2] = off; push(`2 0 obj\n<< /Type /Pages /Kids [${pgs.map((_, i) => `${3 + 3 * i} 0 R`).join(' ')}] /Count ${n} >>\nendobj\n`);
+  pgs.forEach((pg, i) => {
+    const po = 3 + 3 * i, co = po + 1, io = po + 2, content = `q ${PW} 0 0 ${PH} 0 0 cm /Im0 Do Q`;
+    offs[po] = off; push(`${po} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /XObject << /Im0 ${io} 0 R >> >> /Contents ${co} 0 R >>\nendobj\n`);
+    offs[co] = off; push(`${co} 0 obj\n<< /Length ${content.length} >>\nstream\n${content}\nendstream\nendobj\n`);
+    offs[io] = off; push(`${io} 0 obj\n<< /Type /XObject /Subtype /Image /Width ${pg.w} /Height ${pg.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${pg.bytes.length} >>\nstream\n`); push(pg.bytes); push('\nendstream\nendobj\n');
+  });
+  const total = 2 + 3 * n, xr = off;
+  let xref = `xref\n0 ${total + 1}\n0000000000 65535 f \n`; for (let i = 1; i <= total; i++) xref += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+  push(xref + `trailer\n<< /Size ${total + 1} /Root 1 0 R >>\nstartxref\n${xr}\n%%EOF`);
+  const out = new Uint8Array(off); let pos = 0; parts.forEach(b => { out.set(b, pos); pos += b.length; }); return out;
+}
+async function repPDF() {
+  sheet('<h3>تقرير PDF</h3><p style="color:var(--muted)">جارٍ تجهيز التقرير…</p>');
+  try {
+    const cvs = await buildReportPages(), pgs = [];
+    for (const cv of cvs) { const b = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.9)); pgs.push({ w:cv.width, h:cv.height, bytes:new Uint8Array(await b.arrayBuffer()), url:URL.createObjectURL(b) }); }
+    lastPDF = { blob:new Blob([buildPDF(pgs)], { type:'application/pdf' }), name:`report-${rep.by}-${todayISO()}.pdf` };
+    sheet(`<h3>تقرير PDF <span class="num" style="font-size:.85rem;color:var(--muted)">${pgs.length} صفحة</span></h3><div class="btns" style="margin-top:0"><button class="btn gold" onclick="sharePDF()">مشاركة PDF</button><button class="btn ghost" onclick="savePDF()">تنزيل PDF</button></div>
+    <div style="display:grid;gap:10px;margin-top:14px">${pgs.map(j => `<img alt="صفحة التقرير" src="${j.url}" style="width:100%;border:1px solid var(--line);border-radius:8px;display:block">`).join('')}</div>`);
+  } catch (e) { sheet(`<h3>تقرير PDF</h3><div class="banner red">تعذّر إنشاء الملف: ${esc(e.message || e)}</div>`); }
+}
+function savePDF() { if (lastPDF) { dl(lastPDF.blob, lastPDF.name); toast('تم تنزيل الملف'); } }
+async function sharePDF() {
+  if (!lastPDF) return; const f = new File([lastPDF.blob], lastPDF.name, { type:'application/pdf' });
+  if (navigator.canShare && navigator.canShare({ files:[f] })) { try { await navigator.share({ files:[f], title:'تقرير الدفعات' }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+  savePDF();
+}
+const csvCell = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+function repCSV() {
+  const { gs, tot, kind } = repData(), t = BYS.find(x => x[0] === rep.by)[1], rows = [];
+  rows.push([`تقرير الدفعات حسب ${t}`, periodText()]); rows.push([]);
+  if (kind === 'p') {
+    rows.push([t, 'العدد', 'المستحق', 'المسدد', 'المتبقي', 'نسبة التحصيل %']);
+    gs.forEach(g => rows.push([g.name, g.n, r2(g.due), r2(g.paid), r2(g.rem), g.due ? Math.round(g.paid / g.due * 100) : 0]));
+    rows.push(['الإجمالي', tot.n, r2(tot.due), r2(tot.paid), r2(tot.rem), tot.due ? Math.round(tot.paid / tot.due * 100) : 0]); rows.push([]);
+    rows.push(['المستأجر','العقار','الوحدة','نوع الوحدة','دورة السداد','الاستحقاق','قيمة الدفعة','المسدد','المتبقي','الحالة']);
+    gs.forEach(g => g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).forEach(p => { const c = contractOf(p.contractId), u = c && unitOf(c.unitId); rows.push([c ? c.tenant : '', u ? u.property : '', u ? u.unit : '', u ? u.type : '', c ? FREQ[c.freq].l : '', p.due, r2(p.amount), r2(p.paid), remain(p), STAT_L[pStatus(p)]]); }));
+  } else {
+    rows.push(['طريقة الدفع', 'عدد السندات', 'المبلغ']); gs.forEach(g => rows.push([g.name, g.n, r2(g.paid)])); rows.push(['الإجمالي', tot.n, r2(tot.paid)]); rows.push([]);
+    rows.push(['رقم السند','التاريخ','المستأجر','العقار / الوحدة','طريقة الدفع','المبلغ']);
+    gs.forEach(g => g.items.slice().sort((a, b) => a.date.localeCompare(b.date)).forEach(r => { const c = contractOf(r.contractId); rows.push([r.receiptNo, r.date, c ? c.tenant : '', c ? unitLabel(unitOf(c.unitId)) : '', r.method, r.amount]); }));
+  }
+  dl(new Blob(['\ufeff' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], { type:'text/csv;charset=utf-8' }), `report-${rep.by}-${todayISO()}.csv`);
+}
+function repShare() {
+  const { gs, tot, kind } = repData(), t = BYS.find(x => x[0] === rep.by)[1], cu = cur();
+  const lines = gs.map(g => kind === 'p' ? `• ${g.name}: ${g.n} دفعة — مستحق ${money(g.due)} · مسدد ${money(g.paid)} · متبقٍ ${money(g.rem)}` : `• ${g.name}: ${g.n} سند — ${money(g.paid)} ${cu}`);
+  const total = kind === 'p' ? `الإجمالي: مستحق ${money(tot.due)} · مسدد ${money(tot.paid)} · متبقٍ ${money(tot.rem)} ${cu}` : `إجمالي المحصّل: ${money(tot.paid)} ${cu}`;
+  const text = `تقرير الدفعات حسب ${t}\nالفترة: ${periodText()}\n\n${lines.join('\n')}\n\n${total}`;
+  if (navigator.share) navigator.share({ text }).catch(() => {}); else window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+
+/* ========== الإعدادات ========== */
+function viewSettings() {
+  const s = DB.settings;
+  return `<div class="list" style="padding:6px 16px 18px"><label>اسم المؤجّر (يظهر في السند)</label><input id="s-owner" value="${esc(s.owner || '')}">
+  <div class="two"><div><label>جوال المؤجّر</label><input id="s-ophone" inputmode="tel" value="${esc(s.ownerPhone || '')}"></div><div><label>العملة</label><input id="s-cur" value="${esc(s.currency || 'ريال')}"></div></div>
+  <label>مفتاح الدولة للواتساب (بدون +)</label><input id="s-cc" inputmode="numeric" value="${esc(s.countryCode || '966')}">
+  <label>سطر أسفل السند</label><input id="s-foot" value="${esc(s.footer || '')}" placeholder="مثال: جزاكم الله خيراً">
+  <div class="btns"><button class="btn" onclick="saveSettings()">حفظ الإعدادات</button></div></div>
+  <h2>الربط مع Google Sheets</h2><div class="list" style="padding:6px 16px 18px"><label>رابط Apps Script (Web app)</label><input id="s-url" dir="ltr" value="${esc(CFG.url)}" placeholder="https://script.google.com/macros/s/…/exec"><label>المفتاح السري</label><input id="s-key" dir="ltr" value="${esc(CFG.key)}">
+  <div class="btns"><button class="btn gold" onclick="saveCfg()">حفظ الربط وتحميل البيانات</button></div><p style="color:var(--muted);font-size:.85rem;margin:10px 0 0">بدون رابط يعمل التطبيق على هذا الجهاز فقط. عند الربط لأول مرة تُرفع البيانات الموجودة إلى الشيت تلقائياً.</p></div>
+  <h2>نسخة احتياطية</h2><div class="btns"><button class="btn ghost" onclick="exportJSON()">تنزيل نسخة JSON</button></div>`;
+}
+function saveSettings() {
+  if (!guard()) return;
+  Object.assign(DB.settings, { owner:$('#s-owner').value.trim(), ownerPhone:$('#s-ophone').value.trim(), currency:$('#s-cur').value.trim() || 'ريال', countryCode:$('#s-cc').value.trim() || '966', footer:$('#s-foot').value.trim() });
+  commit('settings'); toast('تم الحفظ');
+}
+function saveCfg() { CFG = { url:$('#s-url').value.trim(), key:$('#s-key').value.trim() }; lsSet('rt_cfg', CFG); loaded = false; load(); }
+function exportJSON() { dl(new Blob([JSON.stringify(DB, null, 2)], { type:'application/json' }), `rentals-backup-${todayISO()}.json`); }
+function dl(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+
+/* ========== سند القبض ========== */
+const ONES = ['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+const TENS = ['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
+const HUND = ['','مائة','مائتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];
+function below1000(n) {
+  const p = [], h = Math.floor(n / 100), r = n % 100;
+  if (h) p.push(HUND[h]);
+  if (r) { if (r < 20) p.push(ONES[r]); else { const o = r % 10, t = Math.floor(r / 10); p.push(o ? ONES[o] + ' و' + TENS[t] : TENS[t]); } }
+  return p.join(' و');
+}
+function tafqeet(n) {
+  n = Math.round(n); if (n === 0) return 'صفر';
+  const parts = [], mil = Math.floor(n / 1e6), th = Math.floor((n % 1e6) / 1e3), rest = n % 1e3;
+  const grp = (v, one, two, few, many) => v === 1 ? one : v === 2 ? two : v <= 10 ? below1000(v) + ' ' + few : v < 100 ? below1000(v) + ' ' + many : below1000(v) + ' ' + one;
+  if (mil) parts.push(grp(mil, 'مليون', 'مليونان', 'ملايين', 'مليوناً'));
+  if (th) parts.push(grp(th, 'ألف', 'ألفان', 'آلاف', 'ألفاً'));
+  if (rest) parts.push(below1000(rest));
+  return parts.join(' و');
+}
+let lastCanvas = null;
+async function drawReceipt(r) {
+  const c = contractOf(r.contractId), u = c && unitOf(c.unitId), S = DB.settings, al = r.allocations || [];
+  try { await document.fonts.load('700 30px "IBM Plex Sans Arabic"'); await document.fonts.load('400 30px "IBM Plex Sans Arabic"'); } catch (e) {}
+  const W = 1000, F = (w, s) => `${w} ${s}px "IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif`;
+  const paint = (x, H) => {
+    x.direction = 'rtl';
+    const T = (s, px, py, size, w, col, a = 'right') => { x.font = F(w, size); x.fillStyle = col; x.textAlign = a; x.textBaseline = 'middle'; x.fillText(s, px, py); };
+    const wrap = (s, maxW, size, w) => { x.font = F(w, size); const ws = String(s).split(' '), ls = []; let cu = ''; for (const wd of ws) { const t = cu ? cu + ' ' + wd : wd; if (x.measureText(t).width > maxW && cu) { ls.push(cu); cu = wd; } else cu = t; } if (cu) ls.push(cu); return ls; };
+    x.fillStyle = '#fbf8ef'; x.fillRect(0, 0, W, H);
+    x.strokeStyle = '#a77b2a'; x.lineWidth = 6; x.strokeRect(24, 24, W - 48, H - 48);
+    x.strokeStyle = '#0f3d33'; x.lineWidth = 2; x.strokeRect(40, 40, W - 80, H - 80);
+    x.fillStyle = '#0f3d33'; x.fillRect(40, 40, W - 80, 190); x.fillStyle = '#a77b2a'; x.fillRect(40, 226, W - 80, 6);
+    T(S.owner || 'سند قبض إيجار', W / 2, 115, 50, 700, '#ffffff', 'center');
+    if (S.ownerPhone) T('جوال: ' + S.ownerPhone, W / 2, 175, 28, 400, '#e9d9ae', 'center');
+    T('سند قبض', W / 2, 310, 70, 700, '#0f3d33', 'center');
+    x.strokeStyle = '#a77b2a'; x.lineWidth = 2; x.beginPath(); x.moveTo(380, 360); x.lineTo(620, 360); x.stroke();
+    T('رقم السند: ' + r.receiptNo, W - 90, 415, 30, 600, '#14201c'); T('التاريخ: ' + fmtD(r.date), 90, 415, 30, 600, '#14201c', 'left');
+    const rows = [['استلمت من السيد/ـة', c ? c.tenant : '—'], ['العقار / الوحدة', unitLabel(u)], ['طريقة الدفع', r.method || '—'], ['فترة العقد', c ? `${fmtD(c.start)} إلى ${fmtD(c.end)}` : '—']];
+    let y = 500;
+    rows.forEach(([k, v]) => {
+      T(k, W - 90, y, 27, 400, '#5f6f69');
+      const ls = wrap(v, 560, 32, 600); ls.forEach((ln, i) => T(ln, W - 330, y + i * 42, 32, 600, '#14201c'));
+      y += 92 + (ls.length - 1) * 42; x.strokeStyle = '#e3dcc6'; x.lineWidth = 1; x.beginPath(); x.moveTo(90, y - 46); x.lineTo(W - 90, y - 46); x.stroke();
+    });
+    const by = y + 14;
+    x.fillStyle = '#f1e6cc'; x.strokeStyle = '#a77b2a'; x.lineWidth = 3; x.beginPath(); x.roundRect(90, by, W - 180, 150, 18); x.fill(); x.stroke();
+    T('المبلغ المستلم', W - 120, by + 45, 28, 600, '#7a5a17'); T(`${money(r.amount)} ${cur()}`, W / 2, by + 98, 66, 700, '#0f3d33', 'center');
+    const wl = wrap(`فقط ${tafqeet(r.amount)} ${cur()} لا غير`, W - 200, 30, 500); wl.forEach((ln, i) => T(ln, W - 100, by + 205 + i * 44, 30, 500, '#14201c'));
+    let ny = by + 205 + wl.length * 44 + 14;
+    T('تفاصيل الدفعات المسددة', W - 100, ny + 10, 30, 700, '#0f3d33'); ny += 60;
+    al.forEach(a => {
+      const done = a.left <= 0.005;
+      x.fillStyle = done ? '#eef6f1' : '#fbeeea'; x.strokeStyle = done ? '#b9d9c6' : '#e8b9b2'; x.lineWidth = 2; x.beginPath(); x.roundRect(90, ny, W - 180, 140, 14); x.fill(); x.stroke();
+      T(`دفعة استحقاق ${fmtD(a.due)}`, W - 115, ny + 32, 30, 700, '#14201c'); T(`قيمتها ${money(a.total)}`, 115, ny + 32, 28, 600, '#14201c', 'left');
+      T('مسدد سابقاً', W - 115, ny + 80, 22, 400, '#5f6f69'); T(money(a.before), W - 115, ny + 112, 29, 700, '#14201c');
+      T('هذا السند', W / 2, ny + 80, 22, 400, '#5f6f69', 'center'); T(money(a.a), W / 2, ny + 112, 29, 700, '#0f3d33', 'center');
+      T('المتبقي', 115, ny + 80, 22, 400, '#5f6f69', 'left'); T(money(a.left), 115, ny + 112, 29, 700, done ? '#1f7a4f' : '#a8362a', 'left');
+      ny += 154;
+    });
+    const anyLeft = al.some(a => a.left > 0.005);
+    T(anyLeft ? 'سداد جزئي — يوجد مبلغ متبقٍ على بعض الدفعات' : 'تم سداد الدفعات المذكورة بالكامل', W - 100, ny + 14, 30, 700, anyLeft ? '#a8362a' : '#1f7a4f'); ny += 64;
+    const sy = ny + 30;
+    T('المستلم', W - 130, sy, 28, 600, '#5f6f69'); T(S.owner || '', W - 130, sy + 48, 30, 700, '#14201c');
+    x.strokeStyle = '#14201c'; x.lineWidth = 1.5; x.beginPath(); x.moveTo(90, sy + 90); x.lineTo(380, sy + 90); x.stroke(); T('التوقيع', 235, sy + 118, 24, 400, '#5f6f69', 'center');
+    if (S.footer) T(S.footer, W / 2, H - 60, 26, 400, '#5f6f69', 'center');
+    return sy + 118;
+  };
+  const sc = document.createElement('canvas'); sc.width = W; sc.height = 5000;
+  const endY = paint(sc.getContext('2d'), 5000), H = Math.ceil(endY + (S.footer ? 110 : 70));
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H; paint(cv.getContext('2d'), H);
+  lastCanvas = cv; return cv;
+}
+async function showReceipt(rid) {
+  const r = DB.receipts.find(x => x.id === rid); if (!r) return;
+  sheet(`<h3>سند القبض <span class="num">${esc(r.receiptNo)}</span></h3><p style="color:var(--muted)">جارٍ تجهيز السند…</p>`);
+  const cv = await drawReceipt(r), c = contractOf(r.contractId);
+  sheet(`<h3>سند القبض <span class="num">${esc(r.receiptNo)}</span></h3><img id="rc" alt="سند القبض" src="${cv.toDataURL('image/png')}">
+  <div class="btns"><button class="btn gold" onclick="shareReceipt('${rid}')">إرسال عبر واتساب</button><button class="btn ghost" onclick="saveImg('${rid}')">حفظ الصورة</button></div>
+  <div class="btns"><button class="btn ghost" onclick="waText('${rid}')">رسالة نصية للمستأجر${c && c.phone ? '' : ' (بدون رقم)'}</button><button class="btn danger" onclick="voidReceipt('${rid}')">إلغاء السند</button></div>`);
+}
+function receiptMsg(r) {
+  const c = contractOf(r.contractId), u = c && unitOf(c.unitId);
+  const lines = r.allocations.map(a => `• دفعة ${fmtD(a.due)}: ${money(a.a)} ${cur()}${a.left > 0.005 ? ` (المتبقي ${money(a.left)})` : ' (مكتملة)'}`).join('\n');
+  return `السلام عليكم ورحمة الله ${c ? c.tenant : ''}،\nتم استلام مبلغ ${money(r.amount)} ${cur()} إيجار ${unitLabel(u)} بتاريخ ${fmtD(r.date)}.\n${lines}\nسند القبض رقم ${r.receiptNo}.\nجزاكم الله خيراً.${DB.settings.owner ? '\n' + DB.settings.owner : ''}`;
+}
+function waNumber(c) {
+  let n = (c && c.phone || '').replace(/[^\d]/g, ''); if (!n) return '';
+  const cc = (DB.settings.countryCode || '966').replace(/\D/g, '');
+  if (n.startsWith('00')) n = n.slice(2); else if (n.startsWith('0')) n = cc + n.slice(1); else if (n.length <= 9) n = cc + n;
+  return n;
+}
+function waText(rid) { const r = DB.receipts.find(x => x.id === rid), c = contractOf(r.contractId); window.open(`https://wa.me/${waNumber(c)}?text=${encodeURIComponent(receiptMsg(r))}`, '_blank'); }
+async function saveImg(rid) { const r = DB.receipts.find(x => x.id === rid); const b = await new Promise(f => lastCanvas.toBlob(f, 'image/png')); dl(b, `${r.receiptNo}.png`); }
+async function shareReceipt(rid) {
+  const r = DB.receipts.find(x => x.id === rid), c = contractOf(r.contractId);
+  const blob = await new Promise(f => lastCanvas.toBlob(f, 'image/png')), file = new File([blob], `${r.receiptNo}.png`, { type:'image/png' });
+  if (navigator.canShare && navigator.canShare({ files:[file] })) {
+    try { await navigator.share({ files:[file], text:receiptMsg(r) }); return; } catch (e) { if (e.name === 'AbortError') return; }
+  }
+  dl(blob, `${r.receiptNo}.png`); toast('تم حفظ الصورة — أرفقها في المحادثة');
+  setTimeout(() => window.open(`https://wa.me/${waNumber(c)}?text=${encodeURIComponent(receiptMsg(r))}`, '_blank'), 600);
+}
+
+load();
+</script>
+</body>
+</html>
