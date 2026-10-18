@@ -118,6 +118,14 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .bar i{display:block;height:100%;background:var(--green)}
 #rc{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
 .printonly{display:none}
+@media print{
+ body.pr #app,body.pr header,body.pr nav,body.pr .fab,body.pr .grab,body.pr #sheet h3,body.pr #sheet .btns{display:none!important}
+ body.pr{padding:0;background:#fff}
+ body.pr #overlay{display:block!important;position:static;background:none}
+ body.pr #sheet{max-height:none;overflow:visible;padding:0;max-width:none;width:100%;border-radius:0;animation:none}
+ body.pr #rc{border:0;border-radius:0;width:auto;max-width:100%;max-height:96vh;margin:0 auto}
+ @page{margin:8mm}
+}
 @media print{header,nav,.fab,.noprint,#toast,#overlay{display:none!important}body{padding:0;background:#fff}.printonly{display:block;margin-bottom:10px}.row{break-inside:avoid}}
 #toast{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:.9rem;z-index:80;display:none;max-width:90vw;text-align:center}
 </style>
@@ -818,6 +826,15 @@ async function drawReceipt(r) {
     T('المبلغ المستلم', W - 120, by + 45, 28, 600, '#7a5a17'); T(`${money(r.amount)} ${cur()}`, W / 2, by + 98, 66, 700, '#0f3d33', 'center');
     const wl = wrap(`فقط ${tafqeet(r.amount)} ${cur()} لا غير`, W - 200, 30, 500); wl.forEach((ln, i) => T(ln, W - 100, by + 205 + i * 44, 30, 500, '#14201c'));
     let ny = by + 205 + wl.length * 44 + 14;
+    if (al.length) {
+      const tT = al.reduce((q, a) => q + a.total, 0), tP = al.reduce((q, a) => q + a.before + a.a, 0), tL = r2(al.reduce((q, a) => q + a.left, 0)), multi = al.length > 1, bad = tL > 0.005;
+      [[multi ? 'إجمالي الدفعات' : 'قيمة الدفعة', tT, '#14201c'], ['المسدد حتى الآن', tP, '#1f7a4f'], ['المتبقي', tL, bad ? '#a8362a' : '#1f7a4f']].forEach((b, i) => {
+        const bw = (W - 180 - 32) / 3, bx = W - 90 - (i + 1) * bw - i * 16, hot = i === 2 && bad;
+        x.fillStyle = hot ? '#fbeeea' : '#f3f6f4'; x.strokeStyle = hot ? '#e8b9b2' : '#dbe2de'; x.lineWidth = 2; x.beginPath(); x.roundRect(bx, ny, bw, 118, 14); x.fill(); x.stroke();
+        T(b[0], bx + bw - 18, ny + 30, 22, 400, '#5f6f69'); T(money(b[1]), bx + bw / 2, ny + 80, 40, 700, b[2], 'center');
+      });
+      ny += 146;
+    }
     T('تفاصيل الدفعات المسددة', W - 100, ny + 10, 30, 700, '#0f3d33'); ny += 60;
     al.forEach(a => {
       const done = a.left <= 0.005;
@@ -846,7 +863,7 @@ async function showReceipt(rid) {
   sheet(`<h3>سند القبض <span class="num">${esc(r.receiptNo)}</span></h3><p style="color:var(--muted)">جارٍ تجهيز السند…</p>`);
   const cv = await drawReceipt(r), c = contractOf(r.contractId);
   sheet(`<h3>سند القبض <span class="num">${esc(r.receiptNo)}</span></h3><img id="rc" alt="سند القبض" src="${cv.toDataURL('image/png')}">
-  <div class="btns"><button class="btn gold" onclick="shareReceipt('${rid}')">إرسال عبر واتساب</button><button class="btn ghost" onclick="saveImg('${rid}')">حفظ الصورة</button></div>
+  <div class="btns"><button class="btn gold" onclick="shareReceipt('${rid}')">إرسال عبر واتساب</button><button class="btn ghost" onclick="saveImg('${rid}')">حفظ الصورة</button><button class="btn ghost" onclick="window.print()">طباعة</button></div>
   <div class="btns"><button class="btn ghost" onclick="waText('${rid}')">رسالة نصية للمستأجر${c && c.phone ? '' : ' (بدون رقم)'}</button><button class="btn danger" onclick="voidReceipt('${rid}')">إلغاء السند</button></div>`);
 }
 function receiptMsg(r) {
@@ -872,6 +889,8 @@ async function shareReceipt(rid) {
   setTimeout(() => window.open(`https://wa.me/${waNumber(c)}?text=${encodeURIComponent(receiptMsg(r))}`, '_blank'), 600);
 }
 
+window.addEventListener('beforeprint', () => { if ($('#overlay').classList.contains('open') && document.getElementById('rc')) document.body.classList.add('pr'); });
+window.addEventListener('afterprint', () => document.body.classList.remove('pr'));
 load();
 </script>
 </body>
