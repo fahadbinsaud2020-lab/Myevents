@@ -349,7 +349,7 @@ function viewPays() {
   l = l.filter(f).sort((a, b) => payFilter === 'paid' ? (b.paidDate || '').localeCompare(a.paidDate || '') : a.due.localeCompare(b.due));
   const chips = [['due','غير مسددة'],['overdue','متأخرة'],['part','جزئية'],['paid','مسددة'],['all','الكل']].map(([k, n]) => `<button class="chip ${payFilter===k?'on':''}" onclick="payFilter='${k}';render()">${n}</button>`).join('');
   const cc = payContract ? `<div class="chips"><button class="chip on" onclick="payContract='';render()">عقد: ${esc((contractOf(payContract) || {}).tenant || '')} ✕</button></div>` : '';
-  return unitPicker() + `<input class="search" placeholder="بحث باسم المستأجر أو الوحدة" value="${esc(payQuery)}" oninput="payQuery=this.value;renderListOnly()"><div class="chips">${chips}</div>${cc}<div class="list" id="pl">${plist(l)}</div>`;
+  return unitPicker() + dupBanner() + `<input class="search" placeholder="بحث باسم المستأجر أو الوحدة" value="${esc(payQuery)}" oninput="payQuery=this.value;renderListOnly()"><div class="chips">${chips}</div>${cc}<div class="list" id="pl">${plist(l)}</div>`;
 }
 const plist = l => l.length ? l.slice(0, 200).map(p => payRow(p)).join('') : empty('لا توجد دفعات في هذا العرض');
 function renderListOnly() { const pos = document.activeElement; const prev = $('#app').innerHTML; render(); const s = document.querySelector('.search'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }
@@ -364,6 +364,7 @@ function payDetail(id) {
   sheet(`<h3>${esc(c ? c.tenant : 'عقد محذوف')} <span class="tag ${st}">${STAT_L[st]}</span></h3>
   <div class="kv"><span>الوحدة</span><b>${esc(unitLabel(u))}</b><span>الاستحقاق</span><b>${N(fmtD(p.due))}</b><span>قيمة الدفعة</span><b>${N(money(p.amount))} ${esc(cur())}</b><span>المسدد</span><b>${N(money(p.paid))}</b><span>المتبقي</span><b>${N(money(remain(p)))}</b>${p.notes ? `<span>ملاحظات</span><b>${esc(p.notes)}</b>` : ''}</div>
   <div class="bar"><i style="width:${p.amount ? Math.min(100, p.paid / p.amount * 100) : 0}%"></i></div>
+  ${DB.payments.some(x => x.id !== id && x.contractId === p.contractId && x.due === p.due) ? `<div class="hint" style="background:var(--amber-soft);color:#6b4a06">توجد دفعة أخرى بنفس تاريخ الاستحقاق لهذا العقد. <button class="btn sm gold" style="margin-top:6px" onclick="mergeForm('${p.contractId}','${p.due}')">دمجهما في دفعة واحدة</button></div>` : ''}
   <div class="btns">${remain(p) > 0.005 && c ? `<button class="btn" onclick="receiveForm('${p.contractId}','${p.id}')">تسجيل سداد</button>` : ''}<button class="btn ghost" onclick="editPayment('${p.id}')">تعديل</button><button class="btn danger" onclick="delPayment('${p.id}')">حذف</button></div>${logHtml}`);
 }
 function payForm() {
@@ -422,8 +423,49 @@ function voidReceipt(rid) {
 function saveManual() {
   if (!guard()) return; const a = r2($('#m-a').value), d = $('#m-d').value;
   if (!(a > 0) || !d) return toast('أدخل التاريخ والمبلغ');
+  if (DB.payments.some(x => x.contractId === $('#m-c').value && x.due === d) && !confirm('توجد دفعة لهذا العقد بنفس تاريخ الاستحقاق.\nلتسجيل باقي الدفعة استخدم «تسجيل سداد» على الدفعة نفسها بدل إضافة دفعة جديدة.\n\nهل تريد إضافة دفعة منفصلة فعلاً؟')) return;
   DB.payments.push({ id:uid(), contractId:$('#m-c').value, due:d, amount:a, paid:0, paidDate:'', lastAmount:0, method:'', receiptNo:'', notes:$('#m-n').value.trim() });
   commit('payments'); closeSheet(); toast('تمت إضافة الدفعة');
+}
+/* ===== الدفعات المكررة بنفس تاريخ الاستحقاق: كشف ودمج ===== */
+function dupGroups() {
+  const m = new Map(); DB.payments.forEach(p => { const k = p.contractId + '|' + p.due; if (!m.has(k)) m.set(k, []); m.get(k).push(p); });
+  return [...m.values()].filter(a => a.length > 1 && matchUnit(a[0].contractId));
+}
+function dupBanner() {
+  const g = dupGroups(); if (!g.length) return '';
+  return `<div class="banner noprint"><b>توجد ${g.length} ${g.length > 2 ? 'تواريخ' : 'تاريخ'} فيها أكثر من دفعة لنفس العقد.</b> غالباً هي دفعة واحدة سُجّل باقيها كدفعة جديدة.<br><button class="btn sm gold" onclick="dupList()">مراجعة ودمج</button></div>`;
+}
+function dupList() {
+  const g = dupGroups(); if (!g.length) return closeSheet();
+  sheet(`<h3>دفعات بنفس تاريخ الاستحقاق</h3><div class="list">${g.map(a => { const c = contractOf(a[0].contractId); return `<button class="row" onclick="mergeForm('${a[0].contractId}','${a[0].due}')"><div class="r-main"><b>${esc(c ? c.tenant : '—')}</b><small>${esc(unitLabel(c && unitOf(c.unitId)))} · استحقاق ${N(fmtD(a[0].due))}</small><small>${a.map(p => `${N(money(p.amount))} (مسدد ${N(money(p.paid))})`).join(' + ')}</small></div><div class="r-side"><span class="tag partial">دمج</span></div></button>`; }).join('')}</div>`);
+}
+function mergeRows(cid, due) { return DB.payments.filter(p => p.contractId === cid && p.due === due).sort((a, b) => b.amount - a.amount); }
+function mergeForm(cid, due) {
+  const ps = mergeRows(cid, due); if (ps.length < 2) return toast('لا توجد دفعات مكررة');
+  const c = contractOf(cid), paid = r2(ps.reduce((q, p) => q + p.paid, 0));
+  sheet(`<h3>دمج الدفعات في دفعة واحدة</h3><div class="kv"><span>المستأجر</span><b>${esc(c ? c.tenant : '—')}</b><span>الاستحقاق</span><b>${N(fmtD(due))}</b></div>
+  <div class="list" style="margin-top:8px">${ps.map(p => `<div class="row" style="cursor:default"><div class="r-main"><b>قيمة ${N(money(p.amount))}</b><small>مسدد ${N(money(p.paid))}${p.notes ? ' · ' + esc(p.notes) : ''}</small></div><div class="r-side"><b>${N(money(remain(p)))}</b><small style="color:var(--muted);font-size:.72rem">المتبقي</small></div></div>`).join('')}</div>
+  <label>قيمة الدفعة بعد الدمج (المبلغ الأساسي للدفعة كاملة)</label><input type="number" inputmode="decimal" id="g-a" value="${ps[0].amount}" oninput="hintMerge('${cid}','${due}')">
+  <div class="hint" id="g-hint"></div><div style="color:var(--muted);font-size:.84rem;margin-top:8px">يبقى سجل السداد والسندات كما هي، وتظهر كلها تحت الدفعة المدموجة.</div>
+  <div class="btns"><button class="btn gold" onclick="doMerge('${cid}','${due}')">دمج</button></div>`);
+  hintMerge(cid, due);
+}
+function hintMerge(cid, due) {
+  const paid = r2(mergeRows(cid, due).reduce((q, p) => q + p.paid, 0)), t = r2($('#g-a').value), left = r2(t - paid);
+  $('#g-hint').innerHTML = left < -0.005 ? `<b>القيمة أقل من المسدد (${N(money(paid))})</b>` : `بعد الدمج: قيمة <b>${N(money(t))}</b> · مسدد <b>${N(money(paid))}</b> · متبقٍ <b>${N(money(left))}</b> ${esc(cur())}`;
+}
+function doMerge(cid, due) {
+  if (!guard()) return; const ps = mergeRows(cid, due); if (ps.length < 2) return;
+  const total = r2($('#g-a').value), paid = r2(ps.reduce((q, p) => q + p.paid, 0));
+  if (!(total > 0)) return toast('أدخل قيمة الدفعة'); if (total < paid - 0.005) return toast('القيمة أقل من المسدد فعلاً');
+  const base = ps[0], others = ps.slice(1), ids = new Set(others.map(p => p.id));
+  const last = ps.filter(p => p.paid > 0).sort((a, b) => (b.paidDate || '').localeCompare(a.paidDate || ''))[0];
+  const notes = [...new Set(ps.map(p => p.notes).filter(Boolean))].join(' · ');
+  Object.assign(base, { amount:total, paid, notes }, last ? { lastAmount:last.lastAmount, paidDate:last.paidDate, method:last.method, receiptNo:last.receiptNo } : {});
+  DB.receipts.forEach(r => r.allocations.forEach(a => { if (ids.has(a.id)) a.id = base.id; }));
+  DB.payments = DB.payments.filter(p => !ids.has(p.id));
+  commit('payments', 'receipts'); closeSheet(); toast('تم دمج الدفعات');
 }
 function editPayment(id) {
   const p = DB.payments.find(x => x.id === id);
