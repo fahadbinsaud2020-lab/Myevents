@@ -315,7 +315,7 @@ function payRow(p, showStatus = true) {
   const late = st === 'overdue' ? ` · متأخرة ${diffDays(p.due, todayISO())} يوم` : '';
   const pct = p.amount ? Math.min(100, p.paid / p.amount * 100) : 0;
   const tags = `<span class="tag ${st}">${STAT_L[st]}</span>` + (part && st === 'overdue' ? '<span class="tag partial">سداد جزئي</span>' : '');
-  return `<button class="row prow" onclick="payDetail('${p.id}')"><div class="ph"><div class="r-main"><b>${esc(c ? c.tenant : 'عقد محذوف')}</b><small>${esc(unitLabel(u))} · استحقاق ${N(fmtD(p.due))}${late}</small></div><div class="r-side">${tags}</div></div>
+  return `<button class="row prow" onclick="payDetail('${p.id}')"><div class="ph"><div class="r-main"><b>${esc(c ? c.tenant : 'عقد محذوف')}</b><small>${esc(unitLabel(u))} · استحقاق ${N(fmtD(p.due))}${late}${p.paid > 0 && p.paidDate ? ` · آخر سداد ${N(fmtD(p.paidDate))}` : ''}</small></div><div class="r-side">${tags}</div></div>
   <div class="fig"><div><small>قيمة الدفعة</small><b>${N(money(p.amount))}</b></div><div class="pd"><small>المسدد</small><b>${N(money(p.paid))}</b></div><div class="rm ${rem <= 0.005 ? 'zero' : st === 'overdue' ? 'late' : ''}"><small>المتبقي</small><b>${N(money(rem))}</b></div></div>
   <div class="bar mini"><i style="width:${pct}%"></i></div>${p.notes ? `<small class="pnote">ملاحظة: ${esc(p.notes)}</small>` : ''}</button>`;
 }
@@ -660,6 +660,12 @@ function repData() {
   const tot = { n:0, due:0, paid:0, rem:0 }; gs.forEach(g => { tot.n += g.n; tot.due += g.due; tot.paid += g.paid; tot.rem += g.rem; });
   return { gs, tot, kind:'p' };
 }
+function payLog(p) {
+  const rows = []; DB.receipts.forEach(r => r.allocations.forEach(a => { if (a.id === p.id) rows.push({ r, a }); }));
+  rows.sort((x, y) => x.r.date.localeCompare(y.r.date) || x.r.receiptNo.localeCompare(y.r.receiptNo));
+  return { rows, unlogged: r2(p.paid - rows.reduce((q, z) => q + z.a.a, 0)) };
+}
+const PDF_ST = { paid:'مسددة', overdue:'متأخرة', partial:'جزئي', upcoming:'قادمة' };
 const periodText = () => ((rep.from || rep.to) ? `${fmtD(rep.from)} — ${fmtD(rep.to)}` : 'كل الفترات') + (selLabel() ? ` · ${selLabel()}` : '');
 function viewReport() {
   if (!rep.init) { setPreset('year'); rep.init = true; }
@@ -728,15 +734,18 @@ async function buildReportPages() {
   gs.forEach((g, i) => drawRow(gcols, kind === 'p' ? [g.name, g.n, money(g.due), money(g.paid), money(g.rem), (g.due ? Math.round(g.paid / g.due * 100) : 0) + '%'] : [g.name, g.n, money(g.paid)], 54, { bg:i % 2 ? '#f6f9f7' : '#ffffff', size:25 }));
   drawRow(gcols, kind === 'p' ? ['الإجمالي', tot.n, money(tot.due), money(tot.paid), money(tot.rem), (tot.due ? Math.round(tot.paid / tot.due * 100) : 0) + '%'] : ['الإجمالي', tot.n, money(tot.paid)], 58, { bg:'#f1e6cc', weight:700, size:26 });
   y += 50; ensure(200); T('التفاصيل', W - M, y + 6, 34, 700, PINE); y += 46;
-  const dcols = kind === 'p' ? [{ w:230 }, { w:230 }, { w:130, al:'c' }, { w:120, al:'c' }, { w:120, al:'c' }, { w:120, al:'c' }, { w:150, al:'c' }] : [{ w:170, al:'c' }, { w:150, al:'c' }, { w:330 }, { w:300 }, { w:150, al:'c' }];
-  const dhead = kind === 'p' ? ['المستأجر', 'الوحدة', 'الاستحقاق', 'القيمة', 'المسدد', 'المتبقي', 'الحالة'] : ['السند', 'التاريخ', 'المستأجر', 'الوحدة', 'المبلغ'];
+  const dcols = kind === 'p' ? [{ w:210 }, { w:170 }, { w:140, al:'c' }, { w:140, al:'c' }, { w:110, al:'c' }, { w:110, al:'c' }, { w:110, al:'c' }, { w:110, al:'c' }] : [{ w:170, al:'c' }, { w:150, al:'c' }, { w:330 }, { w:300 }, { w:150, al:'c' }];
+  const dhead = kind === 'p' ? ['المستأجر', 'الوحدة', 'الاستحقاق', 'تاريخ السداد', 'القيمة', 'المسدد', 'المتبقي', 'الحالة'] : ['السند', 'التاريخ', 'المستأجر', 'الوحدة', 'المبلغ'];
   gs.forEach(g => {
     ensure(150); drawRow([{ w:CW }], [`${g.name} — ${g.n} ${kind === 'p' ? 'دفعة' : 'سند'}`], 52, { bg:'#dcebe4', fg:PINE, weight:700, size:27 });
     drawRow(dcols, dhead, 44, { bg:'#eef2f0', fg:MUTED, size:21, weight:600 });
     const items = g.items.slice().sort((a, b) => kind === 'p' ? a.due.localeCompare(b.due) : a.date.localeCompare(b.date));
     items.forEach((it, i) => {
-      const c = contractOf(it.contractId), u = c && unitOf(c.unitId);
-      drawRow(dcols, kind === 'p' ? [c ? c.tenant : '—', unitLabel(u), fmtD(it.due), money(it.amount), money(it.paid), money(remain(it)), STAT_L[pStatus(it)]] : [it.receiptNo, fmtD(it.date), c ? c.tenant : '—', unitLabel(u), money(it.amount)], 44, { size:21, bg:i % 2 ? '#fafcfb' : '#ffffff' });
+      const c = contractOf(it.contractId), u = c && unitOf(c.unitId), lg = kind === 'p' ? payLog(it) : { rows:[], unlogged:0 };
+      const extra = lg.rows.length + (lg.unlogged > 0.005 ? 1 : 0); ensure(44 * (1 + extra));
+      drawRow(dcols, kind === 'p' ? [c ? c.tenant : '—', unitLabel(u), fmtD(it.due), it.paid > 0 && it.paidDate ? fmtD(it.paidDate) : '—', money(it.amount), money(it.paid), money(remain(it)), PDF_ST[pStatus(it)]] : [it.receiptNo, fmtD(it.date), c ? c.tenant : '—', unitLabel(u), money(it.amount)], 44, { size:21, bg:i % 2 ? '#fafcfb' : '#ffffff', weight:kind === 'p' && extra ? 600 : 400 });
+      lg.rows.forEach((z, k) => drawRow(dcols, [`   ↳ سداد ${k + 1} · ${z.r.receiptNo}`, z.r.method || '—', '', fmtD(z.r.date), '', money(z.a.a), money(z.a.left), ''], 40, { size:18, bg:'#f3f7f5', fg:'#3d4f48' }));
+      if (lg.unlogged > 0.005) drawRow(dcols, ['   ↳ سداد سابق', 'غير مفصّل', '', '', '', money(lg.unlogged), '', ''], 40, { size:18, bg:'#f3f7f5', fg:'#3d4f48' });
     });
     y += 22;
   });
@@ -785,8 +794,13 @@ function repCSV() {
     rows.push([t, 'العدد', 'المستحق', 'المسدد', 'المتبقي', 'نسبة التحصيل %']);
     gs.forEach(g => rows.push([g.name, g.n, r2(g.due), r2(g.paid), r2(g.rem), g.due ? Math.round(g.paid / g.due * 100) : 0]));
     rows.push(['الإجمالي', tot.n, r2(tot.due), r2(tot.paid), r2(tot.rem), tot.due ? Math.round(tot.paid / tot.due * 100) : 0]); rows.push([]);
-    rows.push(['المستأجر','العقار','الوحدة','نوع الوحدة','دورة السداد','الاستحقاق','قيمة الدفعة','المسدد','المتبقي','الحالة']);
-    gs.forEach(g => g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).forEach(p => { const c = contractOf(p.contractId), u = c && unitOf(c.unitId); rows.push([c ? c.tenant : '', u ? u.property : '', u ? u.unit : '', u ? u.type : '', c ? FREQ[c.freq].l : '', p.due, r2(p.amount), r2(p.paid), remain(p), STAT_L[pStatus(p)]]); }));
+    rows.push(['المستأجر','العقار','الوحدة','نوع الوحدة','دورة السداد','الاستحقاق','تاريخ آخر سداد','قيمة الدفعة','المسدد','المتبقي','الحالة']);
+    gs.forEach(g => g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).forEach(p => { const c = contractOf(p.contractId), u = c && unitOf(c.unitId); rows.push([c ? c.tenant : '', u ? u.property : '', u ? u.unit : '', u ? u.type : '', c ? FREQ[c.freq].l : '', p.due, p.paid > 0 ? p.paidDate : '', r2(p.amount), r2(p.paid), remain(p), STAT_L[pStatus(p)]]); }));
+    rows.push([]); rows.push(['سجل السداد (كل عملية سداد على حدة)']);
+    rows.push(['المستأجر','الوحدة','استحقاق الدفعة','رقم السند','تاريخ السداد','طريقة الدفع','المبلغ','المتبقي بعد السداد']);
+    gs.forEach(g => g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).forEach(p => { const c = contractOf(p.contractId), u = c && unitOf(c.unitId), lg = payLog(p);
+      lg.rows.forEach(z => rows.push([c ? c.tenant : '', unitLabel(u), p.due, z.r.receiptNo, z.r.date, z.r.method, r2(z.a.a), r2(z.a.left)]));
+      if (lg.unlogged > 0.005) rows.push([c ? c.tenant : '', unitLabel(u), p.due, 'غير مفصّل', '', '', lg.unlogged, '']); }));
   } else {
     rows.push(['طريقة الدفع', 'عدد السندات', 'المبلغ']); gs.forEach(g => rows.push([g.name, g.n, r2(g.paid)])); rows.push(['الإجمالي', tot.n, r2(tot.paid)]); rows.push([]);
     rows.push(['رقم السند','التاريخ','المستأجر','العقار / الوحدة','طريقة الدفع','المبلغ']);
