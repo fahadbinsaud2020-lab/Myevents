@@ -227,12 +227,16 @@ function migrate() {
 }
 async function load() {
   const cached = lsGet('rt_cache', null); if (cached) DB = normalize(cached);
+  try {
+    const m = location.hash.match(/^#cfg=(.+)$/);
+    if (m) { const o = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1]))))), n = normUrl(o.u); if (!n.err) lsSet('rt_cfg', { url:n.url, key:String(o.k || '') }); history.replaceState(null, '', location.pathname + location.search); }
+  } catch (e) {}
   CFG = lsGet('rt_cfg', { url:'', key:'' });
   if (!CFG.url) { loaded = true; migrate(); setSync('local'); render(); return; }
   setSync('loading'); render();
   try {
     const r = await fetch(CFG.url + (CFG.url.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(CFG.key || ''));
-    const j = await r.json();
+    const txt = await r.text(); let j; try { j = JSON.parse(txt); } catch (e) { throw new Error('الرابط لا يُرجع بيانات: تأكد أنه رابط Web app كامل ينتهي بـ /exec وأن الوصول Anyone'); }
     if (!j.ok) throw new Error(j.error || 'خطأ');
     const remote = normalize(j.data);
     if (isEmptyDB(remote) && !isEmptyDB(DB)) { loaded = true; ['units','contracts','payments','receipts','settings'].forEach(k => dirty.add(k)); push(); }
@@ -765,7 +769,7 @@ function viewSettings() {
   <label>سطر أسفل السند</label><input id="s-foot" value="${esc(s.footer || '')}" placeholder="مثال: جزاكم الله خيراً">
   <div class="btns"><button class="btn" onclick="saveSettings()">حفظ الإعدادات</button></div></div>
   <h2>الربط مع Google Sheets</h2><div class="list" style="padding:6px 16px 18px"><label>رابط Apps Script (Web app)</label><input id="s-url" dir="ltr" value="${esc(CFG.url)}" placeholder="https://script.google.com/macros/s/…/exec"><label>المفتاح السري</label><input id="s-key" dir="ltr" value="${esc(CFG.key)}">
-  <div class="btns"><button class="btn gold" onclick="saveCfg()">حفظ الربط وتحميل البيانات</button></div><p style="color:var(--muted);font-size:.85rem;margin:10px 0 0">بدون رابط يعمل التطبيق على هذا الجهاز فقط. عند الربط لأول مرة تُرفع البيانات الموجودة إلى الشيت تلقائياً.</p></div>
+  <div class="btns"><button class="btn gold" onclick="saveCfg()">حفظ الربط وتحميل البيانات</button>${CFG.url ? '<button class="btn ghost" onclick="copyCfgLink()">نسخ رابط إعداد الأجهزة الأخرى</button>' : ''}</div><p style="color:var(--muted);font-size:.85rem;margin:10px 0 0">بدون رابط يعمل التطبيق على هذا الجهاز فقط. عند الربط لأول مرة تُرفع البيانات الموجودة إلى الشيت تلقائياً.</p></div>
   <h2>نسخة احتياطية</h2><div class="btns"><button class="btn ghost" onclick="exportJSON()">تنزيل نسخة JSON</button></div>`;
 }
 function saveSettings() {
@@ -773,7 +777,20 @@ function saveSettings() {
   Object.assign(DB.settings, { owner:$('#s-owner').value.trim(), ownerPhone:$('#s-ophone').value.trim(), currency:$('#s-cur').value.trim() || 'ريال', countryCode:$('#s-cc').value.trim() || '966', footer:$('#s-foot').value.trim() });
   commit('settings'); toast('تم الحفظ');
 }
-function saveCfg() { CFG = { url:$('#s-url').value.trim(), key:$('#s-key').value.trim() }; lsSet('rt_cfg', CFG); loaded = false; load(); }
+function normUrl(u) {
+  u = String(u || '').replace(/\s+/g, ''); if (!u) return { url:'' };
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  if (/…|\.\.\./.test(u) || !/^https:\/\/script\.google\.com\/(a\/[^/]+\/)?macros\/s\/[A-Za-z0-9_-]{20,}\/exec/.test(u)) return { url:u, err:'الرابط غير مكتمل أو غير صحيح. انسخه كاملاً من نافذة النشر في Apps Script (ينتهي بـ /exec)' };
+  return { url:u };
+}
+function saveCfg() {
+  const n = normUrl($('#s-url').value); if (n.err) return toast(n.err);
+  CFG = { url:n.url, key:$('#s-key').value.trim() }; lsSet('rt_cfg', CFG); loaded = false; load();
+}
+function copyCfgLink() {
+  const enc = btoa(unescape(encodeURIComponent(JSON.stringify({ u:CFG.url, k:CFG.key })))), link = location.origin + location.pathname + '#cfg=' + encodeURIComponent(enc);
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(link).then(() => toast('تم نسخ الرابط. افتحه على الجهاز الآخر'), () => prompt('انسخ الرابط:', link)); else prompt('انسخ الرابط:', link);
+}
 function exportJSON() { dl(new Blob([JSON.stringify(DB, null, 2)], { type:'application/json' }), `rentals-backup-${todayISO()}.json`); }
 function dl(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
 
