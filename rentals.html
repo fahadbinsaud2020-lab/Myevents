@@ -359,7 +359,7 @@ function viewPays() {
   l = l.filter(f).sort((a, b) => payFilter === 'paid' ? (b.paidDate || '').localeCompare(a.paidDate || '') : a.due.localeCompare(b.due));
   const chips = [['due','غير مسددة'],['overdue','متأخرة'],['part','جزئية'],['paid','مسددة'],['all','الكل']].map(([k, n]) => `<button class="chip ${payFilter===k?'on':''}" onclick="payFilter='${k}';render()">${n}</button>`).join('');
   const cc = payContract ? `<div class="chips"><button class="chip on" onclick="payContract='';render()">عقد: ${esc((contractOf(payContract) || {}).tenant || '')} ✕</button></div>` : '';
-  return unitPicker() + dupBanner() + `<input class="search" placeholder="بحث باسم المستأجر أو الوحدة" value="${esc(payQuery)}" oninput="payQuery=this.value;renderListOnly()"><div class="chips">${chips}</div>${cc}<div class="list" id="pl">${plist(l)}</div>`;
+  return unitPicker() + dupBanner() + unloggedBanner(false) + `<input class="search" placeholder="بحث باسم المستأجر أو الوحدة" value="${esc(payQuery)}" oninput="payQuery=this.value;renderListOnly()"><div class="chips">${chips}</div>${cc}<div class="list" id="pl">${plist(l)}</div>`;
 }
 const plist = l => l.length ? l.slice(0, 200).map(p => payRow(p)).join('') : empty('لا توجد دفعات في هذا العرض');
 function renderListOnly() { const pos = document.activeElement; const prev = $('#app').innerHTML; render(); const s = document.querySelector('.search'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }
@@ -456,9 +456,13 @@ function renderStages() {
   <div style="color:var(--muted);font-size:.85rem;margin-top:6px">قسّم المبلغ غير المفصّل إلى مراحله، كل سداد بتاريخه. لا يغيّر هذا المسدد ولا المتبقي.</div>
   ${stg.rows.map((r, i) => `<div class="list" style="padding:2px 12px 12px;margin-top:10px"><div class="two"><div><label>تاريخ السداد</label><input type="date" value="${r.d}" onchange="stg.rows[${i}].d=this.value"></div><div><label>المبلغ</label><input type="number" inputmode="decimal" value="${r.a || ''}" oninput="stg.rows[${i}].a=r2(this.value);hintStg()"></div></div>
   <div class="two"><div><label>طريقة الدفع</label><select onchange="stg.rows[${i}].m=this.value">${METHODS.map(m => `<option ${m === r.m ? 'selected' : ''}>${m}</option>`).join('')}</select></div><div style="display:flex;align-items:flex-end">${stg.rows.length > 1 ? `<button class="btn danger sm block" onclick="stg.rows.splice(${i},1);renderStages()">حذف المرحلة</button>` : ''}</div></div></div>`).join('')}
-  <div class="btns"><button class="btn ghost" onclick="stg.rows.push({d:todayISO(),a:0,m:METHODS[0]});renderStages()">+ إضافة مرحلة</button></div>
+  <div class="btns"><button class="btn ghost" onclick="addStage()">+ إضافة مرحلة</button></div>
   <div class="hint" id="s-hint"></div><div class="btns"><button class="btn" onclick="saveStages()">حفظ المراحل</button></div>`);
   hintStg();
+}
+function addStage() {
+  const p = DB.payments.find(x => x.id === stg.pid), un = payLog(p).unlogged, sum = r2(stg.rows.reduce((q, r) => q + (r.a || 0), 0));
+  stg.rows.push({ d:todayISO(), a:Math.max(0, r2(un - sum)), m:METHODS[0] }); renderStages();
 }
 function hintStg() {
   const p = DB.payments.find(x => x.id === stg.pid), un = payLog(p).unlogged, sum = r2(stg.rows.reduce((q, r) => q + (r.a || 0), 0)), left = r2(un - sum);
@@ -468,7 +472,8 @@ function saveStages() {
   if (!guard()) return; const p = DB.payments.find(x => x.id === stg.pid), un = payLog(p).unlogged, sum = r2(stg.rows.reduce((q, r) => q + (r.a || 0), 0));
   if (stg.rows.some(r => !(r.a > 0) || !r.d)) return toast('أكمل تاريخ ومبلغ كل مرحلة'); if (sum > un + 0.005) return toast('المجموع أكبر من المبلغ غير المفصّل');
   stg.rows.forEach(r => DB.receipts.push({ id:uid(), receiptNo:'', contractId:p.contractId, date:r.d, amount:r.a, method:r.m, notes:'__hist', allocations:[{ id:p.id, due:p.due, total:p.amount, before:0, a:r.a, left:0 }] }));
-  snapHist(p.id); commit('receipts'); payDetail(p.id); toast('تم حفظ مراحل السداد');
+  snapHist(p.id); const lastD = payLog(p).rows.map(z => z.r.date).sort().pop(); if (lastD) p.paidDate = lastD;
+  commit('receipts', 'payments'); payDetail(p.id); toast('تم حفظ مراحل السداد');
 }
 function stageSheet(rid) {
   const r = DB.receipts.find(x => x.id === rid); if (!r) return; const c = contractOf(r.contractId);
@@ -480,6 +485,15 @@ function issueStage(rid) { if (!guard()) return; const r = DB.receipts.find(x =>
 function dupGroups() {
   const m = new Map(); DB.payments.forEach(p => { const k = p.contractId + '|' + p.due; if (!m.has(k)) m.set(k, []); m.get(k).push(p); });
   return [...m.values()].filter(a => a.length > 1 && matchUnit(a[0].contractId));
+}
+function unloggedPays(useRange) { return DB.payments.filter(p => p.paid > 0.005 && payLog(p).unlogged > 0.005 && matchUnit(p.contractId) && (!useRange || inRange(p.due))).sort((a, b) => a.due.localeCompare(b.due)); }
+function unloggedBanner(useRange) {
+  const l = unloggedPays(useRange); if (!l.length) return '';
+  return `<div class="banner noprint"><b>${l.length} ${l.length > 2 ? 'دفعات' : 'دفعة'} فيها مبلغ مسدد بدون تفصيل مراحله</b> (يظهر في التقرير «سداد سابق غير مفصّل»).<br><button class="btn sm gold" onclick="unloggedSheet(${useRange ? 1 : 0})">تفصيل المراحل</button></div>`;
+}
+function unloggedSheet(useRange) {
+  const l = unloggedPays(!!useRange); if (!l.length) return closeSheet();
+  sheet(`<h3>دفعات مسددة بدون تفصيل المراحل</h3><div style="color:var(--muted);font-size:.86rem;margin-bottom:8px">اختر الدفعة ثم قسّم المبلغ إلى مراحل السداد بتواريخها.</div><div class="list">${l.map(p => { const c = contractOf(p.contractId); return `<button class="row" onclick="stagesForm('${p.id}')"><div class="r-main"><b>${esc(c ? c.tenant : '—')}</b><small>${esc(unitLabel(c && unitOf(c.unitId)))} · استحقاق ${N(fmtD(p.due))}</small></div><div class="r-side"><b>${N(money(payLog(p).unlogged))}</b><span class="tag partial">تفصيل</span></div></button>`; }).join('')}</div>`);
 }
 function dupBanner() {
   const g = dupGroups(); if (!g.length) return '';
@@ -723,7 +737,7 @@ function viewReport() {
   const by = BYS.map(([k, l]) => `<button class="chip ${rep.by===k?'on':''}" onclick="rep.by='${k}';render()">${l}</button>`).join('');
   const pre = [['month','هذا الشهر'],['year','هذا العام'],['all','الكل']].map(([k, l]) => `<button class="chip ${rep.preset===k?'on':''}" onclick="setPreset('${k}');render()">${l}</button>`).join('');
   const title = BYS.find(x => x[0] === rep.by)[1];
-  const head = unitPicker() + `<div class="noprint"><div class="chips">${pre}</div><div class="two" style="margin-bottom:12px"><div><label style="margin-top:0">من</label><input type="date" value="${rep.from}" onchange="rep.from=this.value;rep.preset='custom';render()"></div><div><label style="margin-top:0">إلى</label><input type="date" value="${rep.to}" onchange="rep.to=this.value;rep.preset='custom';render()"></div></div>
+  const head = unitPicker() + unloggedBanner(true) + `<div class="noprint"><div class="chips">${pre}</div><div class="two" style="margin-bottom:12px"><div><label style="margin-top:0">من</label><input type="date" value="${rep.from}" onchange="rep.from=this.value;rep.preset='custom';render()"></div><div><label style="margin-top:0">إلى</label><input type="date" value="${rep.to}" onchange="rep.to=this.value;rep.preset='custom';render()"></div></div>
   <label style="margin:0 2px 6px">تجميع حسب</label><div class="chips">${by}</div></div><div class="printonly"><b>تقرير الدفعات حسب ${title}</b> — ${periodText()}</div>`;
   if (!gs.length) return head + `<div class="list">${empty('لا توجد بيانات في هذه الفترة', kind === 'r' ? 'لم تُصدر سندات خلال الفترة المحددة.' : 'جرّب توسيع الفترة الزمنية.')}</div>`;
   const pct = tot.due ? Math.min(100, tot.paid / tot.due * 100) : 0;
