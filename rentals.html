@@ -127,6 +127,15 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
  @page{margin:8mm}
 }
 @media print{header,nav,.fab,.noprint,#toast,#overlay{display:none!important}body{padding:0;background:#fff}.printonly{display:block;margin-bottom:10px}.row{break-inside:avoid}}
+#pv{position:fixed;inset:0;z-index:70;background:#2b3330;display:none;flex-direction:column}
+#pv.open{display:flex}
+#pv .pvbar{flex:none;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 8px;background:var(--pine);color:#fff;border-bottom:3px solid var(--brass)}
+#pv .pvbar button{border:0;border-radius:10px;padding:8px 13px;background:rgba(255,255,255,.16);color:#fff;cursor:pointer;font-size:.92rem}
+#pv .pvbar .gold{background:var(--brass)}
+#pv .pvbar span{min-width:46px;text-align:center;font-weight:600}
+#pv .pages{flex:1;min-height:0;overflow:auto;padding:12px;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y pinch-zoom}
+#pv .pages img{display:block;margin:0 auto 14px;background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.45);max-width:none;height:auto}
+@media print{#pv{display:none!important}}
 #toast{position:fixed;bottom:calc(92px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-size:.9rem;z-index:80;display:none;max-width:90vw;text-align:center}
 </style>
 </head>
@@ -136,6 +145,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 <button class="fab" id="fab" onclick="fabAction()" aria-label="إضافة" style="display:none">+</button>
 <nav id="nav"></nav>
 <div id="overlay" onclick="if(event.target===this)closeSheet()"><div id="sheet"><div class="grab"></div><div id="sheet-body"></div></div></div>
+<div id="pv"></div>
 <div id="toast"></div>
 
 <script>
@@ -360,7 +370,7 @@ function payDetail(id) {
   const logs = DB.receipts.filter(r => r.allocations.some(a => a.id === id)).sort((x, y) => y.date.localeCompare(x.date) || y.receiptNo.localeCompare(x.receiptNo));
   const mine = r => r.allocations.filter(a => a.id === id).reduce((t, a) => t + a.a, 0);
   const unlogged = r2(p.paid - logs.reduce((t, r) => t + mine(r), 0));
-  const logHtml = (logs.length || unlogged > 0.005) ? `<h2 style="margin:16px 2px 8px">سجل السداد</h2><div class="list">${logs.map(r => `<button class="row" onclick="showReceipt('${r.id}')"><div class="r-main"><b>${N(fmtD(r.date))} · ${esc(r.method || '—')}</b><small>سند ${N(r.receiptNo)}${r.allocations.length > 1 ? ' · مشترك مع دفعات أخرى' : ''}</small></div><div class="r-side"><b>${N(money(mine(r)))}</b><span class="tag paid">عرض السند</span></div></button>`).join('')}${unlogged > 0.005 ? `<div class="row" style="cursor:default"><div class="r-main"><b>سداد سابق غير مفصّل</b><small>مُدخل يدوياً بدون سند</small></div><div class="r-side"><b>${N(money(unlogged))}</b></div></div>` : ''}</div>` : '';
+  const logHtml = (logs.length || unlogged > 0.005) ? `<h2 style="margin:16px 2px 8px">سجل السداد</h2><div class="list">${logs.map(r => `<button class="row" onclick="${r.receiptNo ? `showReceipt('${r.id}')` : `stageSheet('${r.id}')`}"><div class="r-main"><b>${N(fmtD(r.date))} · ${esc(r.method || '—')}</b><small>${r.receiptNo ? 'سند ' + N(r.receiptNo) : 'مرحلة سداد سابقة (بدون سند)'}${r.allocations.length > 1 ? ' · مشترك مع دفعات أخرى' : ''}</small></div><div class="r-side"><b>${N(money(mine(r)))}</b><span class="tag ${r.receiptNo ? 'paid' : 'partial'}">${r.receiptNo ? 'عرض السند' : 'خيارات'}</span></div></button>`).join('')}${unlogged > 0.005 ? `<button class="row" onclick="stagesForm('${p.id}')"><div class="r-main"><b>سداد سابق غير مفصّل</b><small>اضغط لتقسيمه إلى مراحله بتواريخها</small></div><div class="r-side"><b>${N(money(unlogged))}</b><span class="tag partial">تفصيل المراحل</span></div></button>` : ''}</div>` : '';
   sheet(`<h3>${esc(c ? c.tenant : 'عقد محذوف')} <span class="tag ${st}">${STAT_L[st]}</span></h3>
   <div class="kv"><span>الوحدة</span><b>${esc(unitLabel(u))}</b><span>الاستحقاق</span><b>${N(fmtD(p.due))}</b><span>قيمة الدفعة</span><b>${N(money(p.amount))} ${esc(cur())}</b><span>المسدد</span><b>${N(money(p.paid))}</b><span>المتبقي</span><b>${N(money(remain(p)))}</b>${p.notes ? `<span>ملاحظات</span><b>${esc(p.notes)}</b>` : ''}</div>
   <div class="bar"><i style="width:${p.amount ? Math.min(100, p.paid / p.amount * 100) : 0}%"></i></div>
@@ -409,6 +419,7 @@ function doReceive(cid, pid) {
 }
 function voidReceipt(rid) {
   if (!guard()) return; const r = DB.receipts.find(x => x.id === rid); if (!r) return;
+  if (r.notes === '__hist') { if (!confirm('حذف هذه المرحلة من السجل؟ يبقى المبلغ مسدداً كسداد غير مفصّل.')) return; DB.receipts = DB.receipts.filter(x => x.id !== rid); commit('receipts'); closeSheet(); return; }
   if (!confirm('إلغاء هذا السند وإرجاع المبالغ إلى الدفعات؟')) return;
   r.allocations.forEach(a => { const p = DB.payments.find(x => x.id === a.id); if (p) p.paid = r2(Math.max(0, p.paid - a.a)); });
   DB.receipts = DB.receipts.filter(x => x.id !== rid);
@@ -427,6 +438,44 @@ function saveManual() {
   DB.payments.push({ id:uid(), contractId:$('#m-c').value, due:d, amount:a, paid:0, paidDate:'', lastAmount:0, method:'', receiptNo:'', notes:$('#m-n').value.trim() });
   commit('payments'); closeSheet(); toast('تمت إضافة الدفعة');
 }
+/* ===== مراحل السداد السابقة (بدون سند) ===== */
+let stg = { pid:'', rows:[] };
+function snapHist(pid) {
+  const p = DB.payments.find(x => x.id === pid); if (!p) return;
+  const st = []; DB.receipts.forEach(r => r.allocations.forEach(a => { if (a.id === pid) st.push({ r, a }); }));
+  st.sort((x, y) => x.r.date.localeCompare(y.r.date) || (x.r.notes === '__hist' ? 0 : 1) - (y.r.notes === '__hist' ? 0 : 1));
+  let run = 0; st.forEach(z => { if (z.r.notes === '__hist') { z.a.before = r2(run); z.a.total = p.amount; z.a.left = r2(p.amount - run - z.a.a); } run = r2(run + z.a.a); });
+}
+function stagesForm(pid) {
+  const p = DB.payments.find(x => x.id === pid); if (!p) return; const un = payLog(p).unlogged; if (un <= 0.005) return toast('لا يوجد مبلغ غير مفصّل');
+  stg = { pid, rows:[{ d:p.paidDate || todayISO(), a:un, m:p.method || METHODS[0] }] }; renderStages();
+}
+function renderStages() {
+  const p = DB.payments.find(x => x.id === stg.pid), c = contractOf(p.contractId), un = payLog(p).unlogged;
+  sheet(`<h3>تفصيل مراحل السداد</h3><div class="kv"><span>المستأجر</span><b>${esc(c ? c.tenant : '—')}</b><span>الاستحقاق</span><b>${N(fmtD(p.due))}</b><span>قيمة الدفعة</span><b>${N(money(p.amount))}</b><span>المسدد</span><b>${N(money(p.paid))}</b><span>غير مفصّل</span><b>${N(money(un))}</b></div>
+  <div style="color:var(--muted);font-size:.85rem;margin-top:6px">قسّم المبلغ غير المفصّل إلى مراحله، كل سداد بتاريخه. لا يغيّر هذا المسدد ولا المتبقي.</div>
+  ${stg.rows.map((r, i) => `<div class="list" style="padding:2px 12px 12px;margin-top:10px"><div class="two"><div><label>تاريخ السداد</label><input type="date" value="${r.d}" onchange="stg.rows[${i}].d=this.value"></div><div><label>المبلغ</label><input type="number" inputmode="decimal" value="${r.a || ''}" oninput="stg.rows[${i}].a=r2(this.value);hintStg()"></div></div>
+  <div class="two"><div><label>طريقة الدفع</label><select onchange="stg.rows[${i}].m=this.value">${METHODS.map(m => `<option ${m === r.m ? 'selected' : ''}>${m}</option>`).join('')}</select></div><div style="display:flex;align-items:flex-end">${stg.rows.length > 1 ? `<button class="btn danger sm block" onclick="stg.rows.splice(${i},1);renderStages()">حذف المرحلة</button>` : ''}</div></div></div>`).join('')}
+  <div class="btns"><button class="btn ghost" onclick="stg.rows.push({d:todayISO(),a:0,m:METHODS[0]});renderStages()">+ إضافة مرحلة</button></div>
+  <div class="hint" id="s-hint"></div><div class="btns"><button class="btn" onclick="saveStages()">حفظ المراحل</button></div>`);
+  hintStg();
+}
+function hintStg() {
+  const p = DB.payments.find(x => x.id === stg.pid), un = payLog(p).unlogged, sum = r2(stg.rows.reduce((q, r) => q + (r.a || 0), 0)), left = r2(un - sum);
+  $('#s-hint').innerHTML = left < -0.005 ? `<b>المجموع يتجاوز المبلغ غير المفصّل بمقدار ${N(money(-left))}</b>` : `مجموع المراحل <b>${N(money(sum))}</b> من ${N(money(un))} · يبقى غير مفصّل <b>${N(money(left))}</b>`;
+}
+function saveStages() {
+  if (!guard()) return; const p = DB.payments.find(x => x.id === stg.pid), un = payLog(p).unlogged, sum = r2(stg.rows.reduce((q, r) => q + (r.a || 0), 0));
+  if (stg.rows.some(r => !(r.a > 0) || !r.d)) return toast('أكمل تاريخ ومبلغ كل مرحلة'); if (sum > un + 0.005) return toast('المجموع أكبر من المبلغ غير المفصّل');
+  stg.rows.forEach(r => DB.receipts.push({ id:uid(), receiptNo:'', contractId:p.contractId, date:r.d, amount:r.a, method:r.m, notes:'__hist', allocations:[{ id:p.id, due:p.due, total:p.amount, before:0, a:r.a, left:0 }] }));
+  snapHist(p.id); commit('receipts'); payDetail(p.id); toast('تم حفظ مراحل السداد');
+}
+function stageSheet(rid) {
+  const r = DB.receipts.find(x => x.id === rid); if (!r) return; const c = contractOf(r.contractId);
+  sheet(`<h3>مرحلة سداد سابقة</h3><div class="kv"><span>المستأجر</span><b>${esc(c ? c.tenant : '—')}</b><span>التاريخ</span><b>${N(fmtD(r.date))}</b><span>المبلغ</span><b>${N(money(r.amount))} ${esc(cur())}</b><span>الطريقة</span><b>${esc(r.method || '—')}</b></div>
+  <div class="btns"><button class="btn gold" onclick="issueStage('${rid}')">إصدار سند لهذه المرحلة</button><button class="btn danger" onclick="voidReceipt('${rid}')">حذف المرحلة</button></div>`);
+}
+function issueStage(rid) { if (!guard()) return; const r = DB.receipts.find(x => x.id === rid); if (!r) return; r.receiptNo = nextReceipt(); commit('receipts'); showReceipt(rid); }
 /* ===== الدفعات المكررة بنفس تاريخ الاستحقاق: كشف ودمج ===== */
 function dupGroups() {
   const m = new Map(); DB.payments.forEach(p => { const k = p.contractId + '|' + p.due; if (!m.has(k)) m.set(k, []); m.get(k).push(p); });
@@ -462,9 +511,10 @@ function doMerge(cid, due) {
   const base = ps[0], others = ps.slice(1), ids = new Set(others.map(p => p.id));
   const last = ps.filter(p => p.paid > 0).sort((a, b) => (b.paidDate || '').localeCompare(a.paidDate || ''))[0];
   const notes = [...new Set(ps.map(p => p.notes).filter(Boolean))].join(' · ');
+  ps.forEach(pp => { const lg = payLog(pp); if (lg.unlogged > 0.005) DB.receipts.push({ id:uid(), receiptNo:'', contractId:cid, date:pp.paidDate || pp.due, amount:lg.unlogged, method:pp.method || '', notes:'__hist', allocations:[{ id:pp.id, due:pp.due, total:pp.amount, before:0, a:lg.unlogged, left:0 }] }); });
   Object.assign(base, { amount:total, paid, notes }, last ? { lastAmount:last.lastAmount, paidDate:last.paidDate, method:last.method, receiptNo:last.receiptNo } : {});
   DB.receipts.forEach(r => r.allocations.forEach(a => { if (ids.has(a.id)) a.id = base.id; }));
-  DB.payments = DB.payments.filter(p => !ids.has(p.id));
+  DB.payments = DB.payments.filter(p => !ids.has(p.id)); snapHist(base.id);
   commit('payments', 'receipts'); closeSheet(); toast('تم دمج الدفعات');
 }
 function editPayment(id) {
@@ -692,7 +742,7 @@ function viewReport() {
 function repOpen(i) {
   const g = repGroups[i]; if (!g) return;
   const body = g.kind === 'r'
-    ? g.items.slice().sort((a, b) => b.date.localeCompare(a.date)).map(r => { const c = contractOf(r.contractId); return `<button class="row" onclick="showReceipt('${r.id}')"><div class="r-main"><b>${esc(c ? c.tenant : '—')}</b><small>${N(fmtD(r.date))} · سند ${N(r.receiptNo)}</small></div><div class="r-side"><b>${N(money(r.amount))}</b></div></button>`; }).join('')
+    ? g.items.slice().sort((a, b) => b.date.localeCompare(a.date)).map(r => { const c = contractOf(r.contractId); return `<button class="row" onclick="showReceipt('${r.id}')"><div class="r-main"><b>${esc(c ? c.tenant : '—')}</b><small>${N(fmtD(r.date))} · ${r.receiptNo ? 'سند ' + N(r.receiptNo) : 'مرحلة سابقة'}</small></div><div class="r-side"><b>${N(money(r.amount))}</b></div></button>`; }).join('')
     : g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).slice(0, 150).map(p => payRow(p)).join('');
   sheet(`<h3>${esc(g.name)}</h3><div class="list">${body}</div>`);
 }
@@ -700,7 +750,7 @@ function repOpen(i) {
 let lastPDF = null;
 async function buildReportPages() {
   try { await document.fonts.load('700 30px "IBM Plex Sans Arabic"'); await document.fonts.load('400 30px "IBM Plex Sans Arabic"'); } catch (e) {}
-  const { gs, tot, kind } = repData(), t = BYS.find(z => z[0] === rep.by)[1], S = DB.settings, W = 1240, H = 1754, M = 70, CW = W - 2 * M, cu = cur();
+  const { gs, tot, kind } = repData(), t = BYS.find(z => z[0] === rep.by)[1], S = DB.settings, W = 1240, H = 1754, SC = 2, M = 70, CW = W - 2 * M, cu = cur();
   const F = (w, z) => `${w} ${z}px "IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif`;
   const PINE = '#0f3d33', BRASS = '#a77b2a', MUTED = '#5f6f69', INK = '#14201c';
   const pages = []; let x, y;
@@ -708,7 +758,7 @@ async function buildReportPages() {
   const fit = (s2, maxW, z, w) => { x.font = F(w, z); s2 = String(s2); if (x.measureText(s2).width <= maxW) return s2; while (s2.length > 1 && x.measureText(s2 + '…').width > maxW) s2 = s2.slice(0, -1); return s2 + '…'; };
   const title = `تقرير الدفعات حسب ${t}`;
   const newPage = () => {
-    const cv = document.createElement('canvas'); cv.width = W; cv.height = H; x = cv.getContext('2d'); x.direction = 'rtl'; x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H); pages.push({ cv, x });
+    const cv = document.createElement('canvas'); cv.width = W * SC; cv.height = H * SC; x = cv.getContext('2d'); x.scale(SC, SC); x.direction = 'rtl'; x.fillStyle = '#ffffff'; x.fillRect(0, 0, W, H); pages.push({ cv, x });
     if (pages.length === 1) {
       x.fillStyle = PINE; x.fillRect(0, 0, W, 190); x.fillStyle = BRASS; x.fillRect(0, 190, W, 8);
       T(title, W / 2, 70, 56, 700, '#ffffff', 'center'); T(periodText(), W / 2, 130, 28, 400, '#e9d9ae', 'center');
@@ -734,21 +784,38 @@ async function buildReportPages() {
   gs.forEach((g, i) => drawRow(gcols, kind === 'p' ? [g.name, g.n, money(g.due), money(g.paid), money(g.rem), (g.due ? Math.round(g.paid / g.due * 100) : 0) + '%'] : [g.name, g.n, money(g.paid)], 54, { bg:i % 2 ? '#f6f9f7' : '#ffffff', size:25 }));
   drawRow(gcols, kind === 'p' ? ['الإجمالي', tot.n, money(tot.due), money(tot.paid), money(tot.rem), (tot.due ? Math.round(tot.paid / tot.due * 100) : 0) + '%'] : ['الإجمالي', tot.n, money(tot.paid)], 58, { bg:'#f1e6cc', weight:700, size:26 });
   y += 50; ensure(200); T('التفاصيل', W - M, y + 6, 34, 700, PINE); y += 46;
-  const dcols = kind === 'p' ? [{ w:210 }, { w:170 }, { w:140, al:'c' }, { w:140, al:'c' }, { w:110, al:'c' }, { w:110, al:'c' }, { w:110, al:'c' }, { w:110, al:'c' }] : [{ w:170, al:'c' }, { w:150, al:'c' }, { w:330 }, { w:300 }, { w:150, al:'c' }];
-  const dhead = kind === 'p' ? ['المستأجر', 'الوحدة', 'الاستحقاق', 'تاريخ السداد', 'القيمة', 'المسدد', 'المتبقي', 'الحالة'] : ['السند', 'التاريخ', 'المستأجر', 'الوحدة', 'المبلغ'];
-  gs.forEach(g => {
-    ensure(150); drawRow([{ w:CW }], [`${g.name} — ${g.n} ${kind === 'p' ? 'دفعة' : 'سند'}`], 52, { bg:'#dcebe4', fg:PINE, weight:700, size:27 });
-    drawRow(dcols, dhead, 44, { bg:'#eef2f0', fg:MUTED, size:21, weight:600 });
-    const items = g.items.slice().sort((a, b) => kind === 'p' ? a.due.localeCompare(b.due) : a.date.localeCompare(b.date));
-    items.forEach((it, i) => {
-      const c = contractOf(it.contractId), u = c && unitOf(c.unitId), lg = kind === 'p' ? payLog(it) : { rows:[], unlogged:0 };
-      const extra = lg.rows.length + (lg.unlogged > 0.005 ? 1 : 0); ensure(44 * (1 + extra));
-      drawRow(dcols, kind === 'p' ? [c ? c.tenant : '—', unitLabel(u), fmtD(it.due), it.paid > 0 && it.paidDate ? fmtD(it.paidDate) : '—', money(it.amount), money(it.paid), money(remain(it)), PDF_ST[pStatus(it)]] : [it.receiptNo, fmtD(it.date), c ? c.tenant : '—', unitLabel(u), money(it.amount)], 44, { size:21, bg:i % 2 ? '#fafcfb' : '#ffffff', weight:kind === 'p' && extra ? 600 : 400 });
-      lg.rows.forEach((z, k) => drawRow(dcols, [`   ↳ سداد ${k + 1} · ${z.r.receiptNo}`, z.r.method || '—', '', fmtD(z.r.date), '', money(z.a.a), money(z.a.left), ''], 40, { size:18, bg:'#f3f7f5', fg:'#3d4f48' }));
-      if (lg.unlogged > 0.005) drawRow(dcols, ['   ↳ سداد سابق', 'غير مفصّل', '', '', '', money(lg.unlogged), '', ''], 40, { size:18, bg:'#f3f7f5', fg:'#3d4f48' });
+  if (kind === 'p') {
+    const dcols = [{ w:165 }, { w:175, al:'c' }, { w:175, al:'c' }, { w:120, al:'c' }, { w:120, al:'c' }, { w:120, al:'c' }, { w:125, al:'c' }, { w:100, al:'c' }];
+    const dhead = ['الدفعة', 'الاستحقاق', 'تاريخ السداد', 'القيمة', 'المسدد', 'المتبقي', 'الحالة', 'السند'];
+    const byC = new Map(); gs.forEach(g => g.items.forEach(it => { if (!byC.has(it.contractId)) byC.set(it.contractId, []); byC.get(it.contractId).push(it); }));
+    const blocks = [...byC.entries()].map(([cid, items]) => ({ c:contractOf(cid), items })).sort((m1, m2) => unitLabel(m1.c && unitOf(m1.c.unitId)).localeCompare(unitLabel(m2.c && unitOf(m2.c.unitId)), 'ar') || (m1.c ? m1.c.tenant : '').localeCompare(m2.c ? m2.c.tenant : '', 'ar'));
+    blocks.forEach(bk => {
+      const c = bk.c, u = c && unitOf(c.unitId), items = bk.items.slice().sort((m1, m2) => m1.due.localeCompare(m2.due));
+      const all = c ? DB.payments.filter(z => z.contractId === c.id).sort((m1, m2) => m1.due.localeCompare(m2.due)) : [];
+      ensure(52 + 38 + 44 + 90);
+      drawRow([{ w:CW }], [`${c ? c.tenant : 'عقد محذوف'} — ${unitLabel(u)}`], 52, { bg:'#dcebe4', fg:PINE, weight:700, size:27 });
+      if (c) drawRow([{ w:CW }], [`العقد: ${fmtD(c.start)} ← ${fmtD(c.end)} · ${FREQ[c.freq].l} · الإيجار السنوي ${money(c.annualRent)} ${cu}${isActive(c) ? '' : ' · ' + (c.endType === 'renewal' ? 'مُجدَّد' : 'منتهٍ')}`], 38, { bg:'#eef5f1', fg:MUTED, size:20 });
+      drawRow(dcols, dhead, 44, { bg:'#eef2f0', fg:MUTED, size:21, weight:600 });
+      let tA = 0, tP = 0, tR = 0;
+      items.forEach((it, i) => {
+        const lg = payLog(it), extra = lg.rows.length + (lg.unlogged > 0.005 ? 1 : 0); ensure(44 * (1 + extra));
+        tA += it.amount; tP += it.paid; tR += remain(it);
+        drawRow(dcols, [`الدفعة ${all.findIndex(z => z.id === it.id) + 1}`, fmtD(it.due), it.paid > 0 && it.paidDate ? fmtD(it.paidDate) : '—', money(it.amount), money(it.paid), money(remain(it)), PDF_ST[pStatus(it)], ''], 44, { size:20, weight:600, bg:i % 2 ? '#fafcfb' : '#ffffff' });
+        lg.rows.forEach((z, k) => drawRow(dcols, [`   ↳ مرحلة ${k + 1}`, '', fmtD(z.r.date), '', money(z.a.a), money(z.a.left), z.r.method || '—', z.r.receiptNo || '—'], 40, { size:18, bg:'#f3f7f5', fg:'#3d4f48' }));
+        if (lg.unlogged > 0.005) drawRow(dcols, ['   ↳ سداد سابق', '', '', '', money(lg.unlogged), '', 'غير مفصّل', ''], 40, { size:18, bg:'#f3f7f5', fg:'#3d4f48' });
+      });
+      drawRow(dcols, ['الإجمالي', '', '', money(tA), money(tP), money(tR), '', ''], 46, { bg:'#f1e6cc', weight:700, size:22 });
+      y += 26;
     });
-    y += 22;
-  });
+  } else {
+    const dcols = [{ w:170, al:'c' }, { w:150, al:'c' }, { w:330 }, { w:300 }, { w:150, al:'c' }];
+    gs.forEach(g => {
+      ensure(150); drawRow([{ w:CW }], [`${g.name} — ${g.n} سند`], 52, { bg:'#dcebe4', fg:PINE, weight:700, size:27 });
+      drawRow(dcols, ['السند', 'التاريخ', 'المستأجر', 'الوحدة', 'المبلغ'], 44, { bg:'#eef2f0', fg:MUTED, size:21, weight:600 });
+      g.items.slice().sort((m1, m2) => m1.date.localeCompare(m2.date)).forEach((it, i) => { const c = contractOf(it.contractId), u = c && unitOf(c.unitId); drawRow(dcols, [it.receiptNo || '—', fmtD(it.date), c ? c.tenant : '—', unitLabel(u), money(it.amount)], 44, { size:21, bg:i % 2 ? '#fafcfb' : '#ffffff' }); });
+      y += 22;
+    });
+  }
   pages.forEach((pg, i) => { x = pg.x; T(`صفحة ${i + 1} من ${pages.length}`, W / 2, H - 46, 22, 400, MUTED, 'center'); T(`${cu}`, M, H - 46, 22, 400, MUTED, 'left'); if (S.owner) T(S.owner, W - M, H - 46, 22, 400, MUTED); });
   return pages.map(p => p.cv);
 }
@@ -776,10 +843,19 @@ async function repPDF() {
     const cvs = await buildReportPages(), pgs = [];
     for (const cv of cvs) { const b = await new Promise(r => cv.toBlob(r, 'image/jpeg', 0.9)); pgs.push({ w:cv.width, h:cv.height, bytes:new Uint8Array(await b.arrayBuffer()), url:URL.createObjectURL(b) }); }
     lastPDF = { blob:new Blob([buildPDF(pgs)], { type:'application/pdf' }), name:`report-${rep.by}-${todayISO()}.pdf` };
-    sheet(`<h3>تقرير PDF <span class="num" style="font-size:.85rem;color:var(--muted)">${pgs.length} صفحة</span></h3><div class="btns" style="margin-top:0"><button class="btn gold" onclick="sharePDF()">مشاركة PDF</button><button class="btn ghost" onclick="savePDF()">تنزيل PDF</button></div>
-    <div style="display:grid;gap:10px;margin-top:14px">${pgs.map(j => `<img alt="صفحة التقرير" src="${j.url}" style="width:100%;border:1px solid var(--line);border-radius:8px;display:block">`).join('')}</div>`);
+    closeSheet(); pdfViewer(pgs.map(j => j.url));
   } catch (e) { sheet(`<h3>تقرير PDF</h3><div class="banner red">تعذّر إنشاء الملف: ${esc(e.message || e)}</div>`); }
 }
+let pvZoom = 100;
+function pdfViewer(urls) {
+  pvZoom = 100;
+  $('#pv').innerHTML = `<div class="pvbar"><button onclick="pvClose()">إغلاق</button><button onclick="pvZ(-25)" aria-label="تصغير">−</button><span id="pvz" class="num">100%</span><button onclick="pvZ(25)" aria-label="تكبير">+</button><button onclick="pvZ(0)">ملاءمة</button><button class="gold" onclick="sharePDF()">مشاركة PDF</button><button onclick="savePDF()">تنزيل</button><button onclick="openPDF()">فتح</button></div><div class="pages" id="pvp">${urls.map(u => `<img alt="صفحة التقرير" src="${u}">`).join('')}</div>`;
+  $('#pv').classList.add('open'); pvApply();
+}
+function pvApply() { const c = $('#pvp'); if (!c) return; const base = Math.min(c.clientWidth - 24, 820); document.querySelectorAll('#pvp img').forEach(i => i.style.width = Math.round(base * pvZoom / 100) + 'px'); $('#pvz').textContent = pvZoom + '%'; }
+function pvZ(d) { pvZoom = d === 0 ? 100 : Math.max(50, Math.min(400, pvZoom + d)); pvApply(); }
+function pvClose() { $('#pv').classList.remove('open'); }
+function openPDF() { if (!lastPDF) return; const u = URL.createObjectURL(lastPDF.blob); if (!window.open(u, '_blank')) savePDF(); }
 function savePDF() { if (lastPDF) { dl(lastPDF.blob, lastPDF.name); toast('تم تنزيل الملف'); } }
 async function sharePDF() {
   if (!lastPDF) return; const f = new File([lastPDF.blob], lastPDF.name, { type:'application/pdf' });
@@ -933,6 +1009,7 @@ async function drawReceipt(r) {
 }
 async function showReceipt(rid) {
   const r = DB.receipts.find(x => x.id === rid); if (!r) return;
+  if (!r.receiptNo) return stageSheet(rid);
   sheet(`<h3>سند القبض <span class="num">${esc(r.receiptNo)}</span></h3><p style="color:var(--muted)">جارٍ تجهيز السند…</p>`);
   const cv = await drawReceipt(r), c = contractOf(r.contractId);
   sheet(`<h3>سند القبض <span class="num">${esc(r.receiptNo)}</span></h3><img id="rc" alt="سند القبض" src="${cv.toDataURL('image/png')}">
