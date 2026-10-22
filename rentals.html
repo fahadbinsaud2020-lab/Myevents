@@ -206,7 +206,7 @@ function setSync(state) {
   el.querySelector('span').textContent = t;
 }
 function guard() {
-  if (CFG.url && !loaded) { toast('لم تُحمَّل البيانات من السحابة بعد — اضغط على حالة الاتصال لإعادة المحاولة'); return false; }
+  if (CFG.url && !loaded) { toast(loading ? 'جارٍ تحميل البيانات من السحابة… انتظر لحظات ثم أعد المحاولة' : 'لم تُحمَّل البيانات من السحابة — اضغط «إعادة المحاولة» في أعلى الصفحة'); return false; }
   return true;
 }
 function commit(...keys) {
@@ -235,26 +235,36 @@ function migrate() {
   });
   if (ch) { dirty.add('receipts'); cacheSave(); if (CFG.url && loaded) { setSync('pending'); push(); } }
 }
-async function load() {
+let loading = false, loadTry = 0, loadErr = '', retryTimer = null;
+async function load(auto) {
+  if (!auto) { loadTry = 0; clearTimeout(retryTimer); }
   const cached = lsGet('rt_cache', null); if (cached) DB = normalize(cached);
   try {
     const m = location.hash.match(/^#cfg=(.+)$/);
     if (m) { const o = JSON.parse(decodeURIComponent(escape(atob(decodeURIComponent(m[1]))))), n = normUrl(o.u); if (!n.err) lsSet('rt_cfg', { url:n.url, key:String(o.k || '') }); history.replaceState(null, '', location.pathname + location.search); }
   } catch (e) {}
   CFG = lsGet('rt_cfg', { url:'', key:'' });
-  if (!CFG.url) { loaded = true; migrate(); setSync('local'); render(); return; }
-  setSync('loading'); render();
+  if (!CFG.url) { loading = false; loaded = true; migrate(); setSync('local'); render(); return; }
+  loading = true; loadErr = ''; setSync('loading'); render();
+  const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 25000);
   try {
-    const r = await fetch(CFG.url + (CFG.url.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(CFG.key || ''));
+    const r = await fetch(CFG.url + (CFG.url.includes('?') ? '&' : '?') + 'key=' + encodeURIComponent(CFG.key || ''), { signal:ctl.signal });
     const txt = await r.text(); let j; try { j = JSON.parse(txt); } catch (e) { throw new Error('الرابط لا يُرجع بيانات: تأكد أنه رابط Web app كامل ينتهي بـ /exec وأن الوصول Anyone'); }
     if (!j.ok) throw new Error(j.error || 'خطأ');
     const remote = normalize(j.data);
     if (isEmptyDB(remote) && !isEmptyDB(DB)) { loaded = true; ['units','contracts','payments','receipts','settings'].forEach(k => dirty.add(k)); push(); }
     else { DB = remote; loaded = true; cacheSave(); setSync('ok'); }
-  } catch (e) { loaded = false; setSync('err'); toast('تعذّر الاتصال بالسحابة: ' + (e.message || e)); }
+    loading = false; loadTry = 0;
+  } catch (e) {
+    loaded = false; loadTry++; loadErr = e.name === 'AbortError' ? 'انتهت مهلة الاتصال بالسحابة' : (e.message || String(e));
+    if (loadTry < 3) { loading = true; setSync('loading'); retryTimer = setTimeout(() => load(true), 3000 * loadTry); }
+    else { loading = false; setSync('err'); toast('تعذّر الاتصال بالسحابة: ' + loadErr); }
+  } finally { clearTimeout(to); }
   if (loaded) migrate();
   render();
 }
+window.addEventListener('online', () => { if (CFG.url && !loaded && !loading) load(); });
+document.addEventListener('visibilitychange', () => { if (!document.hidden && CFG.url && !loaded && !loading) load(); });
 function syncNow() { if (!CFG.url) { go('settings'); return; } load(); }
 
 /* ========== منطق الإيجار ========== */
@@ -294,7 +304,9 @@ function render() {
   $('#nav').innerHTML = TABS.map(([k, l]) => `<button class="${tab===k?'on':''}" onclick="go('${k}')">${ICONS[k]}<span>${l}</span></button>`).join('');
   $('#fab').style.display = ['pays','contracts','units'].includes(tab) ? 'block' : 'none';
   const v = { home:viewHome, pays:viewPays, contracts:viewContracts, units:viewUnits, report:viewReport, settings:viewSettings }[tab];
-  const warn = (CFG.url && !loaded) ? `<div class="banner red"><b>تعذّر تحميل البيانات من السحابة.</b> التعديل متوقف حتى لا تُفقد بيانات. <br><button class="btn sm" onclick="load()">إعادة المحاولة</button></div>` : '';
+  const warn = (CFG.url && !loaded) ? (loading
+    ? `<div class="banner"><b>جارٍ تحميل أحدث البيانات من السحابة…</b> ${loadTry ? `(محاولة ${loadTry + 1} من 3)` : ''}<br>ما تراه الآن آخر نسخة محفوظة على هذا الجهاز، والتعديل يتوقف لحظات حتى يكتمل التحميل.</div>`
+    : `<div class="banner red"><b>تعذّر تحميل البيانات من السحابة.</b> التعديل متوقف حتى لا تُفقد بيانات.${loadErr ? `<br><small>السبب: ${esc(loadErr)}</small>` : ''}<br><button class="btn sm" onclick="load()">إعادة المحاولة</button></div>`) : '';
   $('#app').innerHTML = warn + v();
 }
 function fabAction() { ({ pays:()=>payForm(), contracts:()=>contractForm(), units:()=>unitForm() })[tab](); }
