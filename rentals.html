@@ -572,6 +572,17 @@ function conCmp(a, b) {
   else if (k === 'status') r = ((isActive(a) ? 1 : 0) - (isActive(b) ? 1 : 0)) || a.start.localeCompare(b.start); else r = a.start.localeCompare(b.start);
   return (conSort.dir === 'desc' ? -r : r) || b.start.localeCompare(a.start);
 }
+const dateDir = () => (conSort.by === 'start' || conSort.by === 'end') && conSort.dir === 'desc' ? -1 : 1;
+function payCmp(a, b) {
+  const ca = contractOf(a.contractId), cb = contractOf(b.contractId);
+  const r = ca && cb && ca.id !== cb.id ? conCmp(ca, cb) : (ca && !cb ? -1 : !ca && cb ? 1 : 0);
+  return r || dateDir() * a.due.localeCompare(b.due);
+}
+function rcptCmp(a, b) {
+  const d = conSort.dir === 'desc' ? -1 : 1, ca = contractOf(a.contractId), cb = contractOf(b.contractId); let r;
+  if (conSort.by === 'tenant') r = (ca ? ca.tenant : '').localeCompare(cb ? cb.tenant : '', 'ar'); else if (conSort.by === 'rent') r = a.amount - b.amount; else r = a.date.localeCompare(b.date);
+  return d * r || a.receiptNo.localeCompare(b.receiptNo);
+}
 function setConSort(k) { conSort.by = k; lsSet('rt_consort', conSort); render(); }
 function toggleConDir() { conSort.dir = conSort.dir === 'desc' ? 'asc' : 'desc'; lsSet('rt_consort', conSort); render(); }
 function conSortBar() {
@@ -762,7 +773,7 @@ function viewReport() {
   const by = BYS.map(([k, l]) => `<button class="chip ${rep.by===k?'on':''}" onclick="rep.by='${k}';render()">${l}</button>`).join('');
   const pre = [['month','هذا الشهر'],['year','هذا العام'],['all','الكل']].map(([k, l]) => `<button class="chip ${rep.preset===k?'on':''}" onclick="setPreset('${k}');render()">${l}</button>`).join('');
   const title = BYS.find(x => x[0] === rep.by)[1];
-  const head = unitPicker() + unloggedBanner(true) + `<div class="noprint"><div class="chips">${pre}</div><div class="two" style="margin-bottom:12px"><div><label style="margin-top:0">من</label><input type="date" value="${rep.from}" onchange="rep.from=this.value;rep.preset='custom';render()"></div><div><label style="margin-top:0">إلى</label><input type="date" value="${rep.to}" onchange="rep.to=this.value;rep.preset='custom';render()"></div></div>
+  const head = unitPicker() + unloggedBanner(true) + conSortBar() + `<div class="noprint"><div class="chips">${pre}</div><div class="two" style="margin-bottom:12px"><div><label style="margin-top:0">من</label><input type="date" value="${rep.from}" onchange="rep.from=this.value;rep.preset='custom';render()"></div><div><label style="margin-top:0">إلى</label><input type="date" value="${rep.to}" onchange="rep.to=this.value;rep.preset='custom';render()"></div></div>
   <label style="margin:0 2px 6px">تجميع حسب</label><div class="chips">${by}</div></div><div class="printonly"><b>تقرير الدفعات حسب ${title}</b> — ${periodText()}</div>`;
   if (!gs.length) return head + `<div class="list">${empty('لا توجد بيانات في هذه الفترة', kind === 'r' ? 'لم تُصدر سندات خلال الفترة المحددة.' : 'جرّب توسيع الفترة الزمنية.')}</div>`;
   const pct = tot.due ? Math.min(100, tot.paid / tot.due * 100) : 0;
@@ -781,8 +792,8 @@ function viewReport() {
 function repOpen(i) {
   const g = repGroups[i]; if (!g) return;
   const body = g.kind === 'r'
-    ? g.items.slice().sort((a, b) => b.date.localeCompare(a.date)).map(r => { const c = contractOf(r.contractId); return `<button class="row" onclick="showReceipt('${r.id}')"><div class="r-main"><b>${esc(c ? c.tenant : '—')}</b><small>${N(fmtD(r.date))} · ${r.receiptNo ? 'سند ' + N(r.receiptNo) : 'مرحلة سابقة'}</small></div><div class="r-side"><b>${N(money(r.amount))}</b></div></button>`; }).join('')
-    : g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).slice(0, 150).map(p => payRow(p)).join('');
+    ? g.items.slice().sort(rcptCmp).map(r => { const c = contractOf(r.contractId); return `<button class="row" onclick="showReceipt('${r.id}')"><div class="r-main"><b>${esc(c ? c.tenant : '—')}</b><small>${N(fmtD(r.date))} · ${r.receiptNo ? 'سند ' + N(r.receiptNo) : 'مرحلة سابقة'}</small></div><div class="r-side"><b>${N(money(r.amount))}</b></div></button>`; }).join('')
+    : g.items.slice().sort(payCmp).slice(0, 150).map(p => payRow(p)).join('');
   sheet(`<h3>${esc(g.name)}</h3><div class="list">${body}</div>`);
 }
 /* ===== PDF: يُرسم التقرير كصفحات A4 ثم تُجمع في ملف PDF بدون أي مكتبات ===== */
@@ -827,9 +838,9 @@ async function buildReportPages() {
     const dcols = [{ w:165 }, { w:175, al:'c' }, { w:175, al:'c' }, { w:120, al:'c' }, { w:120, al:'c' }, { w:120, al:'c' }, { w:125, al:'c' }, { w:100, al:'c' }];
     const dhead = ['الدفعة', 'الاستحقاق', 'تاريخ السداد', 'القيمة', 'المسدد', 'المتبقي', 'الحالة', 'السند'];
     const byC = new Map(); gs.forEach(g => g.items.forEach(it => { if (!byC.has(it.contractId)) byC.set(it.contractId, []); byC.get(it.contractId).push(it); }));
-    const blocks = [...byC.entries()].map(([cid, items]) => ({ c:contractOf(cid), items })).sort((m1, m2) => unitLabel(m1.c && unitOf(m1.c.unitId)).localeCompare(unitLabel(m2.c && unitOf(m2.c.unitId)), 'ar') || (m1.c ? m1.c.tenant : '').localeCompare(m2.c ? m2.c.tenant : '', 'ar'));
+    const blocks = [...byC.entries()].map(([cid, items]) => ({ c:contractOf(cid), items })).sort((m1, m2) => m1.c && m2.c ? conCmp(m1.c, m2.c) : (m1.c ? -1 : m2.c ? 1 : 0));
     blocks.forEach(bk => {
-      const c = bk.c, u = c && unitOf(c.unitId), items = bk.items.slice().sort((m1, m2) => m1.due.localeCompare(m2.due));
+      const c = bk.c, u = c && unitOf(c.unitId), items = bk.items.slice().sort((m1, m2) => dateDir() * m1.due.localeCompare(m2.due));
       const all = c ? DB.payments.filter(z => z.contractId === c.id).sort((m1, m2) => m1.due.localeCompare(m2.due)) : [];
       ensure(52 + 38 + 44 + 90);
       drawRow([{ w:CW }], [`${c ? c.tenant : 'عقد محذوف'} — ${unitLabel(u)}`], 52, { bg:'#dcebe4', fg:PINE, weight:700, size:27 });
@@ -851,7 +862,7 @@ async function buildReportPages() {
     gs.forEach(g => {
       ensure(150); drawRow([{ w:CW }], [`${g.name} — ${g.n} سند`], 52, { bg:'#dcebe4', fg:PINE, weight:700, size:27 });
       drawRow(dcols, ['السند', 'التاريخ', 'المستأجر', 'الوحدة', 'المبلغ'], 44, { bg:'#eef2f0', fg:MUTED, size:21, weight:600 });
-      g.items.slice().sort((m1, m2) => m1.date.localeCompare(m2.date)).forEach((it, i) => { const c = contractOf(it.contractId), u = c && unitOf(c.unitId); drawRow(dcols, [it.receiptNo || '—', fmtD(it.date), c ? c.tenant : '—', unitLabel(u), money(it.amount)], 44, { size:21, bg:i % 2 ? '#fafcfb' : '#ffffff' }); });
+      g.items.slice().sort(rcptCmp).forEach((it, i) => { const c = contractOf(it.contractId), u = c && unitOf(c.unitId); drawRow(dcols, [it.receiptNo || '—', fmtD(it.date), c ? c.tenant : '—', unitLabel(u), money(it.amount)], 44, { size:21, bg:i % 2 ? '#fafcfb' : '#ffffff' }); });
       y += 22;
     });
   }
@@ -910,16 +921,16 @@ function repCSV() {
     gs.forEach(g => rows.push([g.name, g.n, r2(g.due), r2(g.paid), r2(g.rem), g.due ? Math.round(g.paid / g.due * 100) : 0]));
     rows.push(['الإجمالي', tot.n, r2(tot.due), r2(tot.paid), r2(tot.rem), tot.due ? Math.round(tot.paid / tot.due * 100) : 0]); rows.push([]);
     rows.push(['المستأجر','العقار','الوحدة','نوع الوحدة','دورة السداد','الاستحقاق','تاريخ آخر سداد','قيمة الدفعة','المسدد','المتبقي','الحالة']);
-    gs.forEach(g => g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).forEach(p => { const c = contractOf(p.contractId), u = c && unitOf(c.unitId); rows.push([c ? c.tenant : '', u ? u.property : '', u ? u.unit : '', u ? u.type : '', c ? FREQ[c.freq].l : '', p.due, p.paid > 0 ? p.paidDate : '', r2(p.amount), r2(p.paid), remain(p), STAT_L[pStatus(p)]]); }));
+    gs.forEach(g => g.items.slice().sort(payCmp).forEach(p => { const c = contractOf(p.contractId), u = c && unitOf(c.unitId); rows.push([c ? c.tenant : '', u ? u.property : '', u ? u.unit : '', u ? u.type : '', c ? FREQ[c.freq].l : '', p.due, p.paid > 0 ? p.paidDate : '', r2(p.amount), r2(p.paid), remain(p), STAT_L[pStatus(p)]]); }));
     rows.push([]); rows.push(['سجل السداد (كل عملية سداد على حدة)']);
     rows.push(['المستأجر','الوحدة','استحقاق الدفعة','رقم السند','تاريخ السداد','طريقة الدفع','المبلغ','المتبقي بعد السداد']);
-    gs.forEach(g => g.items.slice().sort((a, b) => a.due.localeCompare(b.due)).forEach(p => { const c = contractOf(p.contractId), u = c && unitOf(c.unitId), lg = payLog(p);
+    gs.forEach(g => g.items.slice().sort(payCmp).forEach(p => { const c = contractOf(p.contractId), u = c && unitOf(c.unitId), lg = payLog(p);
       lg.rows.forEach(z => rows.push([c ? c.tenant : '', unitLabel(u), p.due, z.r.receiptNo, z.r.date, z.r.method, r2(z.a.a), r2(z.a.left)]));
       if (lg.unlogged > 0.005) rows.push([c ? c.tenant : '', unitLabel(u), p.due, 'غير مفصّل', '', '', lg.unlogged, '']); }));
   } else {
     rows.push(['طريقة الدفع', 'عدد السندات', 'المبلغ']); gs.forEach(g => rows.push([g.name, g.n, r2(g.paid)])); rows.push(['الإجمالي', tot.n, r2(tot.paid)]); rows.push([]);
     rows.push(['رقم السند','التاريخ','المستأجر','العقار / الوحدة','طريقة الدفع','المبلغ']);
-    gs.forEach(g => g.items.slice().sort((a, b) => a.date.localeCompare(b.date)).forEach(r => { const c = contractOf(r.contractId); rows.push([r.receiptNo, r.date, c ? c.tenant : '', c ? unitLabel(unitOf(c.unitId)) : '', r.method, r.amount]); }));
+    gs.forEach(g => g.items.slice().sort(rcptCmp).forEach(r => { const c = contractOf(r.contractId); rows.push([r.receiptNo, r.date, c ? c.tenant : '', c ? unitLabel(unitOf(c.unitId)) : '', r.method, r.amount]); }));
   }
   dl(new Blob(['\ufeff' + rows.map(r => r.map(csvCell).join(',')).join('\r\n')], { type:'text/csv;charset=utf-8' }), `report-${rep.by}-${todayISO()}.csv`);
 }
