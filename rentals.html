@@ -564,14 +564,27 @@ function saveEditPay(id) {
 function delPayment(id) { if (!guard()) return; if (!confirm('حذف هذه الدفعة نهائياً؟')) return; DB.payments = DB.payments.filter(p => p.id !== id); commit('payments'); closeSheet(); }
 
 /* ========== العقود ========== */
+let conSort = lsGet('rt_consort', { by:'start', dir:'desc' });
+const CON_SORTS = [['start','بداية العقد'],['end','نهاية العقد'],['tenant','اسم المستأجر'],['rent','الإيجار السنوي'],['status','حالة العقد']];
+function conCmp(a, b) {
+  const k = conSort.by; let r;
+  if (k === 'tenant') r = a.tenant.localeCompare(b.tenant, 'ar'); else if (k === 'rent') r = a.annualRent - b.annualRent; else if (k === 'end') r = a.end.localeCompare(b.end);
+  else if (k === 'status') r = ((isActive(a) ? 1 : 0) - (isActive(b) ? 1 : 0)) || a.start.localeCompare(b.start); else r = a.start.localeCompare(b.start);
+  return (conSort.dir === 'desc' ? -r : r) || b.start.localeCompare(a.start);
+}
+function setConSort(k) { conSort.by = k; lsSet('rt_consort', conSort); render(); }
+function toggleConDir() { conSort.dir = conSort.dir === 'desc' ? 'asc' : 'desc'; lsSet('rt_consort', conSort); render(); }
+function conSortBar() {
+  return `<div class="noprint" style="display:flex;gap:8px;align-items:center;margin-bottom:12px"><select onchange="setConSort(this.value)" style="flex:1">${CON_SORTS.map(([k, l]) => `<option value="${k}" ${conSort.by === k ? 'selected' : ''}>ترتيب حسب: ${l}</option>`).join('')}</select><button class="btn ghost" style="flex:none;white-space:nowrap" onclick="toggleConDir()">${conSort.dir === 'desc' ? 'تنازلي ↓' : 'تصاعدي ↑'}</button></div>`;
+}
 function viewContracts() {
   if (!DB.contracts.length) return `<div class="list">${empty('لا توجد عقود', DB.units.length ? 'اضغط + لإضافة عقد مستأجر.' : 'أضف وحدة أولاً من تبويب الوحدات.')}</div>`;
-  const t = todayISO(), l = DB.contracts.filter(c => matchUnit(c.id)).sort((a, b) => (isActive(b) - isActive(a)) || a.tenant.localeCompare(b.tenant, 'ar'));
+  const t = todayISO(), l = DB.contracts.filter(c => matchUnit(c.id)).sort(conCmp);
   if (!l.length) return unitPicker() + `<div class="list">${empty('لا توجد عقود لهذه الوحدة')}</div>`;
-  return unitPicker() + `<div class="list">${l.map(c => {
+  return unitPicker() + conSortBar() + `<div class="list">${l.map(c => {
     const ps = DB.payments.filter(p => p.contractId === c.id), od = ps.filter(p => pStatus(p) === 'overdue').length, done = ps.filter(p => pStatus(p) === 'paid').length;
     const tag = !isActive(c) ? (c.endType === 'renewal' ? '<span class="tag partial">مُجدَّد</span>' : '<span class="tag upcoming">منتهٍ</span>') : c.end < t ? '<span class="tag partial">انتهت مدته</span>' : od ? `<span class="tag overdue">${od} متأخرة</span>` : '<span class="tag paid">ساري</span>';
-    return `<button class="row" onclick="contractDetail('${c.id}')"><div class="r-main"><b>${esc(c.tenant)}</b><small>${esc(unitLabel(unitOf(c.unitId)))} · ${FREQ[c.freq].l}</small></div><div class="r-side"><b>${N(money(c.annualRent))}</b>${tag}<small style="color:var(--muted);font-size:.74rem">${done}/${ps.length} مسددة</small></div></button>`;
+    return `<button class="row" onclick="contractDetail('${c.id}')"><div class="r-main"><b>${esc(c.tenant)}</b><small style="display:block;color:var(--ink);font-size:.9rem">${N(fmtD(c.start))} ← ${N(fmtD(c.end))}</small><small style="display:block">${esc(unitLabel(unitOf(c.unitId)))} · ${FREQ[c.freq].l}</small></div><div class="r-side"><b>${N(money(c.annualRent))}</b>${tag}<small style="color:var(--muted);font-size:.74rem">${done}/${ps.length} مسددة</small></div></button>`;
   }).join('')}</div>`;
 }
 const END_REASONS = ['انتهاء المدة وعدم الرغبة في التجديد','طلب المستأجر','تأخر في السداد','إخلال بشروط العقد','بيع العقار أو إعادة استخدامه','اتفاق ودّي','أخرى'];
