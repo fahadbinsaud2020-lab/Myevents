@@ -32,11 +32,20 @@ th{background:var(--g2);color:var(--g)}td.n{direction:ltr;text-align:right}tfoot
 label{display:block;margin:8px 0 3px;font-size:13px;color:var(--m)}
 .wrap{overflow-x:auto}.mut{color:var(--m);font-size:13px}.empty{text-align:center;color:var(--m);padding:30px}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 18px;border-radius:20px;z-index:30}
-@media print{header,nav,.bar2,.btn{display:none!important}body{background:#fff}}
+#pr{display:none}
+.doc{background:#fff;border:3px double var(--au);padding:22px;line-height:2;font-size:15px;color:#111}
+.doc h2{text-align:center;color:var(--g);margin:2px 0 6px;font-size:22px}
+.doc .bm{text-align:center;color:var(--m);font-size:13px}
+.doc .bx{border:1px solid var(--b);background:#faf8f2;border-radius:8px;padding:6px 12px;margin:10px 0;line-height:1.9}
+.doc table{margin:10px 0}.doc .sg{display:flex;gap:14px;margin-top:36px}
+.doc .sg div{flex:1;text-align:center;border-top:1px solid #444;padding-top:6px;font-size:13px}
+@media print{header,nav,.bar2,.btn{display:none!important}body{background:#fff}
+body.pdoc>*:not(#pr){display:none!important}body.pdoc #pr{display:block!important}@page{margin:14mm}
+.doc{border:3px double #b8923a;-webkit-print-color-adjust:exact;print-color-adjust:exact}.doc th{background:#e8f3ed!important}}
 </style></head><body>
 <header><h1>🤝 متابعة الدائنين والمدينين</h1><small>سجل الديون والسداد والتقارير</small></header>
 <nav id="nav"></nav><main id="main"></main>
-<div class="ov" id="ov" hidden><div class="box" id="mb"></div></div><div id="toast" hidden></div>
+<div class="ov" id="ov" hidden><div class="box" id="mb"></div></div><div id="toast" hidden></div><div id="pr"></div>
 <script>
 const K='debtors_v1';let D={debts:[],phones:{}},V='dash',F={s:'all',c:'',q:''};
 const $=s=>document.querySelector(s);
@@ -56,6 +65,35 @@ function push(){const u=ls.get(K+'u');if(!u)return;fetch(u,{method:'POST',mode:'
 async function pull(){const u=ls.get(K+'u');if(!u)return toast('أدخل رابط Apps Script أولاً');
  try{const j=await (await fetch(u)).json();if(j&&j.debts){D=Object.assign({debts:[],phones:{}},j);ls.set(K,JSON.stringify(D));render();toast('تم تحميل البيانات من الشيت')}else toast('الشيت فارغ')}catch(e){toast('تعذر الاتصال بالشيت')}}
 function saveUrl(){ls.set(K+'u',$('#url').value.trim());if(!D.debts.length){toast('لا بيانات محلية: سيتم التحميل من الشيت بدل الكتابة فوقه');pull()}else{push();toast('تم الحفظ والمزامنة')}}
+
+const T1=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'],
+T10=['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'],
+T100=['','مائة','مائتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];
+function w3(n){const h=Math.floor(n/100),r=n%100,a=[];if(h)a.push(T100[h]);if(r){if(r<20)a.push(T1[r]);else{if(r%10)a.push(T1[r%10]);a.push(T10[Math.floor(r/10)])}}return a.join(' و')}
+function grp(k,one,two,few,many){return k==1?one:k==2?two:k==200?'مائتا '+one:w3(k)+' '+((k%100>=3&&k%100<=10)?few:(k%100>=11?many:one))}
+function tafqeet(n){n=Math.floor(Math.abs(+n||0));if(!n)return 'فقط صفر ريال لا غير';const m=Math.floor(n/1e6),t=Math.floor(n%1e6/1e3),r=n%1e3,a=[];
+ if(m)a.push(grp(m,'مليون','مليونان','ملايين','مليوناً'));if(t)a.push(grp(t,'ألف','ألفان','آلاف','ألفاً'));if(r)a.push(w3(r));return 'فقط '+a.join(' و')+' ريال لا غير'}
+function hijri(){try{return new Date().toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-latn',{year:'numeric',month:'long',day:'numeric'})}catch(e){return ''}}
+const spays=d=>d.pays.slice().sort((a,b)=>(a.d||'9')<(b.d||'9')?-1:1);
+function ptable(d){let b=+d.amt;const R=spays(d).map((p,i)=>{b-=p.a;return `<tr><td>${i+1}</td><td class="n">${p.d||'—'}</td><td class="n">${fmt(p.a)}</td><td class="n">${fmt(Math.max(0,b))}</td><td>${esc(p.n||'')}</td></tr>`}).join('');
+ return `<table><tr><th>م</th><th>التاريخ</th><th>المبلغ المسدد</th><th>المتبقي بعد الدفعة</th><th>بيان</th></tr>${R||'<tr><td colspan="5" class="empty">لا توجد دفعات مسجلة</td></tr>'}<tfoot><tr><td colspan="2">الإجمالي</td><td class="n">${fmt(paid(d))}</td><td class="n">${fmt(rem(d))}</td><td></td></tr></tfoot></table>`}
+const dhead=t=>`<div class="bm">بسم الله الرحمن الرحيم</div><h2>${t}</h2><div class="mut" style="margin-bottom:8px">التاريخ: ${today()} م${hijri()?' &nbsp;|&nbsp; '+hijri():''}</div>`;
+const dsum=d=>`<div class="bx"><div class="row"><span>المبلغ الإجمالي: <b>${fmt(d.amt)}</b> ريال</span><span>المسدد: <b>${fmt(paid(d))}</b> ريال</span><span>المتبقي: <b>${fmt(rem(d))}</b> ريال</span></div>${d.date?`<div class="mut">تاريخ الدين: ${d.date}${d.due?' · الاستحقاق: '+d.due:''}</div>`:d.due?`<div class="mut">الاستحقاق: ${d.due}</div>`:''}</div>`;
+function showDoc(h){modal(`<div id="dv">${h}</div><div class="row" style="margin-top:12px"><button class="btn p" onclick="printDoc()">🖨 طباعة / حفظ PDF</button><button class="btn" onclick="closeM()">إغلاق</button></div>`);$('#mb').style.maxWidth='760px'}
+function printDoc(){$('#pr').innerHTML=$('#dv').innerHTML;document.body.classList.add('pdoc');window.print()}
+['afterprint','click','touchstart'].forEach(e=>window.addEventListener(e,()=>document.body.classList.remove('pdoc')));
+function docSettle(id){const d=D.debts.find(x=>x.id==id),p=paid(d),r=rem(d),full=r<=0;
+ const t=full?`أقرّ أنا <b>${esc(d.cr)}</b> (الدائن) بأنني استلمت من <b>${esc(d.db)}</b> (المدين) كامل المبلغ المستحق وقدره <b>${fmt(d.amt)}</b> ريال (${tafqeet(d.amt)})، وأبرأتُ ذمته منه براءةً تامة، ولا مطالبة لي عليه في هذا الدين بعد هذه المخالصة.`
+ :`أقرّ أنا <b>${esc(d.cr)}</b> (الدائن) بأنني استلمت من <b>${esc(d.db)}</b> (المدين) مبلغاً وقدره <b>${fmt(p)}</b> ريال (${tafqeet(p)}) من أصل <b>${fmt(d.amt)}</b> ريال، ويبقى في ذمته <b>${fmt(r)}</b> ريال (${tafqeet(r)}).`;
+ showDoc(`<div class="doc">${dhead(full?'مخالصة نهائية':'كشف حساب ومخالصة جزئية')}<p>${t}</p>${dsum(d)}<b>بيان الدفعات:</b>${ptable(d)}
+ <p style="font-size:13px">وعلى ذلك جرى التوقيع.</p><div class="sg"><div>الدائن<br>${esc(d.cr)}</div><div>المدين<br>${esc(d.db)}</div><div>الشاهد</div></div></div>`)}
+function docRemind(id){const d=D.debts.find(x=>x.id==id),r=rem(d),L=late(d),last=spays(d).slice(-1)[0];
+ const due=d.due?(L?`وقد حلّ موعد استحقاقه بتاريخ <b>${d.due}</b> وتأخر السداد <b>${L}</b> يوماً`:`ويحلّ موعد استحقاقه بتاريخ <b>${d.due}</b>`):'';
+ showDoc(`<div class="doc">${dhead('إشعار تذكير بسداد مستحقات')}<p>السلام عليكم ورحمة الله وبركاته،<br>الأخ الكريم / <b>${esc(d.db)}</b> حفظه الله</p>
+ <p>نذكّركم — مع خالص الشكر والتقدير — بأن في ذمتكم لصالح <b>${esc(d.cr)}</b> مبلغاً متبقياً قدره <b>${fmt(r)}</b> ريال (${tafqeet(r)}) من أصل <b>${fmt(d.amt)}</b> ريال${due?'، '+due:''}.</p>
+ ${dsum(d)}${last?`<div class="mut">آخر دفعة مسجلة: ${fmt(last.a)} ريال بتاريخ ${last.d||'—'}</div>`:''}
+ <p>نأمل التكرّم بسداد المبلغ في أقرب فرصة، أو التواصل معنا لترتيب موعد مناسب للسداد. وجزاكم الله خيراً.</p>
+ <div class="sg"><div>الدائن<br>${esc(d.cr)}</div></div></div>`)}
 const names=k=>[...new Set(D.debts.map(d=>d[k]))].filter(Boolean);
 function agg(k){const m={};D.debts.forEach(d=>{const o=m[d[k]]||(m[d[k]]={n:0,a:0,p:0,r:0,l:0});o.n++;o.a+=+d.amt;o.p+=paid(d);o.r+=rem(d);if(late(d))o.l+=rem(d)});return Object.entries(m).sort((a,b)=>b[1].r-a[1].r)}
 function totals(){return D.debts.reduce((t,d)=>(t.a+=+d.amt,t.p+=paid(d),t.r+=rem(d),t.l+=late(d)?rem(d):0,t),{a:0,p:0,r:0,l:0})}
@@ -85,7 +123,8 @@ function debts(){let L=D.debts.filter(d=>(F.s=='all'||st(d)==F.s)&&(!F.c||d.cr==
  <div class="bar"><i style="width:${pc}%"></i></div>
  <div class="row"><span>المبلغ ${fmt(d.amt)} · مسدد ${fmt(paid(d))} · <b>متبقي ${fmt(rem(d))}</b></span></div>
  <div class="row" style="margin-top:8px"><span>${s=='paid'?`<button class="btn" onclick="openDet('${d.id}')">التفاصيل</button>`:`<button class="btn p" onclick="openDet('${d.id}')">سداد / تفاصيل</button> <a class="btn w" target="_blank" rel="noopener" href="${wa(d)}">تذكير واتساب</a>`}</span>
- <span><button class="btn" onclick="openDebt('${d.id}')">تعديل</button> <button class="btn d" onclick="del('${d.id}')">حذف</button></span></div></div>`}).join('')||'<div class="empty">لا توجد ديون مطابقة</div>')}
+ <span><button class="btn" onclick="openDebt('${d.id}')">تعديل</button> <button class="btn d" onclick="del('${d.id}')">حذف</button></span></div>
+ <div style="margin-top:8px"><button class="btn" onclick="docSettle('${d.id}')">🖨 ${s=='paid'?'مخالصة':'كشف حساب / مخالصة'}</button>${s=='paid'?'':` <button class="btn" onclick="docRemind('${d.id}')">🔔 إشعار تذكير</button>`}</div></div>`}).join('')||'<div class="empty">لا توجد ديون مطابقة</div>')}
 function wa(d){let p=(D.phones[d.db]||'').replace(/\D/g,'');if(p.startsWith('0'))p='966'+p.slice(1);
  const m=`السلام عليكم ${d.db}،\nتذكير ودّي بالمبلغ المتبقي لصالح ${d.cr}: ${fmt(rem(d))}`+(d.due?`\nتاريخ الاستحقاق: ${d.due}`:'')+`\nجزاكم الله خيراً.`;
  return `https://wa.me/${p}?text=${encodeURIComponent(m)}`}
@@ -103,7 +142,7 @@ function set(){return `<div class="card"><h3>الربط مع Google Sheets</h3><
  <p class="mut">البيانات تُحفظ في المتصفح دائماً، وتُرسل للشيت تلقائياً بعد كل تعديل عند ربط الرابط.</p></div>
  <div class="card"><h3>نسخة احتياطية</h3><button class="btn" onclick="bk()">تنزيل JSON</button>
  <label class="btn" style="margin-top:0">استيراد<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label></div>`}
-function modal(h){$('#mb').innerHTML=h;$('#ov').hidden=false}
+function modal(h){$('#mb').style.maxWidth='';$('#mb').innerHTML=h;$('#ov').hidden=false}
 function closeM(){$('#ov').hidden=true}
 $('#ov').onclick=e=>{if(e.target.id=='ov')closeM()};
 function openDebt(id){const d=D.debts.find(x=>x.id==id)||{cr:'',db:'',amt:'',date:today(),due:'',note:''};
