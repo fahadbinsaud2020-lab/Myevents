@@ -79,21 +79,24 @@ function ptable(d){let b=+d.amt;const R=spays(d).map((p,i)=>{b-=p.a;return `<tr>
  return `<table><tr><th>م</th><th>التاريخ</th><th>المبلغ المسدد</th><th>المتبقي بعد الدفعة</th><th>بيان</th></tr>${R||'<tr><td colspan="5" class="empty">لا توجد دفعات مسجلة</td></tr>'}<tfoot><tr><td colspan="2">الإجمالي</td><td class="n">${fmt(paid(d))}</td><td class="n">${fmt(rem(d))}</td><td></td></tr></tfoot></table>`}
 const dhead=t=>`<div class="bm">بسم الله الرحمن الرحيم</div><h2>${t}</h2><div class="mut" style="margin-bottom:8px">التاريخ: ${today()} م${hijri()?' &nbsp;|&nbsp; '+hijri():''}</div>`;
 const dsum=d=>`<div class="bx"><div class="row"><span>المبلغ الإجمالي: <b>${fmt(d.amt)}</b> ريال</span><span>المسدد: <b>${fmt(paid(d))}</b> ريال</span><span>المتبقي: <b>${fmt(rem(d))}</b> ريال</span></div>${d.date?`<div class="mut">تاريخ الدين: ${d.date}${d.due?' · الاستحقاق: '+d.due:''}</div>`:d.due?`<div class="mut">الاستحقاق: ${d.due}</div>`:''}</div>`;
-function showDoc(h){modal(`<div id="dv">${h}</div><div class="row" style="margin-top:12px"><button class="btn p" onclick="printDoc()">🖨 طباعة / حفظ PDF</button><button class="btn" onclick="closeM()">إغلاق</button></div>`);$('#mb').style.maxWidth='760px'}
-function printDoc(){$('#pr').innerHTML=$('#dv').innerHTML;document.body.classList.add('pdoc');window.print()}
-['afterprint','click','touchstart'].forEach(e=>window.addEventListener(e,()=>document.body.classList.remove('pdoc')));
+function showDoc(h,name){window._dn=name;modal(`<div id="dv">${h}</div><div class="row" style="margin-top:12px"><button class="btn p" onclick="printDoc()">🖨 طباعة / حفظ PDF</button><button class="btn" onclick="closeM()">إغلاق</button></div>`);$('#mb').style.maxWidth='760px'}
+const T0=document.title;
+function printDoc(){$('#pr').innerHTML=$('#dv').innerHTML;document.body.classList.add('pdoc');window._pt=Date.now();document.title=String(window._dn||T0).replace(/[\\/:*?"<>|]/g,' ').trim();window.print()}
+function endPrint(){document.body.classList.remove('pdoc');document.title=T0}
+window.addEventListener('afterprint',endPrint);
+['click','touchstart'].forEach(e=>window.addEventListener(e,()=>{if(Date.now()-(window._pt||0)>2000)endPrint()}));
 function docSettle(id){const d=D.debts.find(x=>x.id==id),p=paid(d),r=rem(d),full=r<=0;
  const t=full?`أقرّ أنا <b>${esc(d.cr)}</b> (الدائن) بأنني استلمت من <b>${esc(d.db)}</b> (المدين) كامل المبلغ المستحق وقدره <b>${fmt(d.amt)}</b> ريال (${tafqeet(d.amt)})، وأبرأتُ ذمته منه براءةً تامة، ولا مطالبة لي عليه في هذا الدين بعد هذه المخالصة.`
  :`أقرّ أنا <b>${esc(d.cr)}</b> (الدائن) بأنني استلمت من <b>${esc(d.db)}</b> (المدين) مبلغاً وقدره <b>${fmt(p)}</b> ريال (${tafqeet(p)}) من أصل <b>${fmt(d.amt)}</b> ريال، ويبقى في ذمته <b>${fmt(r)}</b> ريال (${tafqeet(r)}).`;
  showDoc(`<div class="doc">${dhead(full?'مخالصة نهائية':'كشف حساب ومخالصة جزئية')}<p>${t}</p>${dsum(d)}<b>بيان الدفعات:</b>${ptable(d)}
- <p style="font-size:13px">وعلى ذلك جرى التوقيع.</p><div class="sg"><div>الدائن<br>${esc(d.cr)}</div><div>المدين<br>${esc(d.db)}</div><div>الشاهد</div></div></div>`)}
+ <p style="font-size:13px">وعلى ذلك جرى التوقيع.</p><div class="sg"><div>الدائن<br>${esc(d.cr)}</div><div>المدين<br>${esc(d.db)}</div><div>الشاهد</div></div></div>`,(full?'مخالصة':'كشف حساب')+' - '+d.db+' - '+today())}
 function docRemind(id){const d=D.debts.find(x=>x.id==id),r=rem(d),L=late(d),last=spays(d).slice(-1)[0];
  const due=d.due?(L?`وقد حلّ موعد استحقاقه بتاريخ <b>${d.due}</b> وتأخر السداد <b>${L}</b> يوماً`:`ويحلّ موعد استحقاقه بتاريخ <b>${d.due}</b>`):'';
  showDoc(`<div class="doc">${dhead('إشعار تذكير بسداد مستحقات')}<p>السلام عليكم ورحمة الله وبركاته،<br>الأخ الكريم / <b>${esc(d.db)}</b> حفظه الله</p>
  <p>نذكّركم — مع خالص الشكر والتقدير — بأن في ذمتكم لصالح <b>${esc(d.cr)}</b> مبلغاً متبقياً قدره <b>${fmt(r)}</b> ريال (${tafqeet(r)}) من أصل <b>${fmt(d.amt)}</b> ريال${due?'، '+due:''}.</p>
  ${dsum(d)}${last?`<div class="mut">آخر دفعة مسجلة: ${fmt(last.a)} ريال بتاريخ ${last.d||'—'}</div>`:''}
  <p>نأمل التكرّم بسداد المبلغ في أقرب فرصة، أو التواصل معنا لترتيب موعد مناسب للسداد. وجزاكم الله خيراً.</p>
- <div class="sg"><div>الدائن<br>${esc(d.cr)}</div></div></div>`)}
+ <div class="sg"><div>الدائن<br>${esc(d.cr)}</div></div></div>`,'تذكير سداد - '+d.db+' - '+today())}
 const names=k=>[...new Set(D.debts.map(d=>d[k]))].filter(Boolean);
 function agg(k){const m={};D.debts.forEach(d=>{const o=m[d[k]]||(m[d[k]]={n:0,a:0,p:0,r:0,l:0});o.n++;o.a+=+d.amt;o.p+=paid(d);o.r+=rem(d);if(late(d))o.l+=rem(d)});return Object.entries(m).sort((a,b)=>b[1].r-a[1].r)}
 function totals(){return D.debts.reduce((t,d)=>(t.a+=+d.amt,t.p+=paid(d),t.r+=rem(d),t.l+=late(d)?rem(d):0,t),{a:0,p:0,r:0,l:0})}
