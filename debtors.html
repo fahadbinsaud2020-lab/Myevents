@@ -55,6 +55,7 @@ function save(){ls.set(K,JSON.stringify(D));push();render()}
 function push(){const u=ls.get(K+'u');if(!u)return;fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(D)}).catch(()=>{})}
 async function pull(){const u=ls.get(K+'u');if(!u)return toast('أدخل رابط Apps Script أولاً');
  try{const j=await (await fetch(u)).json();if(j&&j.debts){D=Object.assign({debts:[],phones:{}},j);ls.set(K,JSON.stringify(D));render();toast('تم تحميل البيانات من الشيت')}else toast('الشيت فارغ')}catch(e){toast('تعذر الاتصال بالشيت')}}
+function saveUrl(){ls.set(K+'u',$('#url').value.trim());if(!D.debts.length){toast('لا بيانات محلية: سيتم التحميل من الشيت بدل الكتابة فوقه');pull()}else{push();toast('تم الحفظ والمزامنة')}}
 const names=k=>[...new Set(D.debts.map(d=>d[k]))].filter(Boolean);
 function agg(k){const m={};D.debts.forEach(d=>{const o=m[d[k]]||(m[d[k]]={n:0,a:0,p:0,r:0,l:0});o.n++;o.a+=+d.amt;o.p+=paid(d);o.r+=rem(d);if(late(d))o.l+=rem(d)});return Object.entries(m).sort((a,b)=>b[1].r-a[1].r)}
 function totals(){return D.debts.reduce((t,d)=>(t.a+=+d.amt,t.p+=paid(d),t.r+=rem(d),t.l+=late(d)?rem(d):0,t),{a:0,p:0,r:0,l:0})}
@@ -98,7 +99,7 @@ function rep(){const B=[['1–30 يوماً',1,30],['31–60 يوماً',31,60],
  <div class="card"><h3>أعمار المتأخرات</h3><table>${B.map(b=>`<tr><td>${b[0]}</td><td class="n">${fmt(b[1])}</td></tr>`).join('')}</table></div>`}
 function set(){return `<div class="card"><h3>الربط مع Google Sheets</h3><label>رابط Apps Script (Web App)</label>
  <input id="url" dir="ltr" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(ls.get(K+'u')||'')}">
- <div class="row" style="margin-top:10px"><button class="btn p" onclick="ls.set(K+'u',$('#url').value.trim());push();toast('تم الحفظ والمزامنة')">حفظ ومزامنة</button><button class="btn" onclick="pull()">تحميل من الشيت</button></div>
+ <div class="row" style="margin-top:10px"><button class="btn p" onclick="saveUrl()">حفظ ومزامنة</button><button class="btn" onclick="pull()">تحميل من الشيت</button></div>
  <p class="mut">البيانات تُحفظ في المتصفح دائماً، وتُرسل للشيت تلقائياً بعد كل تعديل عند ربط الرابط.</p></div>
  <div class="card"><h3>نسخة احتياطية</h3><button class="btn" onclick="bk()">تنزيل JSON</button>
  <label class="btn" style="margin-top:0">استيراد<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label></div>`}
