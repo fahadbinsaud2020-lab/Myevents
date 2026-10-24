@@ -84,7 +84,7 @@ function debts(){let L=D.debts.filter(d=>(F.s=='all'||st(d)==F.s)&&(!F.c||d.cr==
  <div class="mut">الدائن: ${esc(d.cr)} · التاريخ: ${d.date||'—'} · الاستحقاق: ${d.due||'—'}</div>
  <div class="bar"><i style="width:${pc}%"></i></div>
  <div class="row"><span>المبلغ ${fmt(d.amt)} · مسدد ${fmt(paid(d))} · <b>متبقي ${fmt(rem(d))}</b></span></div>
- <div class="row" style="margin-top:8px"><span><button class="btn p" onclick="openDet('${d.id}')">سداد / تفاصيل</button> <a class="btn w" target="_blank" rel="noopener" href="${wa(d)}">تذكير واتساب</a></span>
+ <div class="row" style="margin-top:8px"><span>${s=='paid'?`<button class="btn" onclick="openDet('${d.id}')">التفاصيل</button>`:`<button class="btn p" onclick="openDet('${d.id}')">سداد / تفاصيل</button> <a class="btn w" target="_blank" rel="noopener" href="${wa(d)}">تذكير واتساب</a>`}</span>
  <span><button class="btn" onclick="openDebt('${d.id}')">تعديل</button> <button class="btn d" onclick="del('${d.id}')">حذف</button></span></div></div>`}).join('')||'<div class="empty">لا توجد ديون مطابقة</div>')}
 function wa(d){let p=(D.phones[d.db]||'').replace(/\D/g,'');if(p.startsWith('0'))p='966'+p.slice(1);
  const m=`السلام عليكم ${d.db}،\nتذكير ودّي بالمبلغ المتبقي لصالح ${d.cr}: ${fmt(rem(d))}`+(d.due?`\nتاريخ الاستحقاق: ${d.due}`:'')+`\nجزاكم الله خيراً.`;
@@ -131,7 +131,7 @@ function openDet(id){const d=D.debts.find(x=>x.id==id);if(!d)return;
  <input name="d" type="date" value="${today()}" style="margin-top:6px"><input name="n" placeholder="ملاحظة (اختياري)" style="margin-top:6px">
  <div class="row" style="margin-top:10px"><button class="btn p">تسجيل السداد</button><button type="button" class="btn" onclick="closeM()">إغلاق</button></div></form>`:'<div class="row" style="margin-top:10px"><span class="tag paid">مسدد بالكامل</span><button class="btn" onclick="closeM()">إغلاق</button></div>'}`)}
 function addPay(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),d=D.debts.find(x=>x.id==id);
- d.pays.push({a:Math.min(+f.a,rem(d)),d:f.d,n:f.n.trim()});save();openDet(id);toast('تم تسجيل الدفعة')}
+ if(rem(d)<=0)return;d.pays.push({a:Math.min(+f.a,rem(d)),d:f.d,n:f.n.trim()});save();openDet(id);toast('تم تسجيل الدفعة')}
 function delPay(id,i){if(!confirm('حذف الدفعة؟'))return;D.debts.find(x=>x.id==id).pays.splice(i,1);save();openDet(id)}
 function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()}
 function csv(){const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
