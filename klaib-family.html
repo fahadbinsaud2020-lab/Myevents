@@ -51,7 +51,7 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 </header>
 
 <div class="stats">
-<div class="stat"><b>9</b><span>فروع</span></div>
+<div class="stat"><b>11</b><span>فرعًا</span></div>
 <div class="stat"><b id="sNews">0</b><span>خبر</span></div>
 <div class="stat"><b id="sEv">0</b><span>مناسبة قادمة</span></div>
 <div class="stat"><b>١</b><span>عائلة واحدة</span></div>
@@ -59,12 +59,12 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 
 <section id="about">
 <h2>عن العائلة</h2>
-<div class="card">تجمع عائلة كليب بن عور تسعة فروع كريمة، يجمعها النسب والمحبة والتكافل. يهدف هذا الموقع إلى تقريب أفراد العائلة، ونشر أخبارها ومناسباتها، وتوثيق شجرتها، وتسهيل التواصل بين فروعها.
+<div class="card">تجمع عائلة كليب بن عور فروع كريمة، يجمعها النسب والمحبة والتكافل. يهدف هذا الموقع إلى تقريب أفراد العائلة، ونشر أخبارها ومناسباتها، وتوثيق شجرتها، وتسهيل التواصل بين فروعها.
 <p class="note">يمكن تعديل هذا النص وإضافة نبذة تاريخية عن جد العائلة وأصلها.</p></div>
 </section>
 
 <section id="branches">
-<h2>فروع العائلة التسعة</h2>
+<h2>فروع العائلة</h2>
 <div class="grid" id="brGrid"></div>
 <p class="note">اضغط على الفرع لعرض أخباره.</p>
 </section>
@@ -73,7 +73,7 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <h2>أشجار العائلة</h2>
 <div class="chips" id="tChips"></div>
 <div class="card" id="tView"></div>
-<p class="note">الشجرة الجماعية تضم الفروع التسعة، ولكل فرع شجرته الخاصة.</p>
+<p class="note">الشجرة الجماعية تضم جميع الفروع، ولكل فرع شجرته الخاصة.</p>
 </section>
 
 <section id="news">
@@ -115,7 +115,7 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 
 <script>
 // ===== عدّل البيانات هنا =====
-var BR=["مزيَد","محمد","مزِيد","عيد","زايد","شعيفان","عبدالهادي","عبيد","عبدالله"];
+var BR=["مزيَد","محمد","مزِيد","عيد","زايد","شعيفان","عبدالهادي","عبيد","عبدالله","سداح","شبيب"];
 var NEWS=[
 {b:-1,t:"اجتماع العائلة السنوي",d:"١٤٤٨/٠٢/١٠",x:"يسرنا دعوة جميع الفروع لحضور اللقاء السنوي، والتفاصيل في قسم المناسبات."},
 {b:-1,t:"إطلاق موقع العائلة",d:"١٤٤٨/٠١/٢٠",x:"انطلاق الموقع الرسمي ليكون نافذة التواصل بين أفراد العائلة."},
@@ -126,7 +126,7 @@ var NEWS=[
 var EV=[
 {d:"15",m:"نوفمبر",t:"اللقاء السنوي للعائلة",p:"استراحة العائلة — بعد العشاء"},
 {d:"02",m:"ديسمبر",t:"ملتقى الشباب",p:"يحدد لاحقًا"},
-{d:"20",m:"ديسمبر",t:"زيارة جماعية لكبار العائلة",p:"الفروع التسعة"}
+{d:"20",m:"ديسمبر",t:"زيارة جماعية لكبار العائلة",p:"جميع الفروع"}
 ];
 // ============================
 var cur=-2;
@@ -148,12 +148,12 @@ window.open('https://wa.me/?text='+encodeURIComponent(m),'_blank')};
 $('share').onclick=function(){var u=location.href;if(navigator.share){navigator.share({title:'عائلة كليب بن عور',url:u}).catch(function(){})}else{window.open('https://wa.me/?text='+encodeURIComponent('موقع عائلة كليب بن عور\n'+u),'_blank')}};
 var TURL="https://fahadbinsaud2020-lab.github.io/Myevents/";
 var LT="https://livefamilytrees.com/trees/?t=251208ZRvE";
-var TL={general:LT+"1162206422",br:[LT+"491321947",LT+"1998058335",LT+"750605792",LT+"575843368",LT+"1011936645",LT+"80894857",LT+"1237340341",LT+"1810516695",LT+"883959154"]}; // روابط الأشجار
+var TL={general:LT+"1162206422",br:[LT+"491321947",LT+"1998058335",LT+"750605792",LT+"575843368",LT+"1011936645",LT+"80894857",LT+"1237340341",LT+"1810516695",LT+"883959154",null,null]}; // روابط الأشجار
 var tc=-1;
 function tChips(){var h='<button class="chip'+(tc==-1?' on':'')+'" data-i="-1">🌳 الشجرة الجماعية</button>';BR.forEach(function(n,i){h+='<button class="chip'+(tc==i?' on':'')+'" data-i="'+i+'">'+n+'</button>'});$('tChips').innerHTML=h}
 var API=""; // رابط Apps Script (…/exec)
 var D=null;
-var BID={"مزيَد":"n80","محمد":"n73","مزِيد":"n74","عيد":"n81","زايد":"n76","شعيفان":"n78","عبدالهادي":"n85","عبيد":"n86","عبدالله":"n84"}; // رقم عقدة كل فرع في الشيت
+var BID={"مزيَد":"n80","محمد":"n73","مزِيد":"n74","عيد":"n81","زايد":"n76","شعيفان":"n78","عبدالهادي":"n85","عبيد":"n86","عبدالله":"n84","سداح":"n72","شبيب":"n77"}; // رقم عقدة كل فرع في الشيت
 function nz(s){return String(s||'').trim().replace(/[<>&]/g,'')}
 function nmx(r){return nz(r.name).replace(/ـ+/g,'')+(String(r.deceased).toUpperCase()=='TRUE'?' <small class="note">رحمه الله</small>':'')}
 function load(){if(!API)return;fetch(API).then(function(r){return r.json()}).then(function(j){var s={},a=[];j.rows.forEach(function(r){if(r.id&&!s[r.id]){s[r.id]=1;a.push(r)}});D=a;tView()}).catch(function(){})}
@@ -163,7 +163,7 @@ var ch=kids(BID[BR[i]]);if(!ch.length)return '<p class="note">لا توجد بي
 return '<div style="text-align:start">'+ch.map(function(c){var g=kids(c.id);return '<details class="card" style="margin:6px 0"><summary><b>'+nmx(c)+'</b> — '+g.length+' من الأحفاد</summary>'+(g.map(function(x){return '<span class="nd s">'+nmx(x)+'</span>'}).join('')||'<small class="note">لا يوجد</small>')+'</details>'}).join('')+'</div>'}
 function tView(){var h='<div class="tr">';
 if(tc<0){h+='<span class="nd g">كليب بن عور</span><div class="ln"></div><div class="row">'+BR.map(function(n,i){return '<span class="nd s" data-i="'+i+'">'+n+'</span>'}).join('')+'</div><p><a class="btn" href="'+TL.general+'" target="_blank">عرض الشجرة الكاملة</a></p>'}
-else{h+='<span class="nd g">كليب بن عور</span><div class="ln"></div><span class="nd">'+BR[tc]+'</span><div class="ln"></div>'+fam(tc)+'<p><a class="btn" href="'+TL.br[tc]+'" target="_blank">عرض شجرة فرع '+BR[tc]+'</a></p>'}
+else{h+='<span class="nd g">كليب بن عور</span><div class="ln"></div><span class="nd">'+BR[tc]+'</span><div class="ln"></div>'+fam(tc)+'<p>'+(TL.br[tc]?'<a class="btn" href="'+TL.br[tc]+'" target="_blank">عرض شجرة فرع '+BR[tc]+'</a>':'')+'</p>'}
 $('tView').innerHTML=h+'</div>'}
 function tSel(i){tc=i;tChips();tView()}
 $('tChips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==null)tSel(+i)};
