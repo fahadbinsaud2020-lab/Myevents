@@ -36,6 +36,24 @@ h2::after{content:"";display:block;width:50px;height:3px;background:var(--gold);
 .tools a{display:block;text-decoration:none;color:var(--ink)}.tools b{color:var(--pri)}
 form{display:grid;gap:10px}input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:16px Tajawal}
 .tr{text-align:center}.tr .nd{display:inline-block;background:var(--pri);color:#fff;border-radius:12px;padding:4px 16px;font-weight:700;margin:3px}.tr .nd.g{background:var(--gold);color:#1b1608}.tr .ln{width:2px;height:18px;background:var(--gold);margin:0 auto}.tr .row{display:flex;flex-wrap:wrap;justify-content:center;gap:4px;border-top:2px solid var(--gold);padding-top:10px;margin:0 6%}.tr .nd.s{background:var(--card);color:var(--ink);border:1px solid var(--pri);font-weight:500;cursor:pointer}
+.org{overflow-x:auto;direction:ltr;display:flex;padding-bottom:10px}
+.ot,.ot ul{display:flex;justify-content:center;margin:0;padding:20px 0 0;position:relative;list-style:none}
+.ot{padding-top:0;margin:0 auto;width:max-content}
+.ot li{position:relative;padding:20px 4px 0;text-align:center;list-style:none}
+.ot li::before,.ot li::after{content:"";position:absolute;top:0;right:50%;border-top:2px solid var(--gold);width:50%;height:20px}
+.ot li::after{right:auto;left:50%;border-left:2px solid var(--gold)}
+.ot li:only-child::before,.ot li:only-child::after{display:none}
+.ot li:only-child{padding-top:0}
+.ot li:first-child::before,.ot li:last-child::after{border:0 none}
+.ot li:last-child::before{border-right:2px solid var(--gold);border-radius:0 6px 0 0}
+.ot li:first-child::after{border-radius:6px 0 0 0}
+.ot ul::before{content:"";position:absolute;top:0;left:50%;border-left:2px solid var(--gold);height:20px}
+.ot>li{padding-top:0}.ot>li::before,.ot>li::after{display:none}
+.nb{display:inline-block;direction:rtl;background:var(--card);border:1.5px solid var(--pri);color:var(--ink);border-radius:10px;padding:3px 10px;font:500 14px Tajawal;white-space:nowrap;line-height:1.5}
+.nb small{display:block;font-size:10px;color:var(--mute)}
+.nb i{font-style:normal;background:var(--gold);color:#1b1608;border-radius:8px;padding:0 6px;font-size:11px;margin-inline-start:6px}
+.nb.hk{cursor:pointer}.nb.g{background:var(--gold);color:#1b1608;border-color:var(--gold);font-weight:800}.nb.b{background:var(--pri);color:#fff;font-weight:800}.nb.s1{border-width:2.5px;font-weight:700}
+.ctl{display:flex;gap:6px;margin-bottom:8px;justify-content:center}
 footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-size:14px}
 .note{color:var(--mute);font-size:12px}
 </style>
@@ -152,22 +170,31 @@ var TL={general:LT+"1162206422",br:[LT+"491321947",LT+"1998058335",LT+"750605792
 var tc=-1;
 function tChips(){var h='<button class="chip'+(tc==-1?' on':'')+'" data-i="-1">🌳 الشجرة الجماعية</button>';BR.forEach(function(n,i){h+='<button class="chip'+(tc==i?' on':'')+'" data-i="'+i+'">'+n+'</button>'});$('tChips').innerHTML=h}
 var API=""; // رابط Apps Script (…/exec)
-var D=null;
-var BID={"مزيَد":"n80","محمد":"n73","مزِيد":"n74","عيد":"n81","زايد":"n76","شعيفان":"n78","عبدالهادي":"n85","عبيد":"n86","عبدالله":"n84","سداح":"n72","شبيب":"n77"}; // رقم عقدة كل فرع في الشيت
+var T=null,NID=0,NODES={}; // الأشجار المحمّلة: رقم التبويب ← شجرة
 function nz(s){return String(s||'').trim().replace(/[<>&]/g,'')}
-function nmx(r){return nz(r.name).replace(/ـ+/g,'')+(String(r.deceased).toUpperCase()=='TRUE'?' <small class="note">رحمه الله</small>':'')}
-function load(){if(!API)return;fetch(API).then(function(r){return r.json()}).then(function(j){var s={},a=[];j.rows.forEach(function(r){if(r.id&&!s[r.id]){s[r.id]=1;a.push(r)}});D=a;tView()}).catch(function(){})}
-function kids(id){return D.filter(function(r){return r.parentId==id})}
-function fam(i){if(!D)return '<p class="note">'+(API?'جارٍ تحميل البيانات…':'يظهر هنا الأبناء والأحفاد عند ربط الشيت.')+'</p>';
-var ch=kids(BID[BR[i]]);if(!ch.length)return '<p class="note">لا توجد بيانات لهذا الفرع في الشيت.</p>';
-return '<div style="text-align:start">'+ch.map(function(c){var g=kids(c.id);return '<details class="card" style="margin:6px 0"><summary><b>'+nmx(c)+'</b> — '+g.length+' من الأحفاد</summary>'+(g.map(function(x){return '<span class="nd s">'+nmx(x)+'</span>'}).join('')||'<small class="note">لا يوجد</small>')+'</details>'}).join('')+'</div>'}
+function gidOf(i){var m=(TL.br[i]||'').match(/ZRvE(\d+)/);return m?m[1]:null}
+function build(rows){var root={k:[]};rows.forEach(function(r){var cur=root;for(var j=0;j<r.length;j++){var c=String(r[j]||'').trim();if(!c)break;var d=/&$/.test(c),n=nz(c.replace(/&+$/,'').replace(/ـ+/g,'')),f=null;
+cur.k.forEach(function(x){if(x.n==n)f=x});if(!f){f={id:++NID,par:cur,n:n,d:d,k:[]};NODES[f.id]=f;cur.k.push(f)}if(d)f.d=true;cur=f}});return root}
+function load(){if(!API)return;fetch(API).then(function(r){return r.json()}).then(function(j){T={};for(var g in j.tabs)T[g]=build(j.tabs[g]);tView()}).catch(function(){})}
+function lab(n){return n.n+(n.d?' <small class="note">رحمه الله</small>':'')}
+function rn(n,d){if(!n.k.length)return '<span class="nd s">'+lab(n)+'</span>';return '<details class="card" style="margin:6px 0"><summary><b>'+lab(n)+'</b> — '+n.k.length+(d==0?' من الأحفاد':' من الأبناء')+'</summary>'+n.k.map(function(x){return rn(x,d+1)}).join('')+'</details>'}
+function fam(i){var g=gidOf(i);if(!g)return '<p class="note">لا يوجد أبناء مسجلون لهذا الفرع.</p>';
+if(!T)return '<p class="note">'+(API?'جارٍ تحميل البيانات…':'يظهر هنا الأبناء والأحفاد عند ربط الشيت.')+'</p>';
+var t=T[g];if(!t||!t.k.length)return '<p class="note">لا توجد بيانات لهذا الفرع.</p>';
+return '<div style="text-align:start"><p class="note">الأبناء ('+t.k.length+')</p>'+t.k.map(function(x){return rn(x,0)}).join('')+'</div>'}
+var EMBED={"750605792":[["سند&","فهد"],["سند&","مسلي"],["سند&","راكان","سند"],["سند&","راكان","نايف"],["سند&","فارس"],["سند&","عبدالله","فهد"],["محسن&","مطر","نواف"],["محسن&","مطر","ريان"],["محسن&","مطر","راكان"],["محسن&","مطر","رائد"],["محسن&","شبيب","عبدالعزيز"],["محسن&","جزاء","راشد"],["محسن&","سند","عبدالرحمن"],["محسن&","سند","سيف"],["محسن&","سند","صقر"],["محسن&","سند","دهام"],["محسن&","سفر"],["جزاء&","فواز","عبدالله"],["جزاء&","فواز","عبدالرحمن"],["جزاء&","محمد"],["جزاء&","عبدالعزيز"],["جزاء&","سلمان"],["جزاء&","عبدالمجيد&"],["جزاء&","عبدالمحسن&"],["جزاء&","تركي&"],["جازع","متعب","نواف"],["جازع","متعب","خالد"],["جازع","متعب","سعود"],["جازع","أحمد","عساف"],["جازع","أحمد","مشهور"],["جازع","غانم"],["جازع","ناصر"],["جازي&","عادل"],["جازي&","مزيد","جازي"],["جازي&","مزيد","خالد"],["جازي&","مزيد","سلمان"],["جازي&","مهنا","جازي"],["جازي&","شعيفان"],["مَزْيَد","ثامر","مزيد"],["مَزْيَد","ثامر","عبدالله"],["مَزْيَد","محمد"],["مَزْيَد","عبدالله","مزيد"],["مَزْيَد","أحمد"]],"1011936645":[["مرزوق","عبدالرحمن","خالد"],["مرزوق","عبدالرحمن","أحمد"],["مرزوق","مقبل","تركي"],["مرزوق","مقبل","محمد"],["مرزوق","شبيب","حازم"],["مرزوق","شبيب","سلطان"],["مرزوق","زايد","ياسر"],["مرزوق","زايد","وليد"],["مرزوق","زايد","فيصل"],["مرزوق","مطلق"],["مرزوق","عايد"],["مرزوق","رايد"],["مرزوق","عبدالله"],["مرزوق","ابراهيم"],["مرزوق","عبدالعزيز"],["مرزوق","عزام"],["عبدالعزيز","عجب","عبدالعزيز"],["عبدالعزيز","عجب","مزيد"],["عبدالعزيز","عبدالله"],["عبدالعزيز","راضي"],["عبدالعزيز","سعد"],["عبدالعزيز","مزيد&"],["عبدالله","يوسف","عبدالله"],["عبدالله","يوسف","أوس"],["عبدالله","محمد"],["عبدالله","زايد"],["عبدالله","عبدالرحمن"],["محمد","ابراهيم"],["محمد","يوسف"],["محمد","ايوب"],["محمد","سليمان"],["ضيف الله","عبدالمجيد"],["ضيف الله","وليد"],["صالح","زايد"],["صالح","عبدالله"],["عبدالرحمن","عمر"],["عبدالرحمن","ريان"],["عبدالرحمن","هتان"],["عبدالرحمن","يزن"]]}; // نسخة مضمّنة من تبويبي مزِيد وزايد للتجربة
+T={};for(var g in EMBED)T[g]=build(EMBED[g]);
+var MODE='min',OPEN={},SL=null;
+function isO(n,d){return OPEN[n.id]!==undefined?OPEN[n.id]:MODE=='all'}
+function ob(n,d){var o=n.k.length&&isO(n,d);return '<li><div class="nb'+(d==0?' s1':'')+(n.k.length?' hk':'')+'"'+(n.k.length?' data-id="'+n.id+'" data-d="'+d+'"':'')+'>'+n.n+(n.d?'<small>رحمه الله</small>':'')+(n.k.length&&!o?'<i>+'+n.k.length+'</i>':'')+'</div>'+(o?'<ul>'+n.k.slice().reverse().map(function(x){return ob(x,d+1)}).join('')+'</ul>':'')+'</li>'}
+function org(i,t){return '<div class="ctl"><button class="chip" data-m="all">فتح الكل</button><button class="chip" data-m="min">طي الكل</button></div><div class="org"><ul class="ot"><li><div class="nb g">كليب بن عور</div><ul><li><div class="nb b">'+BR[i]+'</div><ul>'+t.k.slice().reverse().map(function(x){return ob(x,0)}).join('')+'</ul></li></ul></li></ul></div><p class="note">اضغط على أي اسم لفتح أبنائه، وفتح اسم آخر يغلق السابق.</p>'}
 function tView(){var h='<div class="tr">';
 if(tc<0){h+='<span class="nd g">كليب بن عور</span><div class="ln"></div><div class="row">'+BR.map(function(n,i){return '<span class="nd s" data-i="'+i+'">'+n+'</span>'}).join('')+'</div><p><a class="btn" href="'+TL.general+'" target="_blank">عرض الشجرة الكاملة</a></p>'}
-else{h+='<span class="nd g">كليب بن عور</span><div class="ln"></div><span class="nd">'+BR[tc]+'</span><div class="ln"></div>'+fam(tc)+'<p>'+(TL.br[tc]?'<a class="btn" href="'+TL.br[tc]+'" target="_blank">عرض شجرة فرع '+BR[tc]+'</a>':'')+'</p>'}
-$('tView').innerHTML=h+'</div>'}
-function tSel(i){tc=i;tChips();tView()}
+else{var g0=gidOf(tc),t0=T&&g0&&T[g0];h+=(t0&&t0.k.length?org(tc,t0):'<span class="nd g">كليب بن عور</span><div class="ln"></div><span class="nd">'+BR[tc]+'</span><div class="ln"></div>'+fam(tc))+'<p>'+(TL.br[tc]?'<a class="btn" href="'+TL.br[tc]+'" target="_blank">عرض شجرة فرع '+BR[tc]+'</a>':'')+'</p>'}
+$('tView').innerHTML=h+'</div>';var o=document.querySelector('#tView .org');if(o){o.scrollLeft=SL===null?(o.scrollWidth-o.clientWidth)/2:SL;SL=null}}
+function tSel(i){tc=i;OPEN={};MODE='min';SL=null;tChips();tView()}
 $('tChips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==null)tSel(+i)};
-$('tView').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==null&&tc<0)tSel(+i)};
+$('tView').onclick=function(e){var o=document.querySelector('#tView .org');var m=e.target.getAttribute('data-m');if(m){MODE=m;OPEN={};SL=null;tView();return}var nb=e.target.closest('.hk');if(nb){var id=+nb.getAttribute('data-id'),n=NODES[id],cur=OPEN[id]!==undefined?OPEN[id]:MODE=='all';if(!cur&&n&&n.par)n.par.k.forEach(function(x){if(x!==n)OPEN[x.id]=false});OPEN[id]=!cur;SL=o?o.scrollLeft:null;tView();return}var i=e.target.getAttribute('data-i');if(i!==null&&tc<0)tSel(+i)};
 tChips();tView();load();
 chips();news();
 </script>
