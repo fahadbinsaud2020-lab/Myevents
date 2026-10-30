@@ -62,7 +62,7 @@ function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;setTimeout(
 function load(){try{const s=ls.get(K);if(s)D=Object.assign(D,JSON.parse(s))}catch(e){}}
 function save(){ls.set(K,JSON.stringify(D));push();render()}
 function push(){const u=ls.get(K+'u');if(!u)return;fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(D)}).catch(()=>{})}
-async function pull(){const u=ls.get(K+'u');if(!u)return toast('أدخل رابط Apps Script أولاً');
+async function pull(){const iv=$('#url');if(iv&&iv.value.trim())ls.set(K+'u',iv.value.trim());const u=ls.get(K+'u');if(!u)return toast('أدخل رابط Apps Script أولاً');
  try{const j=await (await fetch(u)).json();if(j&&j.debts){D=Object.assign({debts:[],phones:{}},j);ls.set(K,JSON.stringify(D));render();toast('تم تحميل البيانات من الشيت')}else toast('الشيت فارغ')}catch(e){toast('تعذر الاتصال بالشيت')}}
 function saveUrl(){ls.set(K+'u',$('#url').value.trim());if(!D.debts.length){toast('لا بيانات محلية: سيتم التحميل من الشيت بدل الكتابة فوقه');pull()}else{push();toast('تم الحفظ والمزامنة')}}
 
@@ -97,6 +97,15 @@ function docRemind(id){const d=D.debts.find(x=>x.id==id),r=rem(d),L=late(d),last
  ${dsum(d)}${last?`<div class="mut">آخر دفعة مسجلة: ${fmt(last.a)} ريال بتاريخ ${last.d||'—'}</div>`:''}
  <p>نأمل التكرّم بسداد المبلغ في أقرب فرصة، أو التواصل معنا لترتيب موعد مناسب للسداد. وجزاكم الله خيراً.</p>
  <div class="sg"><div>الدائن<br>${esc(d.cr)}</div></div></div>`,'تذكير سداد - '+d.db+' - '+today())}
+function docReceipt(id,i){const d=D.debts.find(x=>x.id==id);if(!d||!d.pays[i])return;const p=d.pays[i];
+ const L=d.pays.map((q,k)=>({a:+q.a,d:q.d||'',k})).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.k-b.k);
+ let cum=0,pos=0;for(let j=0;j<L.length;j++){cum+=L[j].a;if(L[j].k==i){pos=j+1;break}}
+ const bal=Math.max(0,d.amt-cum),no=(()=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))%1000;return String(h).padStart(3,'0')})()+'-'+pos;
+ showDoc(`<div class="doc">${dhead('سند قبض')}<div class="row" style="margin-bottom:6px"><span>رقم السند: <b>${esc(no)}</b></span><span>تاريخ السداد: <b>${p.d||'—'}</b></span></div>
+ <p>استلمنا من <b>${esc(d.db)}</b> مبلغاً وقدره <b>${fmt(p.a)}</b> ريال (${tafqeet(p.a)})، وذلك سداداً للدفعة رقم <b>${pos}</b> من الدين المستحق عليه${p.n?` (${esc(p.n)})`:''}.</p>
+ <div class="bx"><div class="row"><span>إجمالي الدين: <b>${fmt(d.amt)}</b></span><span>المسدد حتى هذه الدفعة: <b>${fmt(cum)}</b></span><span>المتبقي: <b>${fmt(bal)}</b> ريال</span></div></div>
+ ${bal<=0?'<p><b>وبهذه الدفعة اكتمل سداد الدين، والحمد لله.</b></p>':''}
+</div>`,'سند قبض - '+d.db+' - '+(p.d||today()))}
 const names=k=>[...new Set(D.debts.map(d=>d[k]))].filter(Boolean);
 function agg(k){const m={};D.debts.forEach(d=>{const o=m[d[k]]||(m[d[k]]={n:0,a:0,p:0,r:0,l:0});o.n++;o.a+=+d.amt;o.p+=paid(d);o.r+=rem(d);if(late(d))o.l+=rem(d)});return Object.entries(m).sort((a,b)=>b[1].r-a[1].r)}
 function totals(){return D.debts.reduce((t,d)=>(t.a+=+d.amt,t.p+=paid(d),t.r+=rem(d),t.l+=late(d)?rem(d):0,t),{a:0,p:0,r:0,l:0})}
@@ -168,12 +177,12 @@ function del(id){if(confirm('حذف هذا الدين نهائياً؟')){D.debt
 function openDet(id){const d=D.debts.find(x=>x.id==id);if(!d)return;
  modal(`<h3>${esc(d.db)} ← ${esc(d.cr)}</h3><div>المبلغ ${fmt(d.amt)} · مسدد ${fmt(paid(d))} · <b>متبقي ${fmt(rem(d))}</b></div>
  ${d.note?`<p class="mut">${esc(d.note)}</p>`:''}
- <h3>الدفعات</h3>${d.pays.map((p,i)=>`<div class="row" style="border-bottom:1px solid var(--b);padding:5px 0"><span>${p.d} · <b>${fmt(p.a)}</b> <span class="mut">${esc(p.n||'')}</span></span><button class="btn d" onclick="delPay('${id}',${i})">✕</button></div>`).join('')||'<div class="mut">لا توجد دفعات</div>'}
+ <h3>الدفعات</h3>${d.pays.map((p,i)=>`<div class="row" style="border-bottom:1px solid var(--b);padding:5px 0"><span>${p.d} · <b>${fmt(p.a)}</b> <span class="mut">${esc(p.n||'')}</span></span><span><button class="btn" onclick="docReceipt('${id}',${i})">🧾 سند</button> <button class="btn d" onclick="delPay('${id}',${i})">✕</button></span></div>`).join('')||'<div class="mut">لا توجد دفعات</div>'}
  ${rem(d)>0?`<form onsubmit="addPay(event,'${id}')"><label>دفعة جديدة</label><input name="a" type="number" step="any" min="0.01" max="${rem(d)}" value="${rem(d)}" required>
- <input name="d" type="date" value="${today()}" style="margin-top:6px"><input name="n" placeholder="ملاحظة (اختياري)" style="margin-top:6px">
+ <input name="d" type="date" value="${today()}" style="margin-top:6px"><input name="n" placeholder="ملاحظة (اختياري)" style="margin-top:6px"><label style="display:flex;gap:8px;align-items:center;color:var(--t)"><input type="checkbox" name="r" checked style="width:auto"> إصدار سند قبض بعد الحفظ</label>
  <div class="row" style="margin-top:10px"><button class="btn p">تسجيل السداد</button><button type="button" class="btn" onclick="closeM()">إغلاق</button></div></form>`:'<div class="row" style="margin-top:10px"><span class="tag paid">مسدد بالكامل</span><button class="btn" onclick="closeM()">إغلاق</button></div>'}`)}
 function addPay(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),d=D.debts.find(x=>x.id==id);
- if(rem(d)<=0)return;d.pays.push({a:Math.min(+f.a,rem(d)),d:f.d,n:f.n.trim()});save();openDet(id);toast('تم تسجيل الدفعة')}
+ if(rem(d)<=0)return;d.pays.push({a:Math.min(+f.a,rem(d)),d:f.d,n:f.n.trim()});save();if(f.r)docReceipt(id,d.pays.length-1);else openDet(id);toast('تم تسجيل الدفعة')}
 function delPay(id,i){if(!confirm('حذف الدفعة؟'))return;D.debts.find(x=>x.id==id).pays.splice(i,1);save();openDet(id)}
 function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()}
 function csv(){const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
