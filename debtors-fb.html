@@ -52,7 +52,7 @@ body.pdoc>*:not(#pr){display:none!important}body.pdoc #pr{display:block!importan
 <p class="mut">الدخول لصاحب الحساب فقط</p><button class="btn p" style="width:100%;padding:12px" onclick="window.fbSignIn?fbSignIn():toast('جاري تحميل الخدمة…')">الدخول بحساب جوجل</button><p id="gm" class="mut"></p></div></div>
 <div id="toast" hidden></div><div id="pr"></div>
 <script>
-const K='debtors_v1';let D={debts:[],phones:{}},V='dash',F={s:'all',c:'',q:''};
+const K='debtors_v1';let D={debts:[],phones:{}},V='dash',F={s:'all',c:'',d:'',q:''};
 const $=s=>document.querySelector(s);
 const fmt=n=>(+n||0).toLocaleString('en-US',{maximumFractionDigits:2});
 const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
@@ -121,8 +121,8 @@ const names=k=>[...new Set(D.debts.map(d=>d[k]))].filter(Boolean);
 function agg(k){const m={};D.debts.forEach(d=>{const o=m[d[k]]||(m[d[k]]={n:0,a:0,p:0,r:0,l:0});o.n++;o.a+=+d.amt;o.p+=paid(d);o.r+=rem(d);if(late(d))o.l+=rem(d)});return Object.entries(m).sort((a,b)=>b[1].r-a[1].r)}
 function totals(){return D.debts.reduce((t,d)=>(t.a+=+d.amt,t.p+=paid(d),t.r+=rem(d),t.l+=late(d)?rem(d):0,t),{a:0,p:0,r:0,l:0})}
 const TABS=[['dash','الرئيسية'],['debts','الديون'],['rep','التقارير'],['set','الإعدادات']];
-function render(){$('#nav').innerHTML=TABS.map(t=>`<button class="${V==t[0]?'on':''}" onclick="V='${t[0]}';render()">${t[1]}</button>`).join('');
- $('#main').innerHTML={dash,debts,rep,set}[V]()}
+function render(){const fq=document.activeElement&&document.activeElement.id=='sq';$('#nav').innerHTML=TABS.map(t=>`<button class="${V==t[0]?'on':''}" onclick="V='${t[0]}';render()">${t[1]}</button>`).join('');
+ $('#main').innerHTML={dash,debts,rep,set}[V]();if(fq){const i=$('#sq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}}}
 function dash(){const t=totals(),pc=t.a?Math.round(t.p/t.a*100):0;
  const soon=D.debts.filter(d=>rem(d)>0&&d.due&&d.due>=today()&&Date.parse(d.due)-Date.parse(today())<=30*864e5).sort((a,b)=>a.due<b.due?-1:1).slice(0,6);
  const lt=D.debts.filter(late).sort((a,b)=>late(b)-late(a)).slice(0,6);
@@ -135,12 +135,14 @@ function dash(){const t=totals(),pc=t.a?Math.round(t.p/t.a*100):0;
  <div class="card"><h3>📅 استحقاقات خلال 30 يوماً</h3>${soon.map(mini).join('')||'<div class="empty">لا توجد استحقاقات قريبة</div>'}</div>
  <button class="btn p" onclick="openDebt()">+ إضافة دين</button>`}
 const mini=d=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--b)" onclick="openDet('${d.id}')"><span><b>${esc(d.db)}</b> <span class="mut">← ${esc(d.cr)}</span></span><span>${fmt(rem(d))} <span class="mut">${d.due||''}</span></span></div>`;
-function debts(){let L=D.debts.filter(d=>(F.s=='all'||st(d)==F.s)&&(!F.c||d.cr==F.c)&&(!F.q||(d.db+d.cr+(d.note||'')).includes(F.q)));
+const nz=s=>String(s||'').replace(/[\u064B-\u065F\u0670\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/[٠-٩]/g,c=>'٠١٢٣٤٥٦٧٨٩'.indexOf(c)).toLowerCase().trim();
+function debts(){const q=nz(F.q);let L=D.debts.filter(d=>(F.s=='all'||st(d)==F.s)&&(!F.c||d.cr==F.c)&&(!F.d||d.db==F.d)&&(!q||nz(d.db+' '+d.cr+' '+(d.note||'')).includes(q)));
  L.sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
- return `<div class="bar2"><input placeholder="بحث…" value="${esc(F.q)}" oninput="F.q=this.value;clearTimeout(window._t);window._t=setTimeout(render,300)">
+ return `<div class="bar2"><input id="sq" type="search" placeholder="🔍 بحث بالمدين أو الدائن…" value="${esc(F.q)}" oninput="F.q=this.value;clearTimeout(window._t);window._t=setTimeout(render,250)">
  <select onchange="F.s=this.value;render()">${[['all','كل الحالات'],...Object.entries(SN)].map(o=>`<option value="${o[0]}" ${F.s==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>
  <select onchange="F.c=this.value;render()"><option value="">كل الدائنين</option>${names('cr').map(n=>`<option ${F.c==n?'selected':''}>${esc(n)}</option>`).join('')}</select>
- <button class="btn p" onclick="openDebt()">+ دين جديد</button></div>`+
+ <select onchange="F.d=this.value;render()"><option value="">كل المدينين</option>${names('db').sort((x,y)=>x.localeCompare(y,'ar')).map(n=>`<option ${F.d==n?'selected':''}>${esc(n)}</option>`).join('')}</select>
+ <button class="btn p" onclick="openDebt()">+ دين جديد</button></div><div class="mut" style="margin-bottom:8px">النتائج: ${L.length} · المتبقي: <b>${fmt(L.reduce((a,d)=>a+rem(d),0))}</b></div>`+
  (L.map(d=>{const s=st(d),pc=Math.round(paid(d)/d.amt*100);return `<div class="card"><div class="row"><b>${esc(d.db)}</b><span class="tag ${s}">${SN[s]}${late(d)?' '+late(d)+' يوم':''}</span></div>
  <div class="mut">الدائن: ${esc(d.cr)} · التاريخ: ${d.date||'—'} · الاستحقاق: ${d.due||'—'}</div>
  <div class="bar"><i style="width:${pc}%"></i></div>
