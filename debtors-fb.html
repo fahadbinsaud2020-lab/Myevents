@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>متابعة الدائنين والمدينين</title>
+<style>
+:root{--g:#0b5d3b;--g2:#e8f3ed;--au:#b8923a;--bg:#f6f4ee;--t:#1d2b24;--m:#6b7a72;--r:#c0392b;--o:#d98324;--b:#e2ddd0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--t);font:15px/1.6 Tahoma,"Segoe UI",Arial,sans-serif}
+header{background:linear-gradient(135deg,#0b5d3b,#08402a);color:#fff;padding:16px;border-bottom:3px solid var(--au)}
+header h1{margin:0;font-size:19px}header small{opacity:.8}
+nav{display:flex;gap:6px;padding:10px;overflow-x:auto;background:#fff;border-bottom:1px solid var(--b);position:sticky;top:0;z-index:5}
+nav button{flex:1;white-space:nowrap;border:0;background:none;padding:9px 14px;border-radius:20px;font:inherit;color:var(--m);cursor:pointer}
+nav button.on{background:var(--g);color:#fff}
+main{max-width:980px;margin:auto;padding:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.card{background:#fff;border:1px solid var(--b);border-radius:12px;padding:14px;margin-bottom:10px}
+.k{color:var(--m);font-size:13px}.v{font-size:22px;font-weight:700;direction:ltr;text-align:right}
+.v.r{color:var(--r)}.v.g{color:var(--g)}.v.o{color:var(--o)}
+h3{margin:6px 0 10px;color:var(--g)}
+.bar{height:8px;background:var(--g2);border-radius:5px;overflow:hidden;margin:8px 0}.bar i{display:block;height:100%;background:var(--g)}
+.tag{display:inline-block;padding:1px 10px;border-radius:12px;font-size:12px;color:#fff}
+.paid{background:var(--g)}.late{background:var(--r)}.part{background:var(--o)}.open{background:#5b7083}
+.row{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--g);background:#fff;color:var(--g);padding:6px 12px;border-radius:8px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.p{background:var(--g);color:#fff}.btn.d{border-color:var(--r);color:var(--r)}.btn.w{border-color:#25a244;color:#25a244}
+.bar2{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+input,select,textarea{font:inherit;padding:8px 10px;border:1px solid var(--b);border-radius:8px;background:#fff;width:100%}
+.bar2 input,.bar2 select{width:auto;flex:1;min-width:120px}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:8px;border-bottom:1px solid var(--b);text-align:right}
+th{background:var(--g2);color:var(--g)}td.n{direction:ltr;text-align:right}tfoot td{font-weight:700;background:#faf8f2}
+.ov{position:fixed;inset:0;background:#0007;display:flex;align-items:center;justify-content:center;padding:12px;z-index:20}
+.ov[hidden]{display:none}.box{background:#fff;border-radius:14px;padding:18px;width:100%;max-width:480px;max-height:92vh;overflow:auto}
+label{display:block;margin:8px 0 3px;font-size:13px;color:var(--m)}
+.wrap{overflow-x:auto}.mut{color:var(--m);font-size:13px}.empty{text-align:center;color:var(--m);padding:30px}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:8px 18px;border-radius:20px;z-index:30}
+.gate{position:fixed;inset:0;background:linear-gradient(135deg,#0b5d3b,#08402a);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.gate[hidden]{display:none}.gbox{background:#fff;border-radius:16px;padding:28px;max-width:380px;width:100%;text-align:center}.gbox h2{color:var(--g);margin:8px 0}
+#pr{display:none}
+.doc{background:#fff;border:3px double var(--au);padding:22px;line-height:2;font-size:15px;color:#111}
+.doc h2{text-align:center;color:var(--g);margin:2px 0 6px;font-size:22px}
+.doc .bm{text-align:center;color:var(--m);font-size:13px}
+.doc .bx{border:1px solid var(--b);background:#faf8f2;border-radius:8px;padding:6px 12px;margin:10px 0;line-height:1.9}
+.doc table{margin:10px 0}.doc .sg{display:flex;gap:14px;margin-top:36px}
+.doc .sg div{flex:1;text-align:center;border-top:1px solid #444;padding-top:6px;font-size:13px}
+@media print{header,nav,.bar2,.btn{display:none!important}body{background:#fff}
+body.pdoc>*:not(#pr){display:none!important}body.pdoc #pr{display:block!important}@page{margin:14mm}
+.doc{border:3px double #b8923a;-webkit-print-color-adjust:exact;print-color-adjust:exact}.doc th{background:#e8f3ed!important}}
+</style></head><body>
+<header><h1>🤝 متابعة الدائنين والمدينين</h1><small>سجل الديون والسداد والتقارير</small></header>
+<nav id="nav"></nav><main id="main"></main>
+<div class="ov" id="ov" hidden><div class="box" id="mb"></div></div><div class="gate" id="gate"><div class="gbox"><div style="font-size:44px">🤝</div><h2>متابعة الدائنين والمدينين</h2>
+<p class="mut">الدخول لصاحب الحساب فقط</p><button class="btn p" style="width:100%;padding:12px" onclick="window.fbSignIn?fbSignIn():toast('جاري تحميل الخدمة…')">الدخول بحساب جوجل</button><p id="gm" class="mut"></p></div></div>
+<div id="toast" hidden></div><div id="pr"></div>
+<script>
+const K='debtors_v1';let D={debts:[],phones:{}},V='dash',F={s:'all',c:'',q:''};
+const $=s=>document.querySelector(s);
+const fmt=n=>(+n||0).toLocaleString('en-US',{maximumFractionDigits:2});
+const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const paid=d=>d.pays.reduce((a,p)=>a+ +p.a,0),rem=d=>Math.max(0,d.amt-paid(d));
+const late=d=>d.due&&d.due<today()&&rem(d)>0?Math.floor((Date.parse(today())-Date.parse(d.due))/864e5):0;
+const st=d=>rem(d)<=0?'paid':late(d)?'late':paid(d)>0?'part':'open';
+const SN={paid:'مسدد',late:'متأخر',part:'سداد جزئي',open:'قائم'};
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function toast(t){const e=$('#toast');e.textContent=t;e.hidden=false;setTimeout(()=>e.hidden=true,2200)}
+function load(){try{const s=ls.get(K);if(s)D=Object.assign(D,JSON.parse(s))}catch(e){}}
+function save(){window.fbSave&&fbSave();render()}
+function push(){const u=ls.get(K+'u');if(!u)return;fetch(u,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify(D)}).catch(()=>{})}
+async function pull(){const iv=$('#url');if(iv&&iv.value.trim())ls.set(K+'u',iv.value.trim());const u=ls.get(K+'u');if(!u)return toast('أدخل رابط Apps Script أولاً');
+ try{const j=await (await fetch(u)).json();if(j&&j.debts){D=Object.assign({debts:[],phones:{}},j);ls.set(K,JSON.stringify(D));render();toast('تم تحميل البيانات من الشيت')}else toast('الشيت فارغ')}catch(e){toast('تعذر الاتصال بالشيت')}}
+function saveUrl(){ls.set(K+'u',$('#url').value.trim());if(!D.debts.length){toast('لا بيانات محلية: سيتم التحميل من الشيت بدل الكتابة فوقه');pull()}else{push();toast('تم الحفظ والمزامنة')}}
+
+const T1=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'],
+T10=['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'],
+T100=['','مائة','مائتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];
+function w3(n){const h=Math.floor(n/100),r=n%100,a=[];if(h)a.push(T100[h]);if(r){if(r<20)a.push(T1[r]);else{if(r%10)a.push(T1[r%10]);a.push(T10[Math.floor(r/10)])}}return a.join(' و')}
+function grp(k,one,two,few,many){return k==1?one:k==2?two:k==200?'مائتا '+one:w3(k)+' '+((k%100>=3&&k%100<=10)?few:(k%100>=11?many:one))}
+function tafqeet(n){n=Math.floor(Math.abs(+n||0));if(!n)return 'فقط صفر ريال لا غير';const m=Math.floor(n/1e6),t=Math.floor(n%1e6/1e3),r=n%1e3,a=[];
+ if(m)a.push(grp(m,'مليون','مليونان','ملايين','مليوناً'));if(t)a.push(grp(t,'ألف','ألفان','آلاف','ألفاً'));if(r)a.push(w3(r));return 'فقط '+a.join(' و')+' ريال لا غير'}
+function hijri(){try{return new Date().toLocaleDateString('ar-SA-u-ca-islamic-umalqura-nu-latn',{year:'numeric',month:'long',day:'numeric'})}catch(e){return ''}}
+const spays=d=>d.pays.slice().sort((a,b)=>(a.d||'9')<(b.d||'9')?-1:1);
+function ptable(d){let b=+d.amt;const R=spays(d).map((p,i)=>{b-=p.a;return `<tr><td>${i+1}</td><td class="n">${p.d||'—'}</td><td class="n">${fmt(p.a)}</td><td class="n">${fmt(Math.max(0,b))}</td><td>${esc(p.n||'')}</td></tr>`}).join('');
+ return `<table><tr><th>م</th><th>التاريخ</th><th>المبلغ المسدد</th><th>المتبقي بعد الدفعة</th><th>بيان</th></tr>${R||'<tr><td colspan="5" class="empty">لا توجد دفعات مسجلة</td></tr>'}<tfoot><tr><td colspan="2">الإجمالي</td><td class="n">${fmt(paid(d))}</td><td class="n">${fmt(rem(d))}</td><td></td></tr></tfoot></table>`}
+const dhead=t=>`<div class="bm">بسم الله الرحمن الرحيم</div><h2>${t}</h2><div class="mut" style="margin-bottom:8px">التاريخ: ${today()} م${hijri()?' &nbsp;|&nbsp; '+hijri():''}</div>`;
+const dsum=d=>`<div class="bx"><div class="row"><span>المبلغ الإجمالي: <b>${fmt(d.amt)}</b> ريال</span><span>المسدد: <b>${fmt(paid(d))}</b> ريال</span><span>المتبقي: <b>${fmt(rem(d))}</b> ريال</span></div>${d.date?`<div class="mut">تاريخ الدين: ${d.date}${d.due?' · الاستحقاق: '+d.due:''}</div>`:d.due?`<div class="mut">الاستحقاق: ${d.due}</div>`:''}</div>`;
+function showDoc(h,name){window._dn=name;modal(`<div id="dv">${h}</div><div class="row" style="margin-top:12px"><button class="btn p" onclick="printDoc()">🖨 طباعة / حفظ PDF</button><button class="btn" onclick="closeM()">إغلاق</button></div>`);$('#mb').style.maxWidth='760px'}
+const T0=document.title;
+function printDoc(){$('#pr').innerHTML=$('#dv').innerHTML;document.body.classList.add('pdoc');window._pt=Date.now();document.title=String(window._dn||T0).replace(/[\\/:*?"<>|]/g,' ').trim();window.print()}
+function endPrint(){document.body.classList.remove('pdoc');document.title=T0}
+window.addEventListener('afterprint',endPrint);
+['click','touchstart'].forEach(e=>window.addEventListener(e,()=>{if(Date.now()-(window._pt||0)>2000)endPrint()}));
+function docSettle(id){const d=D.debts.find(x=>x.id==id),p=paid(d),r=rem(d),full=r<=0;
+ const t=full?`أقرّ أنا <b>${esc(d.cr)}</b> (الدائن) بأنني استلمت من <b>${esc(d.db)}</b> (المدين) كامل المبلغ المستحق وقدره <b>${fmt(d.amt)}</b> ريال (${tafqeet(d.amt)})، وأبرأتُ ذمته منه براءةً تامة، ولا مطالبة لي عليه في هذا الدين بعد هذه المخالصة.`
+ :`أقرّ أنا <b>${esc(d.cr)}</b> (الدائن) بأنني استلمت من <b>${esc(d.db)}</b> (المدين) مبلغاً وقدره <b>${fmt(p)}</b> ريال (${tafqeet(p)}) من أصل <b>${fmt(d.amt)}</b> ريال، ويبقى في ذمته <b>${fmt(r)}</b> ريال (${tafqeet(r)}).`;
+ showDoc(`<div class="doc">${dhead(full?'مخالصة نهائية':'كشف حساب ومخالصة جزئية')}<p>${t}</p>${dsum(d)}<b>بيان الدفعات:</b>${ptable(d)}
+ <p style="font-size:13px">وعلى ذلك جرى التوقيع.</p><div class="sg"><div>الدائن<br>${esc(d.cr)}</div><div>المدين<br>${esc(d.db)}</div><div>الشاهد</div></div></div>`,(full?'مخالصة':'كشف حساب')+' - '+d.db+' - '+today())}
+function docRemind(id){const d=D.debts.find(x=>x.id==id),r=rem(d),L=late(d),last=spays(d).slice(-1)[0];
+ const due=d.due?(L?`وقد حلّ موعد استحقاقه بتاريخ <b>${d.due}</b> وتأخر السداد <b>${L}</b> يوماً`:`ويحلّ موعد استحقاقه بتاريخ <b>${d.due}</b>`):'';
+ showDoc(`<div class="doc">${dhead('إشعار تذكير بسداد مستحقات')}<p>السلام عليكم ورحمة الله وبركاته،<br>الأخ الكريم / <b>${esc(d.db)}</b> حفظه الله</p>
+ <p>نذكّركم — مع خالص الشكر والتقدير — بأن في ذمتكم لصالح <b>${esc(d.cr)}</b> مبلغاً متبقياً قدره <b>${fmt(r)}</b> ريال (${tafqeet(r)}) من أصل <b>${fmt(d.amt)}</b> ريال${due?'، '+due:''}.</p>
+ ${dsum(d)}${last?`<div class="mut">آخر دفعة مسجلة: ${fmt(last.a)} ريال بتاريخ ${last.d||'—'}</div>`:''}
+ <p>نأمل التكرّم بسداد المبلغ في أقرب فرصة، أو التواصل معنا لترتيب موعد مناسب للسداد. وجزاكم الله خيراً.</p>
+ <div class="sg"><div>الدائن<br>${esc(d.cr)}</div></div></div>`,'تذكير سداد - '+d.db+' - '+today())}
+function docReceipt(id,i){const d=D.debts.find(x=>x.id==id);if(!d||!d.pays[i])return;const p=d.pays[i];
+ const L=d.pays.map((q,k)=>({a:+q.a,d:q.d||'',k})).sort((a,b)=>a.d<b.d?-1:a.d>b.d?1:a.k-b.k);
+ let cum=0,pos=0;for(let j=0;j<L.length;j++){cum+=L[j].a;if(L[j].k==i){pos=j+1;break}}
+ const bal=Math.max(0,d.amt-cum),no=(()=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))%1000;return String(h).padStart(3,'0')})()+'-'+pos;
+ showDoc(`<div class="doc">${dhead('سند قبض')}<div class="row" style="margin-bottom:6px"><span>رقم السند: <b>${esc(no)}</b></span><span>تاريخ السداد: <b>${p.d||'—'}</b></span></div>
+ <p>استلمنا من <b>${esc(d.db)}</b> مبلغاً وقدره <b>${fmt(p.a)}</b> ريال (${tafqeet(p.a)})، وذلك سداداً للدفعة رقم <b>${pos}</b> من الدين المستحق عليه${p.n?` (${esc(p.n)})`:''}.</p>
+ <div class="bx"><div class="row"><span>إجمالي الدين: <b>${fmt(d.amt)}</b></span><span>المسدد حتى هذه الدفعة: <b>${fmt(cum)}</b></span><span>المتبقي: <b>${fmt(bal)}</b> ريال</span></div></div>
+ ${bal<=0?'<p><b>وبهذه الدفعة اكتمل سداد الدين، والحمد لله.</b></p>':''}
+</div>`,'سند قبض - '+d.db+' - '+(p.d||today()))}
+function gate(v){$('#gate').hidden=!v}
+function showRules(){const em=(window.FBUSER||'بريدك@gmail.com').toLowerCase();
+ const t="rules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /users/{uid}/{document=**} {\n      allow read, write: if request.auth != null\n        && request.auth.uid == uid\n        && request.auth.token.email == '"+em+"'\n        && request.auth.token.email_verified == true;\n    }\n  }\n}";
+ modal(`<h3>قواعد الأمان</h3><p class="mut">انسخ النص، ثم في Firebase: Firestore Database ← Rules ← الصقه مكان القديم ← Publish. وإن كنت نشرتها سابقاً فتأكد أنك دخلت بنفس الحساب.</p>
+ <textarea id="rl" readonly dir="ltr" rows="11" style="font-family:monospace;font-size:12px">${esc(t)}</textarea>
+ <div class="row" style="margin-top:10px"><button class="btn p" onclick="navigator.clipboard.writeText($('#rl').value).then(()=>toast('تم النسخ'))">نسخ</button><button class="btn" onclick="closeM()">إغلاق</button></div>`)}
+const names=k=>[...new Set(D.debts.map(d=>d[k]))].filter(Boolean);
+function agg(k){const m={};D.debts.forEach(d=>{const o=m[d[k]]||(m[d[k]]={n:0,a:0,p:0,r:0,l:0});o.n++;o.a+=+d.amt;o.p+=paid(d);o.r+=rem(d);if(late(d))o.l+=rem(d)});return Object.entries(m).sort((a,b)=>b[1].r-a[1].r)}
+function totals(){return D.debts.reduce((t,d)=>(t.a+=+d.amt,t.p+=paid(d),t.r+=rem(d),t.l+=late(d)?rem(d):0,t),{a:0,p:0,r:0,l:0})}
+const TABS=[['dash','الرئيسية'],['debts','الديون'],['rep','التقارير'],['set','الإعدادات']];
+function render(){$('#nav').innerHTML=TABS.map(t=>`<button class="${V==t[0]?'on':''}" onclick="V='${t[0]}';render()">${t[1]}</button>`).join('');
+ $('#main').innerHTML={dash,debts,rep,set}[V]()}
+function dash(){const t=totals(),pc=t.a?Math.round(t.p/t.a*100):0;
+ const soon=D.debts.filter(d=>rem(d)>0&&d.due&&d.due>=today()&&Date.parse(d.due)-Date.parse(today())<=30*864e5).sort((a,b)=>a.due<b.due?-1:1).slice(0,6);
+ const lt=D.debts.filter(late).sort((a,b)=>late(b)-late(a)).slice(0,6);
+ return `<div class="grid"><div class="card"><div class="k">إجمالي الديون</div><div class="v">${fmt(t.a)}</div></div>
+ <div class="card"><div class="k">المسدد</div><div class="v g">${fmt(t.p)}</div></div>
+ <div class="card"><div class="k">المتبقي</div><div class="v o">${fmt(t.r)}</div></div>
+ <div class="card"><div class="k">المتأخر</div><div class="v r">${fmt(t.l)}</div></div></div>
+ <div class="card"><div class="row"><b>نسبة السداد</b><span>${pc}%</span></div><div class="bar"><i style="width:${pc}%"></i></div></div>
+ <div class="card"><h3>⚠️ متأخرات تحتاج متابعة</h3>${lt.map(mini).join('')||'<div class="empty">لا توجد متأخرات 👌</div>'}</div>
+ <div class="card"><h3>📅 استحقاقات خلال 30 يوماً</h3>${soon.map(mini).join('')||'<div class="empty">لا توجد استحقاقات قريبة</div>'}</div>
+ <button class="btn p" onclick="openDebt()">+ إضافة دين</button>`}
+const mini=d=>`<div class="row" style="padding:6px 0;border-bottom:1px solid var(--b)" onclick="openDet('${d.id}')"><span><b>${esc(d.db)}</b> <span class="mut">← ${esc(d.cr)}</span></span><span>${fmt(rem(d))} <span class="mut">${d.due||''}</span></span></div>`;
+function debts(){let L=D.debts.filter(d=>(F.s=='all'||st(d)==F.s)&&(!F.c||d.cr==F.c)&&(!F.q||(d.db+d.cr+(d.note||'')).includes(F.q)));
+ L.sort((a,b)=>(a.due||'9')<(b.due||'9')?-1:1);
+ return `<div class="bar2"><input placeholder="بحث…" value="${esc(F.q)}" oninput="F.q=this.value;clearTimeout(window._t);window._t=setTimeout(render,300)">
+ <select onchange="F.s=this.value;render()">${[['all','كل الحالات'],...Object.entries(SN)].map(o=>`<option value="${o[0]}" ${F.s==o[0]?'selected':''}>${o[1]}</option>`).join('')}</select>
+ <select onchange="F.c=this.value;render()"><option value="">كل الدائنين</option>${names('cr').map(n=>`<option ${F.c==n?'selected':''}>${esc(n)}</option>`).join('')}</select>
+ <button class="btn p" onclick="openDebt()">+ دين جديد</button></div>`+
+ (L.map(d=>{const s=st(d),pc=Math.round(paid(d)/d.amt*100);return `<div class="card"><div class="row"><b>${esc(d.db)}</b><span class="tag ${s}">${SN[s]}${late(d)?' '+late(d)+' يوم':''}</span></div>
+ <div class="mut">الدائن: ${esc(d.cr)} · التاريخ: ${d.date||'—'} · الاستحقاق: ${d.due||'—'}</div>
+ <div class="bar"><i style="width:${pc}%"></i></div>
+ <div class="row"><span>المبلغ ${fmt(d.amt)} · مسدد ${fmt(paid(d))} · <b>متبقي ${fmt(rem(d))}</b></span></div>
+ <div class="row" style="margin-top:8px"><span>${s=='paid'?`<button class="btn" onclick="openDet('${d.id}')">التفاصيل</button>`:`<button class="btn p" onclick="openDet('${d.id}')">سداد / تفاصيل</button> <a class="btn w" target="_blank" rel="noopener" href="${wa(d)}">تذكير واتساب</a>`}</span>
+ <span><button class="btn" onclick="openDebt('${d.id}')">تعديل</button> <button class="btn d" onclick="del('${d.id}')">حذف</button></span></div>
+ <div style="margin-top:8px"><button class="btn" onclick="docSettle('${d.id}')">🖨 ${s=='paid'?'مخالصة':'كشف حساب / مخالصة'}</button>${s=='paid'?'':` <button class="btn" onclick="docRemind('${d.id}')">🔔 إشعار تذكير</button>`}</div></div>`}).join('')||'<div class="empty">لا توجد ديون مطابقة</div>')}
+function wa(d){let p=(D.phones[d.db]||'').replace(/\D/g,'');if(p.startsWith('0'))p='966'+p.slice(1);
+ const m=`السلام عليكم ${d.db}،\nتذكير ودّي بالمبلغ المتبقي لصالح ${d.cr}: ${fmt(rem(d))}`+(d.due?`\nتاريخ الاستحقاق: ${d.due}`:'')+`\nجزاكم الله خيراً.`;
+ return `https://wa.me/${p}?text=${encodeURIComponent(m)}`}
+function tbl(title,k){const R=agg(k),T=R.reduce((t,r)=>(['n','a','p','r','l'].forEach(x=>t[x]+=r[1][x]),t),{n:0,a:0,p:0,r:0,l:0});
+ return `<div class="card"><h3>${title}</h3><div class="wrap"><table><tr><th>الاسم</th><th>عدد</th><th>الإجمالي</th><th>المسدد</th><th>المتبقي</th><th>المتأخر</th></tr>
+ ${R.map(([n,o])=>`<tr><td>${esc(n)}</td><td class="n">${o.n}</td><td class="n">${fmt(o.a)}</td><td class="n">${fmt(o.p)}</td><td class="n">${fmt(o.r)}</td><td class="n" style="color:var(--r)">${fmt(o.l)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">لا بيانات</td></tr>'}
+ <tfoot><tr><td>المجموع</td><td class="n">${T.n}</td><td class="n">${fmt(T.a)}</td><td class="n">${fmt(T.p)}</td><td class="n">${fmt(T.r)}</td><td class="n">${fmt(T.l)}</td></tr></tfoot></table></div></div>`}
+function rep(){const B=[['1–30 يوماً',1,30],['31–60 يوماً',31,60],['61–90 يوماً',61,90],['أكثر من 90',91,1e9]].map(b=>[b[0],D.debts.filter(d=>late(d)>=b[1]&&late(d)<=b[2]).reduce((a,d)=>a+rem(d),0)]);
+ return `<div class="bar2"><button class="btn p" onclick="csv()">تصدير CSV</button><button class="btn" onclick="print()">طباعة</button></div>
+ ${tbl('حسب المدين','db')}${tbl('حسب الدائن','cr')}
+ <div class="card"><h3>أعمار المتأخرات</h3><table>${B.map(b=>`<tr><td>${b[0]}</td><td class="n">${fmt(b[1])}</td></tr>`).join('')}</table></div>`}
+function set(){const e=window.FBUSER||'';return `<div class="card"><h3>الحساب</h3><div class="row"><span dir="ltr">${esc(e)}</span><button class="btn d" onclick="fbOut()">تسجيل الخروج</button></div>
+ <p class="mut">بياناتك محفوظة في Firebase ومتزامنة بين أجهزتك فوراً، وتعمل حتى بدون اتصال.</p></div>
+ <div class="card"><h3>نسخة احتياطية وترحيل</h3><div class="row"><button class="btn" onclick="bk()">تنزيل JSON</button>
+ <label class="btn" style="margin:0">استيراد JSON<input type="file" accept=".json" hidden onchange="imp(this.files[0])"></label></div>
+ <p class="mut">للترحيل من النسخة القديمة: استورد ملف JSON الذي نزّلته منها، فيُدمج مع الموجود ولا يمسح شيئاً.</p></div>
+ <div class="card"><h3>قواعد الأمان</h3><button class="btn" onclick="showRules()">عرض نص القواعد</button></div>`}
+function modal(h){$('#mb').style.maxWidth='';$('#mb').innerHTML=h;$('#ov').hidden=false}
+function closeM(){$('#ov').hidden=true}
+$('#ov').onclick=e=>{if(e.target.id=='ov')closeM()};
+function openDebt(id){const d=D.debts.find(x=>x.id==id)||{cr:'',db:'',amt:'',date:today(),due:'',note:''};
+ modal(`<h3>${id?'تعديل دين':'دين جديد'}</h3><form onsubmit="saveDebt(event,'${id||''}')">
+ <datalist id="c">${names('cr').map(n=>`<option value="${esc(n)}">`).join('')}</datalist><datalist id="m">${names('db').map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+ <label>الدائن</label><input name="cr" list="c" required value="${esc(d.cr)}">
+ <label>المدين</label><input name="db" list="m" required value="${esc(d.db)}">
+ <label>جوال المدين (للتذكير)</label><input name="ph" dir="ltr" inputmode="tel" value="${esc(D.phones[d.db]||'')}">
+ <label>المبلغ</label><input name="amt" type="number" step="any" min="0.01" required value="${d.amt}">
+ <label>تاريخ الدين</label><input name="date" type="date" value="${d.date||''}">
+ <label>تاريخ الاستحقاق</label><input name="due" type="date" value="${d.due||''}">
+ <label>ملاحظات</label><textarea name="note" rows="2">${esc(d.note)}</textarea>
+ <div class="row" style="margin-top:12px"><button class="btn p">حفظ</button><button type="button" class="btn" onclick="closeM()">إلغاء</button></div></form>`)}
+function saveDebt(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),db=f.db.trim();
+ const o={cr:f.cr.trim(),db,amt:+f.amt,date:f.date,due:f.due,note:f.note.trim()};
+ if(f.ph.trim())D.phones[db]=f.ph.trim();
+ if(id){Object.assign(D.debts.find(x=>x.id==id),o)}else D.debts.push({id:uid(),pays:[],...o});
+ closeM();save();toast('تم الحفظ')}
+function del(id){if(confirm('حذف هذا الدين نهائياً؟')){D.debts=D.debts.filter(x=>x.id!=id);save()}}
+function openDet(id){const d=D.debts.find(x=>x.id==id);if(!d)return;
+ modal(`<h3>${esc(d.db)} ← ${esc(d.cr)}</h3><div>المبلغ ${fmt(d.amt)} · مسدد ${fmt(paid(d))} · <b>متبقي ${fmt(rem(d))}</b></div>
+ ${d.note?`<p class="mut">${esc(d.note)}</p>`:''}
+ <h3>الدفعات</h3>${d.pays.map((p,i)=>`<div class="row" style="border-bottom:1px solid var(--b);padding:5px 0"><span>${p.d} · <b>${fmt(p.a)}</b> <span class="mut">${esc(p.n||'')}</span></span><span><button class="btn" onclick="docReceipt('${id}',${i})">🧾 سند</button> <button class="btn d" onclick="delPay('${id}',${i})">✕</button></span></div>`).join('')||'<div class="mut">لا توجد دفعات</div>'}
+ ${rem(d)>0?`<form onsubmit="addPay(event,'${id}')"><label>دفعة جديدة</label><input name="a" type="number" step="any" min="0.01" max="${rem(d)}" value="${rem(d)}" required>
+ <input name="d" type="date" value="${today()}" style="margin-top:6px"><input name="n" placeholder="ملاحظة (اختياري)" style="margin-top:6px"><label style="display:flex;gap:8px;align-items:center;color:var(--t)"><input type="checkbox" name="r" checked style="width:auto"> إصدار سند قبض بعد الحفظ</label>
+ <div class="row" style="margin-top:10px"><button class="btn p">تسجيل السداد</button><button type="button" class="btn" onclick="closeM()">إغلاق</button></div></form>`:'<div class="row" style="margin-top:10px"><span class="tag paid">مسدد بالكامل</span><button class="btn" onclick="closeM()">إغلاق</button></div>'}`)}
+function addPay(e,id){e.preventDefault();const f=Object.fromEntries(new FormData(e.target)),d=D.debts.find(x=>x.id==id);
+ if(rem(d)<=0)return;d.pays.push({a:Math.min(+f.a,rem(d)),d:f.d,n:f.n.trim()});save();if(f.r)docReceipt(id,d.pays.length-1);else openDet(id);toast('تم تسجيل الدفعة')}
+function delPay(id,i){if(!confirm('حذف الدفعة؟'))return;D.debts.find(x=>x.id==id).pays.splice(i,1);save();openDet(id)}
+function dl(name,txt,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type}));a.download=name;a.click()}
+function csv(){const q=s=>'"'+String(s??'').replace(/"/g,'""')+'"';
+ dl('debts-'+today()+'.csv','\ufeff'+[['الدائن','المدين','المبلغ','المسدد','المتبقي','الاستحقاق','الحالة'].map(q).join(',')].concat(D.debts.map(d=>[d.cr,d.db,d.amt,paid(d),rem(d),d.due,SN[st(d)]].map(q).join(','))).join('\n'),'text/csv')}
+function bk(){dl('debtors-backup-'+today()+'.json',JSON.stringify(D),'application/json')}
+function imp(f){if(!f)return;const r=new FileReader();r.onload=()=>{try{const j=JSON.parse(r.result);if(!Array.isArray(j.debts))throw 0;
+ if(!confirm('سيتم استيراد '+j.debts.length+' دين ودمجها مع الموجود. متابعة؟'))return;
+ const m=new Map(D.debts.map(d=>[String(d.id),d]));
+ j.debts.forEach(d=>m.set(String(d.id),Object.assign({},d,{id:String(d.id),pays:Array.isArray(d.pays)?d.pays:[],amt:+d.amt||0})));
+ D.debts=[...m.values()];Object.assign(D.phones,j.phones||{});save();toast('تم استيراد '+j.debts.length+' دين')}catch(e){toast('ملف غير صالح')}};r.readAsText(f)}
+render();setTimeout(()=>{if(!window.FBREADY)$('#gm').textContent='تعذر تحميل Firebase، تحقق من الاتصال'},8000);
+</script>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {initializeFirestore,getFirestore,persistentLocalCache,persistentMultipleTabManager,collection,doc,onSnapshot,writeBatch} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const cfg={apiKey:"AIzaSyDRPgbqa361QNCAs-sB8WlKINJzKMEwUsU",authDomain:"adawati-tools.firebaseapp.com",projectId:"adawati-tools",storageBucket:"adawati-tools.firebasestorage.app",messagingSenderId:"770704186719",appId:"1:770704186719:web:fad75c62fd317aacc4eaea"};
+const app=initializeApp(cfg),auth=getAuth(app);
+let db;try{db=initializeFirestore(app,{localCache:persistentLocalCache({tabManager:persistentMultipleTabManager()})})}catch(e){db=getFirestore(app)}
+let U=null,un=[],LAST=new Map(),LASTP='{}',ready=false;
+const cl=d=>{const o={cr:String(d.cr||''),db:String(d.db||''),amt:+d.amt||0,date:d.date||'',due:d.due||'',note:d.note||'',pays:(d.pays||[]).map(p=>({a:+p.a||0,d:p.d||'',n:p.n||''}))};if(d.tn)o.tn=d.tn;return o};
+const dref=id=>doc(db,'users',U.uid,'debts',String(id));
+const err=e=>{console.error(e);if(e&&e.code==='permission-denied')showRules();else toast('خطأ: '+((e&&(e.code||e.message))||''))};
+window.fbSave=async()=>{if(!U||!ready){toast('لم يكتمل تحميل البيانات بعد');return}
+ try{const b=[],cur=new Set();
+  for(const d of D.debts){const id=String(d.id);cur.add(id);const c=cl(d);if(LAST.get(id)!==JSON.stringify(c))b.push(w=>w.set(dref(id),c))}
+  for(const id of LAST.keys())if(!cur.has(id))b.push(w=>w.delete(dref(id)));
+  if(JSON.stringify(D.phones)!==LASTP)b.push(w=>w.set(doc(db,'users',U.uid,'meta','phones'),{map:D.phones}));
+  for(let i=0;i<b.length;i+=400){const w=writeBatch(db);b.slice(i,i+400).forEach(f=>f(w));await w.commit()}
+ }catch(e){err(e)}};
+function sub(){
+ const a=onSnapshot(collection(db,'users',U.uid,'debts'),s=>{D.debts=s.docs.map(x=>({id:x.id,...cl(x.data())}));LAST=new Map(s.docs.map(x=>[x.id,JSON.stringify(cl(x.data()))]));ready=true;render()},err);
+ const b=onSnapshot(doc(db,'users',U.uid,'meta','phones'),s=>{D.phones=(s.exists()&&s.data().map)||{};LASTP=JSON.stringify(D.phones);render()},err);
+ un=[a,b]}
+onAuthStateChanged(auth,u=>{un.forEach(f=>f());un=[];ready=false;U=u;D.debts=[];D.phones={};window.FBUSER=u?u.email:'';
+ if(u){gate(false);sub()}else gate(true);render()});
+window.fbSignIn=async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){toast('تعذر تسجيل الدخول: '+((e&&(e.code||e.message))||''))}};
+window.fbOut=()=>signOut(auth);
+window.FBREADY=true;
+</script>
+</body></html>
