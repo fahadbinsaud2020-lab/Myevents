@@ -146,15 +146,18 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <section id="admin" class="adm" style="display:none"><h2>لوحة الأدمن</h2>
 <div class="card"><b>طلبات الانضمام</b><table id="tPend"></table></div>
 <div class="card" style="margin-top:10px"><b>الأعضاء</b><table id="tMem"></table></div>
-<div class="card" style="margin-top:10px"><b>إضافة أعضاء (سطر لكل عضو: الفرع، الاسم، الجوال)</b><textarea id="imp" rows="4" placeholder="مزِيد، فلان بن فلان، 0551234567"></textarea><button class="btn" id="impBtn">اعتماد القائمة</button></div>
+<div class="card" style="margin-top:10px"><b>إضافة أعضاء (سطر لكل عضو: الفرع، الاسم، الجوال)</b><textarea id="imp" autocomplete="off" rows="4" placeholder="مزِيد، فلان بن فلان، 0551234567"></textarea><button class="btn" id="impBtn">اعتماد القائمة</button></div>
 <div class="card" style="margin-top:10px"><b>نشر خبر</b>
 <select id="nK"><option>خبر</option><option>تهنئة</option><option>تعزية</option><option>إعلان</option></select>
-<select id="nB"></select><input id="nT" placeholder="العنوان"><textarea id="nX" rows="3" placeholder="نص الخبر"></textarea>
-<input id="nD" type="date"><label><input id="nP" type="checkbox" style="width:auto"> تثبيت في الأعلى</label>
+<select id="nB"></select><input id="nT" autocomplete="off" placeholder="العنوان"><textarea id="nX" autocomplete="off" rows="3" placeholder="نص الخبر"></textarea>
+<input id="nD" autocomplete="off" type="date"><label><input id="nP" type="checkbox" style="width:auto"> تثبيت في الأعلى</label>
 <button class="btn" id="nBtn">نشر الخبر</button><table id="aNews"></table></div>
 <div class="card" style="margin-top:10px"><b>إضافة مناسبة</b>
-<input id="eT" placeholder="عنوان المناسبة"><input id="eD" type="date"><input id="eP" placeholder="المكان"><input id="eL" placeholder="رابط اختياري (https://...)" dir="ltr">
+<input id="eT" autocomplete="off" placeholder="عنوان المناسبة"><input id="eD" autocomplete="off" type="date"><input id="eP" autocomplete="off" placeholder="المكان"><input id="eL" autocomplete="off" placeholder="رابط اختياري (https://...)" dir="ltr">
 <button class="btn" id="eBtn">إضافة المناسبة</button><table id="aEv"></table></div>
+<div class="card" style="margin-top:10px"><b>تحديث شجرة فرع من الشيت</b>
+<p class="note">في الشيت: افتح تبويب الفرع، حدّد الصفوف من العمود A إلى آخر عمود فيه أسماء، وانسخها (Ctrl+C)، ثم الصقها هنا. ستحل محل شجرة الفرع كاملة.</p>
+<select id="tuB"></select><textarea id="tuX" rows="4" autocomplete="off" placeholder="الصق صفوف الفرع هنا"></textarea><button class="btn" id="tuBtn">تحديث شجرة الفرع</button></div>
 <div class="card" style="margin-top:10px"><b>رفع بيانات الأشجار (ملف klaib-seed.json)</b><input type="file" id="seed" accept=".json"><p class="note" id="seedMsg"></p></div>
 </section>
 <footer>© عائلة كليب بن عور — جميع الحقوق محفوظة<br>«وَاتَّقُوا اللَّهَ الَّذِي تَسَاءَلُونَ بِهِ وَالْأَرْحَامَ»</footer>
@@ -267,9 +270,14 @@ $('aNews').innerHTML=NEWS.map(n=>row('news',n.id,n.t,n.d)).join('')||'<tr><td>ل
 $('aEv').innerHTML=EV.map(v=>row('events',v.id,v.t,v.d)).join('')||'<tr><td>لا مناسبات</td></tr>'}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b||!isAdmin)return;const[c,id]=b.dataset.del.split(':');if(confirm('تأكيد الحذف؟')){try{await deleteDoc(doc(db,c,id));loadFeed()}catch(x){alert('تعذر الحذف ('+E(x.code||x.message)+')')}}});
 $('nBtn').onclick=async()=>{const t=$('nT').value.trim(),x=$('nX').value.trim(),d=$('nD').value;if(t.length<2||x.length<2||!d)return alert('أكمل العنوان والنص والتاريخ');
-try{await addDoc(collection(db,'news'),{title:t,text:x,date:d,kind:$('nK').value,branch:$('nB').value,pin:$('nP').checked,createdAt:serverTimestamp()});$('nT').value=$('nX').value='';$('nP').checked=false;await loadFeed();alert('تم نشر الخبر')}catch(x){alert('تعذر النشر ('+E(x.code||x.message)+')')}};
+try{await addDoc(collection(db,'news'),{title:t,text:x,date:d,kind:$('nK').value,branch:$('nB').value,pin:$('nP').checked,createdAt:serverTimestamp()});$('nT').value=$('nX').value=$('nD').value='';$('nP').checked=false;$('nK').selectedIndex=0;$('nB').selectedIndex=0;await loadFeed();alert('تم نشر الخبر')}catch(x){alert('تعذر النشر ('+E(x.code||x.message)+')')}};
 $('eBtn').onclick=async()=>{const t=$('eT').value.trim(),d=$('eD').value,l=$('eL').value.trim();if(t.length<2||!d)return alert('أكمل العنوان والتاريخ');if(l&&!/^https?:\/\//.test(l))return alert('الرابط يبدأ بـ https://');
-try{await addDoc(collection(db,'events'),{title:t,date:d,place:$('eP').value.trim(),link:l,createdAt:serverTimestamp()});$('eT').value=$('eP').value=$('eL').value='';await loadFeed();alert('تمت إضافة المناسبة')}catch(x){alert('تعذر الإضافة ('+E(x.code||x.message)+')')}};
+try{await addDoc(collection(db,'events'),{title:t,date:d,place:$('eP').value.trim(),link:l,createdAt:serverTimestamp()});$('eT').value=$('eP').value=$('eL').value=$('eD').value='';await loadFeed();alert('تمت إضافة المناسبة')}catch(x){alert('تعذر الإضافة ('+E(x.code||x.message)+')')}};
+$('tuB').innerHTML=BR.map((n,i)=>gidOf(i)?'<option value="'+gidOf(i)+'">'+n+'</option>':'').join('');
+$('tuBtn').onclick=async()=>{const M=['اطار','جذع','عنوان'];const rows=$('tuX').value.split('\n').map(l=>l.split('\t').map(x=>x.trim())).filter(c=>c.length>1&&c[0]&&M.indexOf(c[0])<0).map(c=>{c=c.slice(1);while(c.length&&!c[c.length-1])c.pop();return c}).filter(c=>c.length);
+if(!rows.length)return alert('الصق صفوف الفرع كما نسختها من الشيت');
+if(!confirm('سيحل هذا محل شجرة "'+$('tuB').selectedOptions[0].text+'" ('+rows.length+' صف). متابعة؟'))return;
+try{await setDoc(doc(db,'trees',$('tuB').value),{rows:JSON.stringify(rows)});window.T[$('tuB').value]=build(rows);tView();$('tuX').value='';alert('تم تحديث الشجرة')}catch(x){alert('تعذر التحديث ('+E(x.code||x.message)+')')}};
 </script>
 </body>
 </html>
