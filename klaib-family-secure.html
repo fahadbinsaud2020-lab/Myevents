@@ -261,15 +261,15 @@ $('nB').innerHTML='<option>جماعي</option>'+BR.map(n=>'<option>'+n+'</option
 async function loadFeed(){try{const[n,e]=await Promise.all([getDocs(collection(db,'news')),getDocs(collection(db,'events'))]);
 window.NEWS=n.docs.map(d=>{const v=d.data();return{id:d.id,b:BR.indexOf(v.branch),t:v.title,x:v.text,d:v.date,k:v.kind,p:!!v.pin}}).sort((a,b)=>(b.p-a.p)||String(b.d).localeCompare(String(a.d)));
 window.EV=e.docs.map(d=>{const v=d.data();return{id:d.id,t:v.title,d:v.date,p:v.place,l:v.link}}).sort((a,b)=>String(a.d).localeCompare(String(b.d)));
-news();events();stats();feedAdmin()}catch(x){}}
+news();events();stats();feedAdmin()}catch(x){if(isAdmin)alert('تعذر تحميل الأخبار ('+E(x.code||x.message)+')')}}
 function feedAdmin(){if(!isAdmin)return;const row=(c,i,t,d)=>'<tr><td>'+E(t)+'</td><td>'+E(d)+'</td><td><button class="chip" data-del="'+c+':'+E(i)+'">حذف</button></td></tr>';
 $('aNews').innerHTML=NEWS.map(n=>row('news',n.id,n.t,n.d)).join('')||'<tr><td>لا أخبار</td></tr>';
 $('aEv').innerHTML=EV.map(v=>row('events',v.id,v.t,v.d)).join('')||'<tr><td>لا مناسبات</td></tr>'}
-document.addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b||!isAdmin)return;const[c,id]=b.dataset.del.split(':');if(confirm('تأكيد الحذف؟')){await deleteDoc(doc(db,c,id));loadFeed()}});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b||!isAdmin)return;const[c,id]=b.dataset.del.split(':');if(confirm('تأكيد الحذف؟')){try{await deleteDoc(doc(db,c,id));loadFeed()}catch(x){alert('تعذر الحذف ('+E(x.code||x.message)+')')}}});
 $('nBtn').onclick=async()=>{const t=$('nT').value.trim(),x=$('nX').value.trim(),d=$('nD').value;if(t.length<2||x.length<2||!d)return alert('أكمل العنوان والنص والتاريخ');
-await addDoc(collection(db,'news'),{title:t,text:x,date:d,kind:$('nK').value,branch:$('nB').value,pin:$('nP').checked,createdAt:serverTimestamp()});$('nT').value=$('nX').value='';$('nP').checked=false;loadFeed()};
+try{await addDoc(collection(db,'news'),{title:t,text:x,date:d,kind:$('nK').value,branch:$('nB').value,pin:$('nP').checked,createdAt:serverTimestamp()});$('nT').value=$('nX').value='';$('nP').checked=false;await loadFeed();alert('تم نشر الخبر')}catch(x){alert('تعذر النشر ('+E(x.code||x.message)+')')}};
 $('eBtn').onclick=async()=>{const t=$('eT').value.trim(),d=$('eD').value,l=$('eL').value.trim();if(t.length<2||!d)return alert('أكمل العنوان والتاريخ');if(l&&!/^https?:\/\//.test(l))return alert('الرابط يبدأ بـ https://');
-await addDoc(collection(db,'events'),{title:t,date:d,place:$('eP').value.trim(),link:l,createdAt:serverTimestamp()});$('eT').value=$('eP').value=$('eL').value='';loadFeed()};
+try{await addDoc(collection(db,'events'),{title:t,date:d,place:$('eP').value.trim(),link:l,createdAt:serverTimestamp()});$('eT').value=$('eP').value=$('eL').value='';await loadFeed();alert('تمت إضافة المناسبة')}catch(x){alert('تعذر الإضافة ('+E(x.code||x.message)+')')}};
 </script>
 </body>
 </html>
