@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1B2A4A">
+<title>وش تبي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* layout: one phone-width column — navy header, content cards, bottom tab bar per role */
+  --bg:#F2F4F8; --surface:#FFFFFF; --ink:#16233F; --muted:#66708A; --line:#E2E6EF;
+  --navy:#1B2A4A; --on-navy:#FFFFFF; --accent:#EB8420; --accent-ink:#FFFFFF; --accent-soft:#FDEEDC;
+  --good:#1D8456; --good-soft:#E2F3EA; --warn:#A86C12; --warn-soft:#FAF0DA; --bad:#BE3D36; --bad-soft:#FBE5E3; --info:#2D58B3; --info-soft:#E5ECFA;
+  --font:'Tajawal','Segoe UI',Tahoma,Arial,sans-serif;
+  --r:14px; --shadow:0 1px 2px rgba(22,35,63,.05),0 6px 18px rgba(22,35,63,.06);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1322; --surface:#162035; --ink:#E7EBF4; --muted:#97A1BA; --line:#26314A;
+    --navy:#0A1121; --accent:#F29A3A; --accent-soft:#3A2915;
+    --good:#4CC38A; --good-soft:#12352A; --warn:#E3A84C; --warn-soft:#382C13; --bad:#EE7A72; --bad-soft:#3A1D1C; --info:#82A5F1; --info-soft:#1A2747;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1322; --surface:#162035; --ink:#E7EBF4; --muted:#97A1BA; --line:#26314A;
+  --navy:#0A1121; --accent:#F29A3A; --accent-soft:#3A2915;
+  --good:#4CC38A; --good-soft:#12352A; --warn:#E3A84C; --warn-soft:#382C13; --bad:#EE7A72; --bad-soft:#3A1D1C; --info:#82A5F1; --info-soft:#1A2747;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 18px rgba(0,0,0,.25); color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{margin:0;text-wrap:balance;line-height:1.3}
+p{margin:0}
+.num,.q-price,.tile b{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)} .sm{font-size:13px} .xs{font-size:12px}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ic.sm{width:17px;height:17px} .ic.xs{width:14px;height:14px;vertical-align:-2px}
+
+.app{max-width:480px;margin:0 auto;min-height:100%;background:var(--bg);position:relative;padding-bottom:96px}
+@media (min-width:520px){.app{box-shadow:0 0 0 1px var(--line)}}
+
+/* header */
+.top{position:sticky;top:0;z-index:20;background:var(--navy);color:var(--on-navy);display:flex;align-items:center;gap:10px;padding:10px 14px;min-height:60px}
+.brand{display:flex;align-items:center;flex:1}
+.logo{display:inline-flex;align-items:center;gap:4px;font-weight:800;font-size:24px;letter-spacing:0}
+.logo svg{width:28px;height:28px}
+.htitle{flex:1;font-weight:700;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{background:rgba(255,255,255,.1);border:0;color:inherit;width:38px;height:38px;border-radius:12px;display:grid;place-items:center}
+.who{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:0;color:inherit;border-radius:999px;padding:5px 6px 5px 12px;max-width:62%}
+.who-av{width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:800;flex:none}
+.who-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:0}
+.who-txt b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.who-txt small{font-size:11.5px;opacity:.75}
+.strip{background:var(--accent-soft);color:var(--ink);font-size:12.5px;text-align:center;padding:6px 14px}
+
+.main{padding:16px;display:flex;flex-direction:column;gap:18px}
+section{display:flex;flex-direction:column;gap:10px}
+.sec-h{display:flex;align-items:center;justify-content:space-between}
+.sec-h h2{font-size:17px}
+.card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;display:flex;flex-direction:column;gap:12px}
+.card-h{font-size:15px;font-weight:700}
+.link{background:none;border:0;color:var(--accent);font-weight:700;padding:4px}
+.stack{display:flex;flex-direction:column;gap:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.list{display:flex;flex-direction:column;gap:10px}
+
+/* greeting + ask */
+.hello h1{font-size:22px;font-weight:800}
+.hello p{display:flex;align-items:center;gap:4px;margin-top:2px}
+.ask{border-top:4px solid var(--accent)}
+.ask-title{font-size:26px;font-weight:800;display:flex;align-items:center;gap:8px}
+textarea,input[type=text],input[type=number],input[type=tel],input[type=password],input[type=date],input:not([type]),select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:11px 12px;outline:none}
+textarea{resize:vertical;min-height:84px}
+textarea:focus,input:focus,select:focus{border-color:var(--accent)}
+.fld{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted)}
+.fld input,.fld select,.fld textarea{color:var(--ink);font-size:15px}
+.field-label{font-size:13px;color:var(--muted);margin-bottom:-6px}
+.sel{display:flex;align-items:center;gap:6px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 10px;color:var(--muted)}
+.sel select{border:0;background:transparent;padding:10px 0;color:var(--ink)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px;margin-inline:-2px;scrollbar-width:none}
+.chips.scroll::-webkit-scrollbar{display:none}
+.chip{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:14px}
+.chip.on{background:var(--navy);color:var(--on-navy);border-color:var(--navy)}
+.target{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--info-soft);border-radius:12px;padding:9px 12px;font-size:14px}
+.thumb{position:relative;width:110px}
+.thumb img{width:110px;height:110px;object-fit:cover;border-radius:12px;display:block}
+.thumb .x{position:absolute;top:6px;inset-inline-start:6px;background:rgba(0,0,0,.6);color:#fff;border:0;border-radius:50%;width:26px;height:26px;display:grid;place-items:center}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:11px 16px;font-weight:700;font-size:15px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.dark{background:var(--navy);border-color:var(--navy);color:var(--on-navy)}
+.btn.ghost{background:var(--bg)}
+.btn.danger{color:var(--bad);border-color:var(--bad-soft);background:var(--bad-soft)}
+.btn.good{background:var(--good);border-color:var(--good);color:#fff}
+.btn.block{width:100%}
+.btn.sm{padding:8px 12px;font-size:14px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.file{cursor:pointer;font-weight:500;color:var(--muted)}
+.actions{display:flex;flex-direction:column;gap:8px}
+.actions .pair{display:grid;grid-template-columns:2fr 1fr;gap:8px}
+
+/* categories */
+.cats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cat{background:var(--surface);border:0;border-radius:var(--r);box-shadow:var(--shadow);padding:14px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13.5px;font-weight:700}
+.cat .ic{width:28px;height:28px;color:var(--accent)}
+
+/* provider cards */
+.pcard{background:var(--surface);border:0;border-radius:var(--r);box-shadow:var(--shadow);padding:12px;display:flex;align-items:center;gap:12px;text-align:start;width:100%}
+.pav{width:46px;height:46px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
+.pbody{flex:1;display:flex;flex-direction:column;min-width:0}
+.pbody b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmeta{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:none}
+.star{color:var(--accent);font-weight:700;font-size:14px;white-space:nowrap}
+
+/* order cards */
+.ocard{background:var(--surface);border:0;border-radius:var(--r);box-shadow:var(--shadow);padding:13px 14px;display:flex;flex-direction:column;gap:6px;text-align:start;width:100%;border-inline-start:4px solid var(--line)}
+.ocard.t-info{border-inline-start-color:var(--info)} .ocard.t-warn{border-inline-start-color:var(--warn)} .ocard.t-good{border-inline-start-color:var(--good)} .ocard.t-bad{border-inline-start-color:var(--bad)}
+.ocard-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ocard-title{display:flex;align-items:center;gap:7px;min-width:0}
+.ocard-title b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ocat{color:var(--muted);display:inline-flex}
+.ocard-sum{font-size:14px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ocard-meta{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;color:var(--muted)}
+.ocard-meta b{color:var(--ink);font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;background:var(--bg);color:var(--muted)}
+.tag.accent{background:var(--accent-soft);color:var(--accent)}
+.tag.good{background:var(--good-soft);color:var(--good)}
+.pill{font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;white-space:nowrap;flex:none}
+.t-info.pill{background:var(--info-soft);color:var(--info)} .t-warn.pill{background:var(--warn-soft);color:var(--warn)}
+.t-good.pill{background:var(--good-soft);color:var(--good)} .t-bad.pill{background:var(--bad-soft);color:var(--bad)}
+
+/* segmented */
+.seg{display:flex;gap:4px;background:var(--surface);box-shadow:var(--shadow);border-radius:12px;padding:4px;overflow-x:auto;scrollbar-width:none}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;padding:8px 10px;font-size:13.5px;font-weight:700;color:var(--muted);white-space:nowrap}
+.seg button.on{background:var(--navy);color:var(--on-navy)}
+.cnt{display:inline-grid;place-items:center;min-width:19px;height:19px;border-radius:999px;background:var(--accent);color:#fff;font-size:11.5px;padding:0 5px}
+.empty{text-align:center;color:var(--muted);padding:28px 16px;background:var(--surface);border-radius:var(--r);border:1px dashed var(--line)}
+
+/* order detail */
+.ohead-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.oid{font-size:19px;font-weight:800}
+.bar{display:flex;gap:4px;direction:rtl}
+.bar i{flex:1;height:7px;border-radius:4px;background:var(--line)}
+.bar i.d{background:var(--good)}
+.bar i.c{background:var(--accent)}
+.bar-l{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}
+.note{background:var(--bg);border-radius:12px;padding:10px 12px;font-size:14px;display:flex;gap:6px;align-items:flex-start}
+.note.bad{background:var(--bad-soft);color:var(--bad);font-weight:700}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.note.info{background:var(--info-soft);color:var(--info)}
+.parties{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.party{display:flex;flex-direction:column;gap:1px;min-width:0}
+.party .role{font-size:12px;color:var(--muted)}
+.lines{display:flex;flex-direction:column}
+.line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.line:last-child{border-bottom:0}
+.line.total{font-weight:800;font-size:16px}
+.meta-row{display:flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted);flex-wrap:wrap}
+.req{font-size:16px;line-height:1.7}
+.photo{width:100%;max-height:260px;object-fit:cover;border-radius:12px}
+.quotes{display:flex;flex-direction:column;gap:10px}
+.quote{border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:6px}
+.quote.best{border-color:var(--good)}
+.q-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.q-price{font-size:20px;font-weight:800}
+.msgs{display:flex;flex-direction:column;gap:8px;max-height:320px;overflow-y:auto}
+.msg{align-self:flex-end;max-width:82%;background:var(--bg);border-radius:14px 14px 4px 14px;padding:8px 12px;font-size:14px;display:flex;flex-direction:column}
+.msg.me{align-self:flex-start;background:var(--info-soft);border-radius:14px 14px 14px 4px}
+.msg-by{font-size:11.5px;color:var(--muted);font-weight:700}
+.msg-t{font-size:11px;color:var(--muted);align-self:flex-end}
+.chat-in{display:flex;gap:8px}
+.chat-in button{flex:none}
+details.log summary{cursor:pointer;font-weight:700;font-size:14px;color:var(--muted)}
+.log ol{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;border-inline-start:2px solid var(--line);padding-inline-start:12px}
+.log li{font-size:13.5px}
+.log li span{display:block;font-size:12px;color:var(--muted)}
+.stars{display:flex;gap:6px;direction:ltr;justify-content:flex-end}
+.stars button{background:none;border:0;padding:2px;color:var(--line)}
+.stars button.on{color:var(--accent)}
+.stars .ic{width:32px;height:32px}
+.stars.ro .ic{width:18px;height:18px}
+.stars .on .ic{fill:currentColor}
+
+/* provider page */
+.phead{display:flex;gap:14px;align-items:center}
+.phead .pav{width:58px;height:58px}
+.phead h1{font-size:20px;font-weight:800}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.fact{background:var(--bg);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column}
+.fact span{font-size:12px;color:var(--muted)}
+.fact b{font-size:14px}
+.item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .nm{display:flex;flex-direction:column}
+.item.off .nm{opacity:.5}
+.stepper{display:flex;align-items:center;gap:4px;background:var(--bg);border-radius:999px;padding:3px}
+.stepper button{width:32px;height:32px;border-radius:50%;border:0;background:var(--surface);display:grid;place-items:center;box-shadow:var(--shadow)}
+.stepper b{min-width:22px;text-align:center}
+.add1{border:1px solid var(--accent);color:var(--accent);background:transparent;border-radius:999px;padding:6px 16px;font-weight:700}
+details.more summary{cursor:pointer;color:var(--accent);font-weight:700;list-style:none}
+details.more summary::-webkit-details-marker{display:none}
+details.more[open] summary{margin-bottom:12px}
+.cartbar{position:fixed;bottom:14px;inset-inline:0;margin:0 auto;max-width:448px;width:calc(100% - 32px);z-index:25;display:flex;align-items:center;justify-content:space-between;background:var(--navy);color:var(--on-navy);border:0;border-radius:16px;padding:14px 18px;font-weight:700;box-shadow:0 10px 30px rgba(10,17,33,.35)}
+.cartbar .cnt{background:var(--accent)}
+.opts{display:grid;gap:8px}
+.opt{display:flex;align-items:center;justify-content:space-between;border:1.5px solid var(--line);border-radius:12px;padding:12px;background:var(--surface);text-align:start}
+.opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.opt span{display:flex;flex-direction:column}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:2px}
+.tile span{font-size:13px;color:var(--muted)}
+.tile b{font-size:22px;font-weight:800}
+.tile small{font-size:12px;color:var(--muted)}
+.tile.hl{background:var(--navy);color:var(--on-navy)}
+.tile.hl span,.tile.hl small{color:rgba(255,255,255,.75)}
+.hbar{display:flex;flex-direction:column;gap:8px}
+.hbar div{display:grid;grid-template-columns:70px 1fr 28px;gap:8px;align-items:center;font-size:13.5px}
+.hbar i{display:block;height:9px;border-radius:5px;background:var(--accent);min-width:3px}
+.hbar em{font-style:normal;font-variant-numeric:tabular-nums;color:var(--muted);text-align:end}
+.switch{width:46px;height:28px;border-radius:999px;border:0;background:var(--line);position:relative;flex:none;transition:background .2s}
+.switch::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:inset-inline-start .2s}
+.switch.on{background:var(--good)}
+.switch.on::after{inset-inline-start:21px}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:14px;color:var(--ink)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.toggle-row span{display:flex;flex-direction:column}
+
+/* bottom nav */
+.tabs{position:fixed;bottom:0;inset-inline:0;margin:0 auto;max-width:480px;z-index:20;background:var(--surface);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+.tabs button{flex:1;border:0;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;font-weight:700;color:var(--muted);padding:6px 2px;position:relative;border-radius:10px}
+.tabs button.on{color:var(--accent)}
+.tabs .cnt{position:absolute;top:0;inset-inline-end:calc(50% - 26px)}
+
+/* sheet + toast */
+.scrim{position:fixed;inset:0;background:rgba(8,12,24,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:8px 16px calc(18px + env(safe-area-inset-bottom));max-height:86%;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 2px}
+.sheet h2{font-size:18px}
+.plist{display:flex;flex-direction:column;gap:6px}
+.pitem{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:10px 12px;text-align:start;width:100%}
+.pitem.on{border-color:var(--accent);background:var(--accent-soft)}
+.pitem .who-av{width:34px;height:34px}
+.pitem .pi-txt{display:flex;flex-direction:column;flex:1;min-width:0}
+.pitem .cnt{flex:none}
+[hidden]{display:none!important}
+.menu-tools{position:sticky;top:60px;z-index:10;background:var(--bg);padding:8px 0;display:flex;flex-direction:column;gap:8px}
+.search{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:0 12px;color:var(--muted)}
+.search:focus-within{border-color:var(--accent)}
+.search input{border:0;background:transparent;padding:11px 0;color:var(--ink)}
+.msec{scroll-margin-top:150px;gap:4px}
+.msec-h{display:flex;justify-content:space-between;align-items:baseline;padding-bottom:6px;border-bottom:2px solid var(--accent-soft)}
+.msec-h h3{font-size:15px}
+.starter h2{font-size:19px}
+.cchk{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--line);cursor:pointer}
+.cchk input{width:20px;height:20px;accent-color:var(--accent);flex:none}
+.cchk .nm{flex:1}
+.sheet-foot{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom));background:var(--surface);padding:10px 0 6px;display:flex;gap:8px;border-top:1px solid var(--line)}
+.grp{font-size:12.5px;color:var(--muted);font-weight:700;margin-top:6px}
+.toast{position:fixed;top:72px;inset-inline:0;margin:0 auto;width:max-content;max-width:calc(100% - 32px);background:var(--navy);color:var(--on-navy);padding:10px 16px;border-radius:12px;z-index:60;font-size:14px;font-weight:500;box-shadow:0 10px 30px rgba(10,17,33,.3);animation:tin .25s ease}
+@keyframes tin{from{transform:translateY(-8px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:370px){.cats{grid-template-columns:repeat(3,1fr)}.facts{grid-template-columns:1fr 1fr}}
+
+.loadbar{position:fixed;top:0;inset-inline:0;height:3px;z-index:80;overflow:hidden;display:none;background:var(--accent-soft)}
+.busy .loadbar{display:block}
+.loadbar i{display:block;height:100%;width:40%;background:var(--accent);animation:lb 1.1s infinite ease-in-out}
+@keyframes lb{from{transform:translateX(160%)}to{transform:translateX(-260%)}}
+.busy .app [data-act],.busy .app form button,.busy .sheet button{pointer-events:none;opacity:.6}
+.spin{width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp .8s linear infinite;margin:10px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.center{display:flex;flex-direction:column;align-items:center;gap:14px;padding:40px 20px;text-align:center}
+.center.full{min-height:100vh;justify-content:center}
+.center .logo{font-size:34px;color:var(--ink)} .center .logo svg{width:36px;height:36px}
+.center-t{text-align:center;align-items:center}
+.auth{min-height:100%}
+.auth-hero{background:var(--navy);color:var(--on-navy);padding:44px 20px 64px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+.auth-hero .logo{font-size:40px} .auth-hero .logo svg{width:42px;height:42px}
+.auth-hero p{opacity:.8}
+.auth-body{margin-top:-36px;padding:0 16px 32px}
+.auth h2{font-size:19px}
+.pcard{padding:0;overflow:hidden;display:flex;align-items:stretch}
+.pmain{flex:1;display:flex;align-items:center;gap:12px;padding:12px;border:0;background:none;text-align:start;min-width:0}
+.fav{border:0;background:none;color:var(--line);padding:0 14px;display:grid;place-items:center;border-inline-start:1px solid var(--line)}
+.fav.on{color:var(--accent)} .fav.on .ic,.btn.favon .ic{fill:currentColor}
+.btn.favon{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.favrow{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.favrow::-webkit-scrollbar{display:none}
+.favchip{flex:none;display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--accent-soft);border-radius:var(--r);box-shadow:var(--shadow);padding:10px 14px 10px 12px;text-align:start;max-width:240px}
+.favchip .pav{width:38px;height:38px}
+.favchip span:last-child{display:flex;flex-direction:column;min-width:0}
+.favchip b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.favchip small{color:var(--muted);font-size:12px}
+.iact{display:flex;gap:6px;align-items:center}
+.iconbtn.light{background:var(--bg);color:var(--ink)}
+.stars span{color:var(--line)} .stars span.on{color:var(--accent)}
+.stars.ro{justify-content:flex-start}
+input:disabled{opacity:.7}
+</style>
+</head>
+<body>
+<div class="loadbar" aria-hidden="true"><i></i></div>
+<div class="app" id="app"></div>
+<div id="toast-host"></div>
+<script>
+/* ============================================================
+   وش تبي — التطبيق
+   البيانات كلها على الخادم (Google Sheets عبر Apps Script).
+   ضع رابط تطبيق الويب في API_URL.
+   ============================================================ */
+const API_URL = '';
+
+const LS_TOKEN = 'weshtabi_token', LS_API = 'weshtabi_api';
+let apiUrl = API_URL || lsGet(LS_API) || '';
+let token = lsGet(LS_TOKEN) || '';
+let db = null;
+function lsGet(k) { try { return localStorage.getItem(k) } catch (e) { return null } }
+function lsSet(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k) } catch (e) { } }
+
+/* ---------- icons ---------- */
+const IC={
+  cart:'<path d="M3 4h2l2.4 11h11l2-8H6.2"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>',
+  shirt:'<path d="M8 3l4 2 4-2 5 4-3 3-2-1v12H8V9L6 10 3 7z"/>',
+  scissors:'<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M8.6 7.6L20 18M8.6 16.4L20 6"/>',
+  drop:'<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  bolt:'<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  snow:'<path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/>',
+  roller:'<rect x="3" y="3" width="15" height="6" rx="1.5"/><path d="M18 6h3v6h-9v3"/><rect x="10" y="15" width="4" height="7" rx="1"/>',
+  tiles:'<rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/>',
+  home:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/>',
+  receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h10"/>',
+  store:'<path d="M4 9l1.5-5h13L20 9"/><path d="M4 9h16v2a3 3 0 0 1-5.3 2 3 3 0 0 1-5.4 0A3 3 0 0 1 4 11z"/><path d="M5 13v8h14v-8"/>',
+  wallet:'<rect x="3" y="6" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="16.5" cy="15" r="1.2"/>',
+  chart:'<path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/>',
+  sliders:'<path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/>',
+  truck:'<path d="M3 6h11v10H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/>',
+  shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+  back:'<path d="M9 5l7 7-7 7"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  minus:'<path d="M5 12h14"/>',
+  pin:'<path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  camera:'<path d="M4 8h3l2-3h6l2 3h3v12H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+  star:'<path d="M12 3l2.8 5.8 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.3l1.1-6.2L3 9.7l6.2-.9z"/>',
+  swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>',
+  send:'<path d="M3 12l18-8-6 18-3-7z"/>',
+  x:'<path d="M6 6l12 12M18 6L6 18"/>',
+  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+  edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  phone:'<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 5a2 2 0 0 1 2-2z"/>'
+};
+
+IC.leaf = '<path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"/><path d="M5 19l7-7"/>';
+IC.logout = '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>';
+IC.key = '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/>';
+IC.refresh = '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>';
+IC.users = '<circle cx="9" cy="8" r="3.5"/><path d="M3 20c1-3.5 3.5-5.5 6-5.5s5 2 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.5 0 4.2 1.8 5 4.5"/>';
+const icon = (n, c = '') => `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[n] || ''}</svg>`;
+const LOGO = `<span class="logo" aria-label="وش تبي"><span>وش تبي</span><svg viewBox="0 0 28 28" aria-hidden="true"><path d="M3 6a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4v10a4 4 0 0 1-4 4h-7l-6 5v-5H7a4 4 0 0 1-4-4z" fill="#EB8420"/><text x="14" y="16.5" text-anchor="middle" font-size="15" font-weight="800" fill="#fff" font-family="Tajawal,sans-serif">؟</text></svg></span>`;
+
+/* ---------- الخدمات والقوائم الجاهزة ---------- */
+const CATS = [
+  { id: 'grocery', name: 'تموينات', icon: 'cart', hasMenu: true, visit: false },
+  { id: 'veg', name: 'خضار وفواكه', icon: 'leaf', hasMenu: true, visit: false },
+  { id: 'laundry', name: 'مغاسل', icon: 'shirt', hasMenu: true, visit: false },
+  { id: 'tailor', name: 'خياطة', icon: 'scissors', hasMenu: true, visit: false },
+  { id: 'plumbing', name: 'سباكة', icon: 'drop', hasMenu: false, visit: true },
+  { id: 'electric', name: 'كهرباء', icon: 'bolt', hasMenu: false, visit: true },
+  { id: 'ac', name: 'تكييف', icon: 'snow', hasMenu: false, visit: true },
+  { id: 'paint', name: 'دهان', icon: 'roller', hasMenu: false, visit: true },
+  { id: 'tiles', name: 'بلاط', icon: 'tiles', hasMenu: false, visit: true }
+];
+const CAT = id => CATS.find(c => c.id === id) || { id, name: id || '', icon: 'store', hasMenu: false, visit: false };
+const CATALOG_SRC={
+  grocery:[
+    ['dairy','الألبان والأجبان',['حليب طازج كامل الدسم 1 لتر|6.5','حليب طازج كامل الدسم 2 لتر|11','حليب قليل الدسم 2 لتر|11','لبن 1 لتر|6','لبن 2 لتر|10.5','زبادي 170 جم × 6|9','زبادي عائلي 1 كجم|9.5','لبنة 400 جم|10','قشطة 100 جم|3.5','زبدة 100 جم|7','حليب مبخر 170 مل|3','جبنة شرائح 200 جم|9','جبنة مثلثات 16 قطعة|11','جبنة كريمية 500 جم|17','جبنة بيضاء 500 جم|15']],
+    ['bakery','المخبوزات',['خبز صامولي 6 حبات|3','خبز عربي 5 أرغفة|2','خبز توست أبيض كبير|6','خبز توست بر|7','خبز برجر 6 حبات|5','كرواسون 6 حبات|9','بقصماط 400 جم|8']],
+    ['eggs','البيض',['بيض 15 حبة|13','بيض 30 حبة|23']],
+    ['breakfast','الفطور والتمور',['تمر سكري 1 كجم|25','تمر خلاص 1 كجم|20','عسل 500 جم|25','مربى 450 جم|9','طحينة 400 جم|10','حلاوة طحينية 400 جم|11','شوكولاتة للدهن 350 جم|18','زبدة فول سوداني 340 جم|13','زيتون 450 جم|10','شوفان 500 جم|11','كورن فليكس 375 جم|14']],
+    ['grains','الأرز والحبوب والمكرونة',['أرز بسمتي 5 كجم|45','أرز بسمتي 10 كجم|85','أرز مصري 2 كجم|12','طحين أبيض 1 كجم|4','مكرونة 400 جم|3.5','شعيرية 400 جم|3.5','عدس أحمر 1 كجم|8','حمص حب 1 كجم|9','برغل 1 كجم|7','فاصوليا بيضاء جافة 1 كجم|10']],
+    ['canned','المعلبات',['فول مدمس 400 جم|3.5','حمص معلب 400 جم|3.5','تونة 160 جم|7','ذرة حلوة 400 جم|4.5','معجون طماطم 400 جم|5','فاصوليا بيضاء معلبة 400 جم|3.5','فطر معلب 400 جم|5']],
+    ['oils','الزيوت والسمن',['زيت دوار الشمس 1.5 لتر|17','زيت ذرة 1.5 لتر|18','زيت زيتون 500 مل|25','سمن نباتي 1 كجم|22','سمن بقري 400 جم|30']],
+    ['spices','السكر والملح والتوابل',['سكر أبيض 2 كجم|9','سكر أبيض 5 كجم|20','ملح طعام 700 جم|2','بهارات مشكلة 100 جم|6','كمون 100 جم|6','فلفل أسود 100 جم|7','كركم 100 جم|5','هيل 100 جم|25','مرقة دجاج 24 مكعب|9','خميرة فورية 5 أظرف|5','بيكنج باودر 100 جم|3']],
+    ['tea','الشاي والقهوة',['شاي أحمر 100 كيس|13','شاي أخضر 25 كيس|7','قهوة عربية 250 جم|28','قهوة سريعة التحضير 200 جم|30','قهوة 3 في 1 × 30 ظرف|25','حليب بودرة 900 جم|35']],
+    ['drinks','المياه والمشروبات',['ماء 40 عبوة صغيرة|13','ماء 1.5 لتر × 6|7','عصير برتقال 1 لتر|7','عصير مشكل 200 مل × 6|8','مشروب غازي 330 مل × 6|15','مشروب غازي 2.25 لتر|7']],
+    ['frozen','الدواجن والمجمدات',['دجاج مبرد 1 كجم|19','دجاج مجمد 1 كجم|17','صدور دجاج 1 كجم|30','لحم مفروم مجمد 400 جم|15','خضار مشكلة مجمدة 450 جم|7','بطاطس مقلية مجمدة 2.5 كجم|22','سمبوسة مجمدة 20 حبة|14','ناجتس دجاج 400 جم|16','آيس كريم 2 لتر|18']],
+    ['snacks','الحلويات والسناكات',['شيبس عائلي 165 جم|9','شيبس صغير × 20|12','بسكويت × 12|10','شوكولاتة لوح 100 جم|6','كيك صغير × 12|11','مكسرات مشكلة 300 جم|22']],
+    ['cleaning','المنظفات',['سائل غسيل صحون 1 لتر|9','مسحوق غسيل 2.5 كجم|28','منظف أرضيات 3 لتر|15','مبيض ملابس 2 لتر|9','معطر أقمشة 3 لتر|18','منظف زجاج 750 مل|9','إسفنج جلي 5 حبات|5','أكياس قمامة كبيرة 30 كيس|12','مبيد حشرات 300 مل|14']],
+    ['paper','المناديل والورقيات',['مناديل وجه 5 علب|20','مناديل حمام 10 رولات|22','مناديل مطبخ 4 رولات|15','ورق ألمنيوم 30 م|15','نايلون تغليف 30 م|8','أكواب ورقية 50 كوب|8','صحون فلين 25 صحن|7']],
+    ['care','العناية الشخصية',['صابون يد سائل 500 مل|10','شامبو 400 مل|20','معجون أسنان 100 مل|9','فرشاة أسنان|8','مزيل عرق|15','مناديل مبللة 64 منديل|10']],
+    ['baby','مستلزمات الأطفال',['حفائض مقاس 4 حزمة|55','مناديل أطفال مبللة 72|12','حليب أطفال 400 جم|45']]
+  ]
+};
+
+CATALOG_SRC.veg = [
+  ['veg', 'الخضار', ['طماطم 1 كجم|5', 'خيار 1 كجم|6', 'بطاطس 1 كجم|4', 'بصل أحمر 1 كجم|3.5', 'بصل أبيض 1 كجم|4', 'جزر 1 كجم|5', 'كوسة 1 كجم|7', 'باذنجان 1 كجم|6', 'فلفل بارد ألوان 1 كجم|12', 'فلفل رومي أخضر 1 كجم|8', 'فلفل حار 250 جم|3', 'ثوم 250 جم|4', 'ليمون 1 كجم|8', 'ملفوف حبة|5', 'قرنبيط حبة|7', 'بامية 1 كجم|14', 'فاصوليا خضراء 1 كجم|12', 'ذرة حبة|3']],
+  ['fruit', 'الفواكه', ['موز 1 كجم|7', 'تفاح أحمر 1 كجم|9', 'تفاح أخضر 1 كجم|10', 'برتقال 1 كجم|6', 'يوسفي 1 كجم|8', 'عنب 1 كجم|14', 'رمان 1 كجم|10', 'مانجو 1 كجم|15', 'بطيخ حبة|18', 'شمام حبة|12', 'فراولة 250 جم|10', 'كيوي 1 كجم|14', 'أفوكادو 1 كجم|18', 'جوافة 1 كجم|10', 'أناناس حبة|12']],
+  ['herbs', 'الورقيات والأعشاب', ['بقدونس ربطة|1', 'كزبرة ربطة|1', 'نعناع ربطة|1.5', 'جرجير ربطة|1', 'شبت ربطة|1', 'خس روماني حبة|3', 'سبانخ ربطة|3', 'بصل أخضر ربطة|1.5', 'ريحان ربطة|2']]
+];
+const CATALOG = Object.fromEntries(Object.entries(CATALOG_SRC).map(([cat, secs]) => [cat, {
+  sections: secs.map(([id, name]) => ({ id, name })),
+  items: secs.flatMap(([sec, , list]) => list.map((x, i) => { const [name, price] = x.split('|'); return { id: `${cat}-${sec}-${i + 1}`, sec, name, price: +price } }))
+}]));
+
+/* ---------- constants ---------- */
+const ROLE = { customer: 'طالب خدمة', provider: 'مقدم خدمة', courier: 'مندوب توصيل', broker: 'منسّق', admin: 'مدير المنصة' };
+const STATUS_U = { active: 'مفعّل', pending: 'بانتظار الاعتماد', blocked: 'موقوف', rejected: 'مرفوض' };
+const ST = {
+  new: { l: 'طلب جديد', t: 'info' }, accepted: { l: 'مقبول', t: 'info' }, in_progress: { l: 'قيد التنفيذ', t: 'warn' },
+  with_courier: { l: 'مع المندوب', t: 'warn' }, delivered: { l: 'تم التسليم والدفع', t: 'good' }, closed: { l: 'مُقيَّم ومغلق', t: 'good' },
+  cancelled: { l: 'ملغى', t: 'bad' }, rejected: { l: 'مرفوض', t: 'bad' }
+};
+const ACTIVE = ['new', 'accepted', 'in_progress', 'with_courier'];
+const WHENS = ['أقرب وقت', 'اليوم مساءً', 'غداً صباحاً', 'غداً مساءً', 'أتفق مع مقدم الخدمة'];
+const QWHENS = ['خلال ساعة', 'اليوم مساءً', 'غداً صباحاً', 'غداً مساءً', 'بعد غد'];
+const CANCEL_REASONS = ['تأخر الرد', 'غيّرت رأيي', 'وجدت بديلاً', 'طلبت بالخطأ', 'سبب آخر'];
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').toLowerCase().replace(/[ً-ْـ]/g, '').replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي').replace(/\s+/g, ' ').trim();
+const digits = s => String(s || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g, '');
+const money = n => `${(+n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })} ر.س`;
+const me = () => db.me;
+const P = id => db.providers.find(p => p.id === id);
+const O = id => db.orders.find(o => o.id === +id);
+const byNew = (a, b) => b.createdAt - a.createdAt;
+const avg = p => p && p.ratingCount ? p.ratingSum / p.ratingCount : 0;
+const ratingText = p => p && p.ratingCount ? `★ ${avg(p).toFixed(1)} (${p.ratingCount})` : 'جديد';
+const phone = p => p ? `<span dir="ltr">${esc(p)}</span>` : '';
+function ago(t) { const s = (Date.now() - t) / 1000; if (s < 60) return 'الآن'; const m = Math.floor(s / 60); if (m < 60) return `قبل ${m} د`; const h = Math.floor(m / 60); if (h < 24) return `قبل ${h} س`; const d = Math.floor(h / 24); return d === 1 ? 'أمس' : d === 2 ? 'قبل يومين' : `قبل ${d} أيام` }
+const providersIn = (district, cat) => db.providers.filter(p => p.districts.includes(district) && (!cat || p.cat === cat));
+const favIds = () => (me().favorites || []);
+const isFav = id => favIds().includes(id);
+const favProviders = cat => favIds().map(P).filter(p => p && (!cat || p.cat === cat));
+const fulfilLabel = o => ({ delivery: 'توصيل للبيت', pickup: 'استلام من المحل', visit: 'زيارة في الموقع' })[o.fulfil] || '';
+function feeLabel(p) { const c = CAT(p.cat); if (c.visit) return p.visitFee ? `زيارة من ${money(p.visitFee)}` : 'السعر بعرض'; return p.delivers ? `توصيل ${money(p.deliveryFee)}` : 'استلام من المحل' }
+function fees(o) { const r = o.rates || {}; if (r.trial) return { platform: 0, broker: 0 }; const b = o.subtotal; return o.brokerId ? { platform: b * r.brokerPlatform / 100, broker: b * r.broker / 100 } : { platform: b * r.platform / 100, broker: 0 } }
+const availTask = o => o.status === 'in_progress' && o.courierRequested && !o.courierId;
+const plural = (n, one, two, many) => n === 1 ? one : n === 2 ? two : `${n} ${many}`;
+
+/* ============================================================
+   الاتصال بالخادم
+   ============================================================ */
+async function call(action, payload = {}) {
+  let res;
+  try { res = await fetch(apiUrl, { method: 'POST', body: JSON.stringify(Object.assign({ action, token }, payload)) }) }
+  catch (e) { throw new Error('تعذّر الاتصال بالخادم. تأكد من الإنترنت وحاول مرة ثانية') }
+  let j;
+  try { j = await res.json() } catch (e) { throw new Error('رد غير متوقع من الخادم. تأكد من رابط Apps Script') }
+  if (!j.ok) {
+    if (j.code === 'AUTH') logoutLocal();
+    throw new Error(j.error || 'صار خطأ، حاول مرة ثانية');
+  }
+  if (j.token) { token = j.token; lsSet(LS_TOKEN, token) }
+  if (j.data) db = j.data;
+  return j;
+}
+async function run(action, payload, okMsg, after) {
+  if (state.busy) return null;
+  state.busy = true; document.body.classList.add('busy');
+  try {
+    const j = await call(action, payload);
+    if (after) after(j);
+    render();
+    if (okMsg) toast(typeof okMsg === 'function' ? okMsg(j) : okMsg);
+    return j;
+  } catch (e) { toast(e.message); if (!token) render(); return null }
+  finally { state.busy = false; document.body.classList.remove('busy') }
+}
+function logoutLocal() {
+  token = ''; lsSet(LS_TOKEN, ''); db = null;
+  Object.assign(state, { boot: 'auth', auth: 'login', tab: '', stack: [], cart: null, sheet: null, menus: {}, photos: {} });
+}
+const isTyping = () => { const a = document.activeElement; return a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) };
+async function quietSync() {
+  if (state.boot !== 'ready' || state.busy || state.sheet || isTyping() || document.visibilityState !== 'visible') return;
+  try { await call('sync'); render() } catch (e) { if (!token) render() }
+}
+setInterval(quietSync, 25000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') quietSync() });
+
+/* ============================================================
+   الحالة
+   ============================================================ */
+const state = {
+  boot: 'loading', bootError: '', config: null, busy: false, auth: 'login',
+  reg: { role: 'customer', name: '', phone: '', pin: '', pin2: '', district: '', details: '', cat: '', hours: '', vehicle: '', districts: [] },
+  tab: '', stack: [], cart: null, co: { fulfil: 'delivery', note: '', when: 'أقرب وقت' },
+  compose: { text: '', cat: '', when: 'أقرب وقت', photo: null, target: null, scope: 'fav' },
+  sub: { orders: 'current', p_orders: 'targeted', a_orders: 'active', a_users: 'pending' },
+  sheet: null, rate: 5, rateText: '', filters: {}, menus: {}, menuLoading: {}, photos: {}, photoLoading: {}
+};
+
+const TABS = {
+  customer: [{ k: 'home', l: 'الرئيسية', i: 'home' }, { k: 'favs', l: 'مفضلتي', i: 'star' }, { k: 'orders', l: 'طلباتي', i: 'receipt' }, { k: 'account', l: 'حسابي', i: 'user' }],
+  provider: [{ k: 'p_orders', l: 'الطلبات', i: 'receipt' }, { k: 'p_menu', l: 'القائمة', i: 'menu', menuOnly: true }, { k: 'p_income', l: 'الدخل', i: 'chart' }, { k: 'p_shop', l: 'المحل', i: 'store' }],
+  courier: [{ k: 'c_tasks', l: 'المهام المتاحة', i: 'truck' }, { k: 'c_mine', l: 'مهامي', i: 'receipt' }, { k: 'c_wallet', l: 'المحفظة', i: 'wallet' }],
+  broker: [{ k: 'b_open', l: 'تنتظر مقدم', i: 'link' }, { k: 'b_mine', l: 'طلباتي', i: 'receipt' }, { k: 'b_wallet', l: 'المحفظة', i: 'wallet' }],
+  admin: [{ k: 'a_overview', l: 'نظرة عامة', i: 'chart' }, { k: 'a_users', l: 'المستخدمون', i: 'users' }, { k: 'a_orders', l: 'الطلبات', i: 'receipt' }, { k: 'a_settings', l: 'الإعدادات', i: 'sliders' }]
+};
+const tabsFor = u => (TABS[u.role] || []).filter(t => !t.menuOnly || CAT(u.cat).hasMenu);
+function ensureTab() { const u = me(); if (!tabsFor(u).some(t => t.k === state.tab)) state.tab = (tabsFor(u)[0] || {}).k }
+const provTargeted = o => o.status === 'new' && (o.providerId === me().id || o.targetedToMe);
+const provOpen = o => o.status === 'new' && !o.providerId && !o.targetedToMe;
+const quotedByMe = o => o.quotes.some(q => q.pid === me().id);
+function badge(k) {
+  const u = me(), os = db.orders;
+  switch (k) {
+    case 'orders': return os.filter(o => o.customerId === u.id && ((o.status === 'new' && o.type === 'text' && o.quoteCount) || o.status === 'delivered')).length;
+    case 'p_orders': return os.filter(o => (provTargeted(o) || provOpen(o)) && !quotedByMe(o)).length;
+    case 'c_tasks': return os.filter(availTask).length;
+    case 'c_mine': return os.filter(o => o.courierId === u.id && ['in_progress', 'with_courier'].includes(o.status)).length;
+    case 'b_open': return os.filter(o => o.status === 'new' && !o.providerId).length;
+    case 'a_users': return (db.users || []).filter(x => x.status === 'pending').length;
+  }
+  return 0;
+}
+
+/* ============================================================
+   render
+   ============================================================ */
+function render() {
+  const app = $('#app');
+  if (state.boot === 'loading') { app.innerHTML = `<div class="center full">${LOGO}<div class="spin" role="status" aria-label="جارٍ التحميل"></div></div>`; return }
+  if (state.boot === 'setup') { app.innerHTML = setupView(); return }
+  if (state.boot === 'error') { app.innerHTML = `<div class="center full">${LOGO}<p>${esc(state.bootError)}</p><button class="btn primary" data-act="retry">${icon('refresh', 'sm')} حاول مرة ثانية</button>${!API_URL ? `<button class="link" data-act="changeApi">تغيير رابط الخادم</button>` : ''}</div>`; return }
+  if (state.boot === 'auth' || !db) { app.innerHTML = authView(); return }
+  const u = me();
+  if (u.status !== 'active') { app.innerHTML = header(u, null) + `<main class="main">${pendingView(u)}</main>` + sheetHtml(); return }
+  ensureTab();
+  const top = state.stack.at(-1);
+  const strip = db.settings.trial ? `<div class="strip">فترة تجريبية · بدون عمولة حتى ${esc(db.settings.trialEnds)}</div>` : '';
+  app.innerHTML = header(u, top) + strip + `<main class="main" id="main">${body(u, top)}</main>` + (top ? '' : nav(u)) + cartBar(top) + sheetHtml();
+  applyFilters();
+}
+function header(u, top) {
+  const start = top ? `<button class="iconbtn" data-act="back" aria-label="رجوع">${icon('back')}</button><div class="htitle">${esc(titleOf(top))}</div>` : `<div class="brand">${LOGO}</div>`;
+  return `<header class="top">${start}<button class="who" data-act="sheet" data-type="me" aria-label="حسابي"><span class="who-av">${esc((u.name || '؟').trim()[0])}</span><span class="who-txt"><b>${esc(u.name)}</b><small>${ROLE[u.role]}</small></span></button></header>`;
+}
+function titleOf(t) { switch (t.v) { case 'provider': return P(t.id)?.name || ''; case 'category': return CAT(t.id).name; case 'checkout': return 'تأكيد الطلب'; case 'order': return `طلب #${t.id}` } return '' }
+function nav(u) {
+  return `<nav class="tabs">${tabsFor(u).map(t => { const n = badge(t.k); return `<button class="${state.tab === t.k ? 'on' : ''}" data-act="tab" data-k="${t.k}" aria-current="${state.tab === t.k ? 'page' : 'false'}">${icon(t.i)}<span>${t.l}</span>${n ? `<span class="cnt">${n}</span>` : ''}</button>` }).join('')}</nav>`;
+}
+function body(u, top) {
+  if (top) { switch (top.v) { case 'provider': return providerView(top.id); case 'category': return categoryView(top.id); case 'checkout': return checkoutView(); case 'order': return orderView(top.id) } }
+  return (VIEWS[state.tab] || (() => ''))(u);
+}
+const card = (title, inner, cls = '') => `<section class="card ${cls}">${title ? `<h3 class="card-h">${title}</h3>` : ''}${inner}</section>`;
+const empty = t => `<div class="empty">${t}</div>`;
+const seg = (key, opts) => `<div class="seg" role="tablist">${opts.map(([k, l, n]) => `<button role="tab" aria-selected="${state.sub[key] === k}" class="${state.sub[key] === k ? 'on' : ''}" data-act="sub" data-key="${key}" data-k="${k}">${l}${n ? ` <span class="cnt">${n}</span>` : ''}</button>`).join('')}</div>`;
+const listOr = (arr, txt) => arr.length ? `<div class="list">${arr.map(orderCard).join('')}</div>` : empty(txt);
+function pill(o) { const s = ST[o.status]; const l = o.status === 'new' && !o.providerId ? (o.targetCount && me().role === 'customer' ? 'بانتظار المختارين' : 'مفتوح') : s.l; return `<span class="pill t-${s.t}">${l}</span>` }
+
+/* ---------- setup + auth ---------- */
+function setupView() {
+  return `<div class="auth"><div class="auth-hero">${LOGO}<p>إعداد أول مرة</p></div><div class="auth-body"><section class="card">
+    <h2>رابط الخادم</h2><p class="muted sm">الصق رابط تطبيق الويب من Google Apps Script (ينتهي بـ /exec). يُحفظ في هذا الجهاز فقط، وللنشر النهائي ضعه في API_URL داخل الملف.</p>
+    <form data-form="setup" class="stack"><label class="fld" for="api-url"><span>الرابط</span><input id="api-url" name="url" dir="ltr" placeholder="https://script.google.com/macros/s/…/exec" required value="${esc(apiUrl)}"></label>
+    <button class="btn primary block">حفظ ومتابعة</button></form></section></div></div>`;
+}
+function authView() {
+  const districts = state.config?.districts || ['السعادة'], r = state.reg;
+  const hero = `<div class="auth-hero">${LOGO}<p>كل خدمات حيّك في مكان واحد</p></div>`;
+  if (state.auth === 'login') return `<div class="auth">${hero}<div class="auth-body stack"><section class="card"><h2>تسجيل الدخول</h2>
+    <form data-form="login" class="stack">
+      <label class="fld" for="l-phone"><span>رقم الجوال</span><input id="l-phone" name="phone" type="tel" inputmode="numeric" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel" required></label>
+      <label class="fld" for="l-pin"><span>الرمز السري</span><input id="l-pin" name="pin" type="password" inputmode="numeric" maxlength="4" dir="ltr" placeholder="••••" autocomplete="current-password" required></label>
+      <button class="btn primary block">دخول</button></form>
+    <p class="muted sm center-t">نسيت الرمز؟ تواصل مع إدارة المنصة لإعادة تعيينه.</p></section>
+    <section class="card center-t"><p>ما عندك حساب؟</p><button class="btn ghost block" data-act="authMode" data-k="register">أنشئ حساباً جديداً</button></section></div></div>`;
+  const roleSeg = `<div class="seg">${[['customer', 'أطلب خدمة'], ['provider', 'أقدم خدمة'], ['courier', 'مندوب توصيل']].map(([k, l]) => `<button type="button" class="${r.role === k ? 'on' : ''}" data-act="regRole" data-k="${k}">${l}</button>`).join('')}</div>`;
+  const f = (id, bind, label, attrs = '') => `<label class="fld" for="${id}"><span>${label}</span><input id="${id}" data-bind="reg.${bind}" value="${esc(r[bind])}" ${attrs}></label>`;
+  return `<div class="auth">${hero}<div class="auth-body stack"><section class="card"><h2>حساب جديد</h2>${roleSeg}
+    <form data-form="register" class="stack" novalidate>
+      ${f('r-name', 'name', r.role === 'provider' ? 'اسم المحل أو الفني' : 'الاسم', 'autocomplete="name" required')}
+      ${f('r-phone', 'phone', 'رقم الجوال', 'type="tel" inputmode="numeric" dir="ltr" placeholder="05xxxxxxxx" autocomplete="tel" required')}
+      <div class="row2">${f('r-pin', 'pin', 'رمز سري (4 أرقام)', 'type="password" inputmode="numeric" maxlength="4" dir="ltr" autocomplete="new-password" required')}
+      ${f('r-pin2', 'pin2', 'أعد كتابة الرمز', 'type="password" inputmode="numeric" maxlength="4" dir="ltr" autocomplete="new-password" required')}</div>
+      ${r.role === 'customer' ? `<label class="fld" for="r-district"><span>الحي</span><select id="r-district" data-bind="reg.district">${districts.map(d => `<option ${r.district === d ? 'selected' : ''}>${esc(d)}</option>`).join('')}</select></label>
+        ${f('r-details', 'details', 'العنوان التفصيلي', 'placeholder="الشارع، رقم البيت أو العمارة"')}` : ''}
+      ${r.role === 'provider' ? `<label class="fld" for="r-cat"><span>نوع الخدمة</span><select id="r-cat" data-bind="reg.cat"><option value="">اختر…</option>${CATS.map(c => `<option value="${c.id}" ${r.cat === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}</select></label>
+        ${f('r-hours', 'hours', 'أوقات العمل', 'placeholder="مثال: 7 ص – 11 م"')}
+        <div class="field-label">الأحياء اللي تخدمها</div><div class="checks">${districts.map((d, i) => `<label for="rd${i}"><input type="checkbox" id="rd${i}" name="regDistricts" value="${esc(d)}" ${r.districts.includes(d) ? 'checked' : ''}>${esc(d)}</label>`).join('')}</div>` : ''}
+      ${r.role === 'courier' ? f('r-vehicle', 'vehicle', 'السيارة', 'placeholder="مثال: هايلكس 2019"') : ''}
+      ${r.role !== 'customer' ? `<div class="note info">${icon('shield', 'sm')} حسابك يتفعّل بعد اعتماد إدارة المنصة.</div>` : ''}
+      <button class="btn primary block">إنشاء الحساب</button></form></section>
+    <section class="card center-t"><p>عندك حساب؟</p><button class="btn ghost block" data-act="authMode" data-k="login">سجّل دخولك</button></section></div></div>`;
+}
+function pendingView(u) {
+  return card('حسابك بانتظار الاعتماد', `<p>استلمنا طلب انضمامك باسم <b>${esc(u.name)}</b> كـ${ROLE[u.role]}. بعد ما تعتمده إدارة المنصة تظهر لك الطلبات.</p>
+    <button class="btn primary block" data-act="refresh">${icon('refresh', 'sm')} تحقق من الحالة</button><button class="btn ghost block" data-act="logout">${icon('logout', 'sm')} تسجيل الخروج</button>`);
+}
+
+/* ---------- shared pieces ---------- */
+function orderCard(o) {
+  const u = me(), cat = CAT(o.cat);
+  let title;
+  if (u.role === 'customer') title = o.providerName || (o.targetCount ? (o.targetCount === 1 ? o.targetNames[0] : `مفضلتك في ${cat.name} (${o.targetCount})`) : `كل مقدمي ${cat.name} في الحي`);
+  else title = o.customerName;
+  const sum = o.type === 'menu' ? o.items.map(i => `${i.name}${i.qty > 1 ? ` ×${i.qty}` : ''}`).join('، ') : o.text;
+  const tags = [];
+  if (o.type === 'text' && o.status === 'new') {
+    if (u.role === 'provider') { if (quotedByMe(o)) tags.push('<span class="tag">أرسلت عرضك</span>'); else if (o.targetedToMe) tags.push('<span class="tag accent">موجّه لك</span>') }
+    else if (o.quoteCount) tags.push(`<span class="tag accent">${plural(o.quoteCount, 'عرض واحد', 'عرضان', 'عروض')}</span>`);
+  }
+  if (availTask(o)) tags.push('<span class="tag accent">بانتظار مندوب</span>');
+  if (o.status === 'delivered' && u.role === 'customer') tags.push('<span class="tag accent">قيّم الخدمة</span>');
+  if (o.brokerId && u.role !== 'customer') tags.push('<span class="tag">عبر منسّق</span>');
+  return `<button class="ocard t-${ST[o.status].t}" data-act="open" data-v="order" data-id="${o.id}">
+    <span class="ocard-top"><span class="ocard-title"><span class="ocat">${icon(cat.icon, 'sm')}</span><b>${esc(title)}</b></span>${pill(o)}</span>
+    <span class="ocard-sum">${esc(sum)}</span>
+    <span class="ocard-meta"><span>#${o.id} · ${esc(o.address.district)} · ${ago(o.createdAt)}</span>${o.total ? `<b class="num">${money(o.total)}</b>` : ''}</span>
+    ${tags.length ? `<span class="tags">${tags.join('')}</span>` : ''}</button>`;
+}
+const favBtn = (p, big) => me().role !== 'customer' ? '' : big
+  ? `<button class="btn ${isFav(p.id) ? 'favon' : 'ghost'} sm" data-act="fav" data-id="${p.id}" aria-pressed="${isFav(p.id)}">${icon('star', 'sm')} ${isFav(p.id) ? 'في مفضلتك' : 'أضف للمفضلة'}</button>`
+  : `<button class="fav ${isFav(p.id) ? 'on' : ''}" data-act="fav" data-id="${p.id}" aria-pressed="${isFav(p.id)}" aria-label="${isFav(p.id) ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}: ${esc(p.name)}">${icon('star')}</button>`;
+function providerCard(p) {
+  const c = CAT(p.cat);
+  return `<div class="pcard"><button class="pmain" data-act="open" data-v="provider" data-id="${p.id}"><span class="pav">${icon(c.icon)}</span>
+    <span class="pbody"><b>${esc(p.name)}</b><span class="muted sm">${c.name}${p.hours ? ` · ${esc(p.hours)}` : ''}</span></span>
+    <span class="pmeta"><span class="star">${ratingText(p)}</span><span class="muted xs">${feeLabel(p)}</span></span></button>${favBtn(p)}</div>`;
+}
+function composeForm(mode) {
+  const c = state.compose, u = me(), t = mode === 'target' && c.target ? P(c.target) : null;
+  const visit = t && CAT(t.cat).visit;
+  const favs = !t && c.cat ? favProviders(c.cat) : [];
+  const all = !t && c.cat ? providersIn(u.address?.district, c.cat).length : 0;
+  const scope = favs.length ? c.scope : 'all';
+  const label = t ? `أرسل الطلب إلى ${esc(t.name)}` : !c.cat ? 'أرسل الطلب' : scope === 'fav' ? `أرسل لمفضلتي في ${CAT(c.cat).name} (${favs.length})` : `أرسل لكل مقدمي ${CAT(c.cat).name} في الحي${all ? ` (${all})` : ''}`;
+  return `<form data-form="text-order" data-mode="${mode}" class="stack" novalidate>
+    <textarea id="c-text" data-bind="compose.text" rows="3" aria-label="اكتب طلبك" placeholder="${visit || !t ? 'اكتب طلبك بكلماتك… مثال: أبي سبّاك يصلح تسريب تحت مغسلة المطبخ' : 'اكتب اللي تبيه وما لقيته في القائمة'}">${esc(c.text)}</textarea>
+    ${t ? `<div class="target">${icon('store', 'sm')} يوصل إلى <b>${esc(t.name)}</b> وحده</div>`
+      : `<div class="field-label">نوع الخدمة</div><div class="chips scroll">${CATS.map(k => `<button type="button" class="chip ${c.cat === k.id ? 'on' : ''}" data-act="pickcat" data-id="${k.id}" aria-pressed="${c.cat === k.id}">${icon(k.icon, 'sm')}${k.name}</button>`).join('')}</div>
+        ${favs.length ? `<div class="field-label">يوصل إلى</div><div class="seg">
+          <button type="button" class="${scope === 'fav' ? 'on' : ''}" data-act="scope" data-k="fav">${icon('star', 'xs')} مفضلتي (${favs.length})</button>
+          <button type="button" class="${scope === 'all' ? 'on' : ''}" data-act="scope" data-k="all">كل الحي${all ? ` (${all})` : ''}</button></div>
+          ${scope === 'fav' ? `<p class="muted xs">${favs.map(p => esc(p.name)).join('، ')}</p>` : ''}` : ''}`}
+    <div class="row2">
+      <label class="sel" for="c-when">${icon('clock', 'sm')}<select id="c-when" data-bind="compose.when" aria-label="الموعد المناسب">${WHENS.map(w => `<option ${c.when === w ? 'selected' : ''}>${w}</option>`).join('')}</select></label>
+      <label class="btn ghost file" for="c-photo">${icon('camera', 'sm')} ${c.photo ? 'تغيير الصورة' : 'إرفاق صورة'}<input type="file" accept="image/*" id="c-photo" hidden></label>
+    </div>
+    ${c.photo ? `<div class="thumb"><img src="${c.photo}" alt="الصورة المرفقة"><button type="button" class="x" data-act="unphoto" aria-label="حذف الصورة">${icon('x', 'sm')}</button></div>` : ''}
+    <button class="btn primary block" type="submit">${icon('send', 'sm')} ${label}</button>
+  </form>`;
+}
+
+/* ============================================================
+   طالب الخدمة
+   ============================================================ */
+const VIEWS = {};
+VIEWS.home = u => {
+  const hr = new Date().getHours(), greet = hr < 12 ? 'صباح الخير' : 'مساء الخير', d = u.address?.district || '';
+  const active = db.orders.filter(o => o.customerId === u.id && (ACTIVE.includes(o.status) || o.status === 'delivered')).sort(byNew);
+  const favs = favProviders(), provs = providersIn(d).sort((a, b) => (isFav(b.id) - isFav(a.id)) || (avg(b) - avg(a)));
+  return `<section class="hello"><h1>${greet} يا ${esc(u.name)}</h1><p class="muted sm">${icon('pin', 'xs')} ${d ? `حي ${esc(d)}` : 'أكمل عنوانك من حسابي'}</p></section>
+  <section class="card ask"><h2 class="ask-title">وش تبي؟</h2>${composeForm('home')}</section>
+  ${favs.length ? `<section><div class="sec-h"><h2>مفضلتي</h2><button class="link" data-act="tab" data-k="favs">الكل</button></div><div class="favrow">${favs.map(p => `<button class="favchip" data-act="open" data-v="provider" data-id="${p.id}"><span class="pav">${icon(CAT(p.cat).icon)}</span><span><b>${esc(p.name)}</b><small>${CAT(p.cat).name}</small></span></button>`).join('')}</div></section>` : ''}
+  ${active.length ? `<section><div class="sec-h"><h2>طلباتك الجارية</h2><button class="link" data-act="tab" data-k="orders">كل طلباتي</button></div><div class="list">${active.slice(0, 3).map(orderCard).join('')}</div></section>` : ''}
+  <section><div class="sec-h"><h2>الخدمات</h2></div><div class="cats">${CATS.map(c => `<button class="cat" data-act="open" data-v="category" data-id="${c.id}">${icon(c.icon)}<span>${c.name}</span></button>`).join('')}</div></section>
+  <section><div class="sec-h"><h2>يخدمون حيّك</h2><span class="muted sm">${provs.length} مقدم خدمة</span></div>${provs.length ? `<div class="list">${provs.map(providerCard).join('')}</div>` : empty('ما فيه مقدمو خدمة معتمدون في حيّك بعد. اكتب طلبك فوق ويوصل لهم أول ما ينضمون.')}</section>`;
+};
+VIEWS.favs = u => {
+  const favs = favProviders();
+  if (!favs.length) return card('مفضلتي', `<p>اضغط ${icon('star', 'xs')} عند أي محل أو فني يعجبك ويصير في مفضلتك.</p><p class="muted sm">بعدها طلباتك النصية تروح لمفضلتك في نفس الخدمة، ومتى ما بغيت تعمّمها على كل مقدمي الخدمة في الحي.</p><button class="btn primary block" data-act="tab" data-k="home">تصفّح مقدمي الخدمة</button>`);
+  const groups = CATS.map(c => ({ c, ps: favs.filter(p => p.cat === c.id) })).filter(g => g.ps.length);
+  return groups.map(g => `<section><div class="sec-h"><h2>${g.c.name}</h2><span class="muted sm">${g.ps.length}</span></div><div class="list">${g.ps.map(providerCard).join('')}</div></section>`).join('');
+};
+VIEWS.orders = u => {
+  const mine = db.orders.filter(o => o.customerId === u.id).sort(byNew);
+  const cur = mine.filter(o => ACTIVE.includes(o.status) || o.status === 'delivered'), past = mine.filter(o => !cur.includes(o));
+  return seg('orders', [['current', 'الحالية', cur.length], ['past', 'السابقة', 0]]) + (state.sub.orders === 'current' ? listOr(cur, 'ما عندك طلبات جارية. اكتب "وش تبي" في الرئيسية وأرسل طلبك.') : listOr(past, 'ما فيه طلبات سابقة بعد.'));
+};
+VIEWS.account = u => `
+  ${card('بياناتي', `<form data-form="profile" class="stack">
+    <label class="fld" for="pf-name"><span>الاسم</span><input id="pf-name" name="name" value="${esc(u.name)}" required></label>
+    <label class="fld" for="pf-phone"><span>رقم الجوال</span><input id="pf-phone" type="tel" dir="ltr" value="${esc(u.phone)}" disabled></label>
+    <label class="fld" for="pf-district"><span>الحي</span><select id="pf-district" name="district">${db.settings.districts.map(d => `<option ${u.address?.district === d ? 'selected' : ''}>${esc(d)}</option>`).join('')}</select></label>
+    <label class="fld" for="pf-details"><span>العنوان التفصيلي</span><input id="pf-details" name="details" value="${esc(u.address?.details || '')}" placeholder="الشارع، رقم البيت أو العمارة"></label>
+    <p class="muted xs">عنوانك التفصيلي ورقمك ما يشوفها مقدم الخدمة إلا بعد ما يقبل طلبك.</p>
+    <button class="btn dark block">حفظ البيانات</button></form>`)}
+  ${card('', `<div class="actions"><button class="btn ghost block" data-act="sheet" data-type="pin">${icon('key', 'sm')} تغيير الرمز السري</button><button class="btn danger block" data-act="logout">${icon('logout', 'sm')} تسجيل الخروج</button></div>`)}
+  ${card('', `<p class="muted sm">الدفع في وش تبي عند الاستلام، نقداً أو تحويل مباشر لمقدم الخدمة.</p>`)}`;
+
+function categoryView(id) {
+  const u = me(), c = CAT(id), d = u.address?.district || '';
+  const provs = providersIn(d, id).sort((a, b) => (isFav(b.id) - isFav(a.id)) || (avg(b) - avg(a)));
+  const favs = favProviders(id);
+  return `<section class="card"><div class="phead"><span class="pav">${icon(c.icon)}</span><div><h1>${c.name}</h1><p class="muted sm">${provs.length} مقدم خدمة في حي ${esc(d)}${favs.length ? ` · ${favs.length} في مفضلتك` : ''}</p></div></div>
+    <p class="sm">${c.visit ? 'اكتب المشكلة، ويوصلك عرض سعر من مفضلتك أو من كل فنيي الحي، وتختار الأنسب.' : 'اطلب من قائمة محل تختاره، أو اكتب طلبك ويوصل لمفضلتك أو لكل المحلات.'}</p>
+    <button class="btn primary block" data-act="askCat" data-id="${id}">${icon('send', 'sm')} اكتب طلبك</button></section>
+  <section><div class="sec-h"><h2>اختر بنفسك</h2></div>${provs.length ? `<div class="list">${provs.map(providerCard).join('')}</div>` : empty('ما فيه مقدمو خدمة معتمدون لهذه الخدمة في حيّك بعد.')}</section>`;
+}
+function loadMenu(pid) {
+  if (state.menuLoading[pid]) return;
+  state.menuLoading[pid] = true;
+  call('getMenu', { pid }).then(j => { state.menus[pid] = j.menu; }).catch(e => { state.menus[pid] = state.menus[pid] || []; toast(e.message) })
+    .finally(() => { state.menuLoading[pid] = false; const t = state.stack.at(-1); if (t && (t.id === pid || t.v === 'checkout')) render() });
+}
+function providerView(id) {
+  const p = P(id); if (!p) return empty('المحل غير متاح الآن.');
+  const c = CAT(p.cat);
+  const head = `<section class="card"><div class="phead"><span class="pav">${icon(c.icon)}</span><div style="flex:1"><h1>${esc(p.name)}</h1><p class="muted sm">${c.name} · <span class="star">${ratingText(p)}</span></p></div></div>
+    <div class="facts"><div class="fact"><span>الدوام</span><b>${esc(p.hours || '—')}</b></div>
+    ${c.visit ? `<div class="fact"><span>الزيارة من</span><b>${p.visitFee ? money(p.visitFee) : 'بعرض'}</b></div>` : `<div class="fact"><span>التوصيل</span><b>${p.delivers ? money(p.deliveryFee) : 'استلام فقط'}</b></div>`}
+    <div class="fact"><span>${c.visit ? 'يخدم' : 'أقل طلب'}</span><b>${c.visit ? plural(p.districts.length, 'حي واحد', 'حيّين', 'أحياء') : money(p.minOrder)}</b></div></div>
+    ${favBtn(p, true)}</section>`;
+  if (!c.hasMenu) return head + card('اكتب طلبك', composeForm('target'));
+  const items = state.menus[id];
+  if (!items) { loadMenu(id); return head + card('القائمة', '<div class="spin" role="status" aria-label="جارٍ تحميل القائمة"></div>') }
+  const cart = state.cart && state.cart.pid === id ? state.cart.items : {};
+  const ordered = [...items.filter(i => i.available), ...items.filter(i => !i.available)];
+  const row = i => { const q = cart[i.id] || 0; return `<div class="item ${i.available ? '' : 'off'}" data-s="${esc(norm(i.name))}"><span class="nm"><b>${esc(i.name)}</b><span class="muted sm num">${money(i.price)}</span></span>
+    ${!i.available ? '<span class="tag">غير متوفر الآن</span>' : q ? `<span class="stepper"><button data-act="qty" data-id="${i.id}" data-d="1" aria-label="زيادة">${icon('plus', 'sm')}</button><b class="num">${q}</b><button data-act="qty" data-id="${i.id}" data-d="-1" aria-label="إنقاص">${icon('minus', 'sm')}</button></span>` : `<button class="add1" data-act="qty" data-id="${i.id}" data-d="1">أضف</button>`}</div>` };
+  return head + (items.length ? menuBrowser(p, ordered, row, 'cm') : card('القائمة', '<p class="muted">المحل يجهّز قائمته الآن. تقدر تكتب طلبك له نصياً تحت.</p>')) +
+    card('', `<details class="more" ${items.length ? '' : 'open'}><summary>ما لقيت اللي تبيه؟ اكتبه للمحل</summary>${composeForm('target')}</details>`);
+}
+function groupBySec(p, items) {
+  const cat = CATALOG[p.cat]; if (!cat) return [{ id: 'all', name: '', items }];
+  const known = new Set(cat.sections.map(x => x.id));
+  return [...cat.sections, { id: 'other', name: 'أصناف أخرى' }].map(g => ({ ...g, items: items.filter(i => (known.has(i.sec) ? i.sec : 'other') === g.id) })).filter(g => g.items.length);
+}
+function menuBrowser(p, items, row, key) {
+  const groups = groupBySec(p, items);
+  const tools = `<div class="menu-tools"><label class="search" for="f-${key}">${icon('search', 'sm')}<input id="f-${key}" data-filter="${key}" value="${esc(state.filters[key] || '')}" placeholder="ابحث في ${items.length} صنف" autocomplete="off" aria-label="بحث في الأصناف"></label>
+    ${groups.length > 1 ? `<div class="chips scroll">${groups.map(g => `<button type="button" class="chip" data-act="jump" data-id="${key}-${g.id}">${g.name}</button>`).join('')}</div>` : ''}</div>`;
+  return `<div data-filter-root="${key}" class="stack">${tools}${groups.map(g => `<section class="card msec fgroup" id="${key}-${g.id}">${g.name ? `<div class="msec-h"><h3>${g.name}</h3><span class="muted xs">${g.items.length} صنف</span></div>` : ''}<div>${g.items.map(row).join('')}</div></section>`).join('')}<div class="empty fempty" hidden>ما لقينا صنف بهذا الاسم.</div></div>`;
+}
+function applyFilters() {
+  document.querySelectorAll('[data-filter]').forEach(inp => {
+    const root = document.querySelector(`[data-filter-root="${inp.dataset.filter}"]`); if (!root) return;
+    const q = norm(inp.value); let any = 0;
+    root.querySelectorAll('[data-s]').forEach(el => { const ok = !q || el.dataset.s.includes(q); el.hidden = !ok; if (ok) any++ });
+    root.querySelectorAll('.fgroup').forEach(g => { g.hidden = !g.querySelector('[data-s]:not([hidden])') });
+    const e = root.querySelector('.fempty'); if (e) e.hidden = !!any;
+  });
+}
+function cartTotals() {
+  const c = state.cart, m = c && state.menus[c.pid]; if (!c || !m) return { count: 0, subtotal: 0 };
+  const ids = Object.keys(c.items).filter(k => m.some(x => x.id === k));
+  return { count: ids.reduce((s, k) => s + c.items[k], 0), subtotal: ids.reduce((s, k) => s + m.find(x => x.id === k).price * c.items[k], 0) };
+}
+function cartBar(top) {
+  if (!top || top.v !== 'provider' || !state.cart || state.cart.pid !== top.id) return '';
+  const t = cartTotals(); if (!t.count) return '';
+  return `<button class="cartbar" data-act="open" data-v="checkout"><span>متابعة الطلب <span class="cnt">${t.count}</span></span><span class="num">${money(t.subtotal)}</span></button>`;
+}
+function checkoutView() {
+  const u = me(), c = state.cart; if (!c) return empty('السلة فارغة');
+  const p = P(c.pid), m = state.menus[c.pid] || [], t = cartTotals();
+  if (!p) return empty('المحل غير متاح الآن.');
+  if (!p.delivers) state.co.fulfil = 'pickup';
+  const del = state.co.fulfil === 'delivery' ? p.deliveryFee : 0, below = t.subtotal < p.minOrder;
+  const rows = Object.entries(c.items).map(([id, q]) => { const it = m.find(x => x.id === id); return it ? `<div class="line"><span>${esc(it.name)} <span class="muted">× ${q}</span></span><span class="num">${money(it.price * q)}</span></div>` : '' }).join('');
+  const shopish = ['laundry', 'tailor'].includes(p.cat);
+  return card(esc(p.name), `<div class="lines">${rows}</div>`) +
+    card('طريقة الاستلام', `<div class="opts">
+    ${p.delivers ? `<button class="opt ${state.co.fulfil === 'delivery' ? 'on' : ''}" data-act="fulfil" data-k="delivery" aria-pressed="${state.co.fulfil === 'delivery'}"><span><b>توصيل للبيت</b><small class="muted">${esc(u.address?.details || '')}${u.address?.details ? '، ' : ''}حي ${esc(u.address?.district || '')}</small></span><b class="num">${money(p.deliveryFee)}</b></button>` : ''}
+    <button class="opt ${state.co.fulfil === 'pickup' ? 'on' : ''}" data-act="fulfil" data-k="pickup" aria-pressed="${state.co.fulfil === 'pickup'}"><span><b>${shopish ? 'أسلّم وأستلم في المحل' : 'أستلم من المحل'}</b><small class="muted">بدون رسوم</small></span><b class="num">0 ر.س</b></button></div>
+    <label class="fld" for="co-when"><span>الموعد</span><select id="co-when" data-bind="co.when">${WHENS.slice(0, 4).map(w => `<option ${state.co.when === w ? 'selected' : ''}>${w}</option>`).join('')}</select></label>
+    <label class="fld" for="co-note"><span>ملاحظة للمحل (اختياري)</span><textarea id="co-note" data-bind="co.note" rows="2" placeholder="مثال: إذا الصنف خلص جيبوا بديل قريب">${esc(state.co.note)}</textarea></label>`) +
+    card('', `<div class="lines"><div class="line"><span>قيمة الطلب</span><span class="num">${money(t.subtotal)}</span></div>
+    <div class="line"><span>التوصيل</span><span class="num">${money(del)}</span></div>
+    <div class="line total"><span>الإجمالي</span><span class="num">${money(t.subtotal + del)}</span></div></div>
+    <div class="note">${icon('wallet', 'sm')} الدفع عند الاستلام، نقداً أو تحويل مباشر.</div>
+    ${below ? `<div class="note warn">أقل طلب عند ${esc(p.name)} هو ${money(p.minOrder)}. أضف أصنافاً بقيمة ${money(p.minOrder - t.subtotal)}.</div>` : ''}
+    <button class="btn primary block" data-act="placeOrder" ${below || !t.count ? 'disabled' : ''}>أكّد الطلب · ${money(t.subtotal + del)}</button>`);
+}
+
+/* ============================================================
+   صفحة الطلب
+   ============================================================ */
+function stepper(o) {
+  const rank = { new: 0, accepted: 2, in_progress: 3, with_courier: 4, delivered: 5, closed: 6 }[o.status] ?? 0;
+  const steps = [{ l: 'طلب جديد', d: true }];
+  if (o.brokerId) steps.push({ l: 'إسناد من المنسّق', d: true });
+  if (o.type === 'text') steps.push({ l: 'عرض سعر', d: !!o.acceptedQuote });
+  steps.push({ l: 'مقبول', d: rank >= 2 }, { l: 'قيد التنفيذ', d: rank >= 3 });
+  if (o.needsCourier) steps.push({ l: 'مع المندوب', d: rank >= 4 });
+  steps.push({ l: 'تم التسليم والدفع', d: rank >= 5 }, { l: 'مُقيَّم ومغلق', d: rank >= 6 });
+  const cur = steps.findIndex(s => !s.d), last = cur === -1 ? steps.at(-1) : steps[cur - 1], next = cur === -1 ? null : steps[cur];
+  return `<div class="bar" aria-hidden="true">${steps.map((s, i) => `<i class="${s.d ? 'd' : ''} ${i === cur ? 'c' : ''}"></i>`).join('')}</div>
+    <div class="bar-l"><span>الآن: <b>${last.l}</b></span>${next ? `<span class="muted">التالي: ${next.l}</span>` : ''}</div>`;
+}
+function partiesCard(o) {
+  const u = me(), cat = CAT(o.cat);
+  const party = (role, name, lines) => `<div class="party"><span class="role">${role}</span><b>${esc(name)}</b>${lines.filter(Boolean).map(l => `<span class="muted sm">${l}</span>`).join('')}</div>`;
+  const rows = [party('طالب الخدمة', o.customerName, [phone(o.customerPhone), `حي ${esc(o.address.district)}${o.address.details ? `، ${esc(o.address.details)}` : ''}`])];
+  if (o.providerName) rows.push(party('مقدم الخدمة', o.providerName, [phone(o.providerPhone), o.providerPhone ? '' : ratingText(P(o.providerId))]));
+  else if (u.role === 'customer' || u.role === 'admin' || u.role === 'broker') rows.push(party('يوصل إلى', o.targetCount ? o.targetNames.join('، ') : `كل مقدمي ${cat.name}`, [o.targetCount ? '' : `في حي ${esc(o.address.district)}`]));
+  if (o.brokerName) rows.push(party('المنسّق', o.brokerName, [phone(o.brokerPhone)]));
+  if (o.courierName) rows.push(party('المندوب', o.courierName, [phone(o.courierPhone)]));
+  else if (o.courierRequested && o.status === 'in_progress') rows.push(party('المندوب', 'بانتظار مندوب', ['يظهر هنا أول ما يقبل المهمة']));
+  return card('أطراف الطلب', `<div class="parties">${rows.join('')}</div>`);
+}
+function loadPhoto(id) {
+  if (state.photoLoading[id]) return; state.photoLoading[id] = true;
+  call('getPhoto', { orderId: id }).then(j => { state.photos[id] = j.photo || '' }).catch(() => { state.photos[id] = '' })
+    .finally(() => { const t = state.stack.at(-1); if (t && t.v === 'order' && t.id === id) render() });
+}
+function contentCard(o) {
+  if (o.type === 'menu') return card('الأصناف', `<div class="lines">${o.items.map(i => `<div class="line"><span>${esc(i.name)} <span class="muted">× ${i.qty}</span></span><span class="num">${money(i.price * i.qty)}</span></div>`).join('')}</div>
+    ${o.text ? `<div class="note">${icon('chat', 'sm')}<span>${esc(o.text)}</span></div>` : ''}<div class="meta-row">${icon('truck', 'xs')} ${fulfilLabel(o)} · ${icon('clock', 'xs')} ${esc(o.when)}</div>`);
+  let ph = '';
+  if (o.hasPhoto) { if (state.photos[o.id] === undefined) { loadPhoto(o.id); ph = '<div class="spin" role="status" aria-label="جارٍ تحميل الصورة"></div>' } else if (state.photos[o.id]) ph = `<img class="photo" src="${state.photos[o.id]}" alt="صورة مرفقة بالطلب">` }
+  return card('الطلب', `<p class="req">${esc(o.text)}</p>${ph}<div class="meta-row">${icon('pin', 'xs')} ${fulfilLabel(o)} · ${icon('clock', 'xs')} ${esc(o.when)}</div>`);
+}
+function quotesCard(o) {
+  const u = me();
+  if (u.role === 'customer') {
+    if (!o.quotes.length) return card('عروض الأسعار', `<p class="muted">${o.targetCount ? `وصل طلبك إلى ${o.targetCount === 1 ? esc(o.targetNames[0]) : `${o.targetCount} من مفضلتك`}، والعروض تظهر هنا أول ما توصل.` : 'وصل طلبك لمقدمي الخدمة في الحي، والعروض تظهر هنا أول ما توصل.'}</p>`);
+    const qs = [...o.quotes].sort((a, b) => a.price - b.price);
+    return card(`عروض الأسعار (${qs.length})`, `<div class="quotes">${qs.map((q, i) => {
+      const best = i === 0 && qs.length > 1; return `<div class="quote ${best ? 'best' : ''}">
+      <div class="q-top"><b>${esc(q.pname)}${isFav(q.pid) ? ` ${icon('star', 'xs')}` : ''}</b><span class="q-price">${money(q.price)}</span></div>
+      <div class="muted sm"><span class="star">${ratingText(P(q.pid))}</span> · ${icon('clock', 'xs')} ${esc(q.when)}</div>
+      ${q.note ? `<p class="sm">${esc(q.note)}</p>` : ''}${best ? '<span><span class="tag good">الأقل سعراً</span></span>' : ''}
+      <button class="btn ${best ? 'primary' : 'ghost'} sm" data-act="acceptQuote" data-id="${o.id}" data-q="${q.id}">اقبل هذا العرض</button></div>` }).join('')}</div>`);
+  }
+  if (u.role === 'provider') {
+    const mine = o.quotes.find(q => q.pid === u.id);
+    if (mine) return card('عرضك', `<div class="lines"><div class="line"><span>السعر</span><b class="num">${money(mine.price)}</b></div><div class="line"><span>الموعد</span><span>${esc(mine.when)}</span></div></div><p class="muted sm">بانتظار رد العميل${o.quoteCount > 1 ? `، ووصلته ${o.quoteCount} عروض` : ''}.</p>`);
+    if (o.type === 'text' && o.status === 'new' && !o.providerId) {
+      const visit = CAT(o.cat).visit;
+      return card('أرسل عرض سعر', `<form data-form="quote" data-id="${o.id}" class="stack">
+        <div class="row2"><label class="fld" for="q-price"><span>السعر ${visit ? 'شامل الزيارة' : 'شامل التوصيل'}</span><input id="q-price" name="price" type="number" min="1" step="1" inputmode="numeric" required placeholder="ر.س"></label>
+        <label class="fld" for="q-when"><span>الموعد</span><select id="q-when" name="when">${QWHENS.map(w => `<option>${w}</option>`).join('')}</select></label></div>
+        <label class="fld" for="q-note"><span>ملاحظة للعميل (اختياري)</span><input id="q-note" name="note" placeholder="مثال: السعر يشمل القطع الأساسية"></label>
+        <button class="btn primary block">أرسل العرض</button>
+        ${o.targetedToMe ? `<button type="button" class="btn danger block" data-act="reject" data-id="${o.id}">أعتذر عن الطلب</button>` : ''}</form>`);
+    }
+    return '';
+  }
+  if (u.role === 'admin' && o.quotes.length) return card(`عروض الأسعار (${o.quotes.length})`, `<div class="lines">${o.quotes.map(q => `<div class="line"><span>${esc(q.pname)} · <span class="muted sm">${esc(q.when)}</span></span><b class="num">${money(q.price)}</b></div>`).join('')}</div>`);
+  if (u.role === 'broker' && o.quoteCount) return card('', `<p class="muted sm">وصل الطلب ${plural(o.quoteCount, 'عرض واحد', 'عرضان', 'عروض')}.</p>`);
+  return '';
+}
+function totalsCard(o) {
+  if (!o.subtotal) return '';
+  const u = me(), done = ['delivered', 'closed'].includes(o.status), f = done ? { platform: o.platformFee, broker: o.brokerFee } : fees(o);
+  const showComm = ['provider', 'admin', 'broker'].includes(u.role);
+  return card('', `<div class="lines"><div class="line"><span>${o.type === 'text' ? 'قيمة الخدمة' : 'قيمة الطلب'}</span><span class="num">${money(o.subtotal)}</span></div>
+    ${o.deliveryFee ? `<div class="line"><span>التوصيل</span><span class="num">${money(o.deliveryFee)}</span></div>` : ''}
+    <div class="line total"><span>الإجمالي</span><span class="num">${money(o.total)}</span></div>
+    ${showComm ? `<div class="line"><span class="muted sm">العمولة</span><span class="muted sm">${o.rates?.trial ? 'مجانية (فترة التجربة)' : `المنصة ${money(f.platform)}${o.brokerId ? ` · المنسّق ${money(f.broker)}` : ''}`}</span></div>` : ''}</div>
+    <div class="note">${icon('wallet', 'sm')} الدفع عند الاستلام${o.needsCourier ? '، ويحصّله المندوب' : ''}.</div>`);
+}
+function actionsCard(o) {
+  const u = me(), b = [];
+  const btn = (act, label, cls = 'primary', extra = '') => `<button class="btn ${cls} block" data-act="${act}" data-id="${o.id}" ${extra}>${label}</button>`;
+  if (u.role === 'customer' && o.customerId === u.id) {
+    if (o.status === 'new' && o.type === 'text' && o.targetCount && !o.providerId) b.push(btn('openToAll', `${icon('send', 'sm')} عمّم الطلب على كل مقدمي ${CAT(o.cat).name} في الحي`, 'ghost'));
+    if (o.status === 'rejected' && o.type === 'text') b.push(btn('openToAll', 'أرسل الطلب لكل مقدمي الخدمة في الحي'));
+    if (['new', 'accepted'].includes(o.status)) b.push(btn('sheet', 'إلغاء الطلب', 'danger', 'data-type="cancel"'));
+  }
+  if (u.role === 'provider' && o.providerId === u.id) {
+    if (o.status === 'new' && o.type === 'menu') b.push(`<div class="pair">${btn('accept', 'اقبل الطلب')}${btn('reject', 'اعتذار', 'danger')}</div>`);
+    if (o.status === 'accepted') b.push(btn('start', o.type === 'menu' ? 'ابدأ تجهيز الطلب' : 'ابدأ التنفيذ', 'dark'));
+    if (o.status === 'in_progress') {
+      if (o.needsCourier) {
+        if (!o.courierRequested) b.push(btn('requestCourier', `${icon('truck', 'sm')} الطلب جاهز، اطلب مندوب`, 'dark'));
+        else if (!o.courierId) b.push(`<div class="note info">${icon('truck', 'sm')} طلبنا مندوب، وننتظر أحد يقبل المهمة.</div>`);
+        else b.push(`<div class="note info">${icon('truck', 'sm')} ${esc(o.courierName)} في الطريق لاستلام الطلب.</div>`);
+      } else b.push(btn('complete', `تم ${o.fulfil === 'visit' ? 'تنفيذ الخدمة' : 'التسليم'} واستلمت ${money(o.total)}`, 'good'));
+    }
+    if (o.status === 'with_courier') b.push(`<div class="note info">${icon('truck', 'sm')} الطلب مع ${esc(o.courierName)} في الطريق للعميل.</div>`);
+  }
+  if (u.role === 'courier') {
+    if (availTask(o)) b.push(btn('courierTake', `اقبل المهمة · ربحك ${money(o.deliveryFee)}`));
+    if (o.courierId === u.id && o.status === 'in_progress') b.push(btn('courierPicked', `استلمت الطلب من ${esc(o.providerName)}`, 'dark'));
+    if (o.courierId === u.id && o.status === 'with_courier') b.push(btn('complete', `سلّمت الطلب وحصّلت ${money(o.total)}`, 'good'));
+  }
+  if (u.role === 'broker' && o.status === 'new' && !o.providerId) b.push(btn('sheet', `${icon('link', 'sm')} تولَّ الطلب وأسنده لمقدم خدمة`, 'primary', 'data-type="assign"'));
+  if (u.role === 'admin' && ACTIVE.includes(o.status)) b.push(btn('sheet', 'إلغاء الطلب من الإدارة', 'danger', 'data-type="cancel"'));
+  return b.length ? `<section class="actions">${b.join('')}</section>` : '';
+}
+function ratingCard(o) {
+  const u = me();
+  if (o.status === 'delivered' && u.id === o.customerId) {
+    return card(`كيف كانت خدمة ${esc(o.providerName)}؟`, `<div class="stars" role="radiogroup" aria-label="التقييم">${[1, 2, 3, 4, 5].map(n => `<button type="button" class="${n <= state.rate ? 'on' : ''}" data-act="star" data-n="${n}" role="radio" aria-checked="${n === state.rate}" aria-label="${n} من 5">${icon('star')}</button>`).join('')}</div>
+      <textarea id="rate-text" data-bind="state.rateText" rows="2" placeholder="كلمة عن الخدمة (اختياري)">${esc(state.rateText)}</textarea>
+      <button class="btn primary block" data-act="rate" data-id="${o.id}">أرسل التقييم</button>`);
+  }
+  if (o.rating) return card('التقييم', `<div class="stars ro">${[1, 2, 3, 4, 5].map(n => `<span class="${n <= o.rating.stars ? 'on' : ''}">${icon('star')}</span>`).join('')}</div>${o.rating.comment ? `<p class="sm">"${esc(o.rating.comment)}"</p>` : ''}`);
+  return '';
+}
+function chatCard(o) {
+  const u = me(), part = [o.customerId, o.providerId, o.brokerId, o.courierId].includes(u.id);
+  if (!part && u.role !== 'admin') return '';
+  if (!o.providerId) return card('المحادثة', '<p class="muted sm">تُفتح المحادثة أول ما يُحدَّد مقدم الخدمة.</p>');
+  const msgs = o.messages.map(m => `<div class="msg ${m.mine ? 'me' : ''}"><span class="msg-by">${esc(m.byName)}</span>${esc(m.text)}<span class="msg-t">${ago(m.at)}</span></div>`).join('');
+  const closed = ['closed', 'cancelled', 'rejected'].includes(o.status);
+  return card('المحادثة', `${msgs ? `<div class="msgs">${msgs}</div>` : '<p class="muted sm">ما فيه رسائل بعد.</p>'}
+    ${!closed && part ? `<form data-form="chat" data-id="${o.id}" class="chat-in"><input id="chat-text" name="text" placeholder="اكتب رسالة لأطراف الطلب" autocomplete="off" aria-label="رسالة"><button class="btn dark" aria-label="إرسال">${icon('send', 'sm')}</button></form>` : ''}`);
+}
+function logCard(o) {
+  return `<section class="card"><details class="log"><summary>سجل الطلب (${o.events.length})</summary><ol>${[...o.events].reverse().map(e => `<li>${esc(e.text)}<span>${esc(e.byName)} · ${ago(e.at)}</span></li>`).join('')}</ol></details></section>`;
+}
+function orderView(id) {
+  const o = O(id); if (!o) return empty('هذا الطلب لم يعد متاحاً لك.');
+  const cat = CAT(o.cat), out = ['cancelled', 'rejected'].includes(o.status);
+  return `<section class="card"><div class="ohead-top"><div><div class="oid">طلب #${o.id}</div><div class="muted sm">${cat.name} · ${o.type === 'menu' ? 'من القائمة' : 'طلب نصي'} · ${ago(o.createdAt)}</div></div>${pill(o)}</div>
+    ${out ? `<div class="note bad">${o.status === 'cancelled' ? 'أُلغي هذا الطلب' : 'اعتذر مقدم الخدمة عن هذا الطلب'}${o.reason ? `: ${esc(o.reason)}` : ''}</div>` : stepper(o)}</section>`
+    + actionsCard(o) + (o.type === 'text' && o.status === 'new' ? quotesCard(o) : '') + contentCard(o) + totalsCard(o) + partiesCard(o) + ratingCard(o) + chatCard(o) + logCard(o);
+}
+
+/* ============================================================
+   مقدم الخدمة
+   ============================================================ */
+VIEWS.p_orders = u => {
+  const os = db.orders.slice().sort(byNew);
+  const targeted = os.filter(provTargeted), open = os.filter(provOpen);
+  const working = os.filter(o => o.providerId === u.id && ['accepted', 'in_progress', 'with_courier'].includes(o.status));
+  const done = os.filter(o => o.providerId === u.id && ['delivered', 'closed', 'cancelled', 'rejected'].includes(o.status));
+  const k = state.sub.p_orders;
+  return seg('p_orders', [['targeted', 'موجّهة لي', targeted.filter(o => !quotedByMe(o)).length], ['open', 'مفتوحة في الحي', open.filter(o => !quotedByMe(o)).length], ['working', 'قيد التنفيذ', working.length], ['done', 'منتهية', 0]]) +
+    (k === 'targeted' ? listOr(targeted, 'ما فيه طلبات موجّهة لك الآن. لما يضيفك عميل لمفضلته أو يختارك، تظهر طلباته هنا.')
+      : k === 'open' ? (open.length ? `<p class="muted sm">طلبات ${CAT(u.cat).name} المفتوحة لكل المحلات في أحيائك. أرسل عرضك والعميل يختار.</p>${listOr(open, '')}` : empty('ما فيه طلبات مفتوحة في أحيائك الآن.'))
+        : k === 'working' ? listOr(working, 'ما فيه طلبات قيد التنفيذ.') : listOr(done, 'ما فيه طلبات منتهية بعد.'));
+};
+VIEWS.p_menu = u => {
+  const items = db.menu || [], cat = CATALOG[u.cat], cn = CAT(u.cat).name;
+  if (!items.length && cat) return `<section class="card starter"><h2>ابدأ قائمتك في دقيقة</h2>
+    <p>جهّزنا لك قائمة ${cn} فيها ${cat.items.length} صنف في ${cat.sections.length} ${cat.sections.length > 2 ? 'أقسام' : 'قسم'}، بأسعار مقترحة تقديرية تعدّلها حسب محلك.</p>
+    <div class="actions"><button class="btn primary block" data-act="addAllCatalog">${icon('plus', 'sm')} أضف القائمة كاملة (${cat.items.length} صنف)</button>
+    <button class="btn ghost block" data-act="sheet" data-type="catalog">أختار الأصناف بنفسي</button>
+    <button class="btn ghost block" data-act="sheet" data-type="item">أضيف صنف خاص</button></div></section>`;
+  const off = items.filter(i => !i.available).length;
+  const row = i => `<div class="item ${i.available ? '' : 'off'}" data-s="${esc(norm(i.name))}"><span class="nm"><b>${esc(i.name)}</b><span class="muted sm num">${money(i.price)}${i.available ? '' : ' · غير متوفر'}</span></span>
+    <span class="iact"><button class="switch ${i.available ? 'on' : ''}" data-act="toggleItem" data-id="${i.id}" role="switch" aria-checked="${i.available}" aria-label="متوفر: ${esc(i.name)}"></button>
+    <button class="iconbtn light" data-act="sheet" data-type="item" data-id="${i.id}" aria-label="تعديل ${esc(i.name)}">${icon('edit', 'sm')}</button></span></div>`;
+  return `<div class="${cat ? 'row2' : 'actions'}">${cat ? `<button class="btn primary" data-act="sheet" data-type="catalog">${icon('plus', 'sm')} من القائمة الجاهزة</button>` : ''}<button class="btn ${cat ? 'ghost' : 'primary block'}" data-act="sheet" data-type="item">${cat ? '' : icon('plus', 'sm') + ' '}صنف خاص</button></div>
+    <p class="muted sm">${items.length ? `${items.length} صنف في قائمتك${off ? ` · ${off} غير متوفر الآن` : ''}. اضغط ${icon('edit', 'xs')} لتعديل السعر.` : 'أضف أول صنف في قائمتك.'}</p>
+    ${items.length ? menuBrowser(u, items, row, 'pm') : ''}`;
+};
+VIEWS.p_income = u => {
+  const mine = db.orders.filter(o => o.providerId === u.id && ['delivered', 'closed'].includes(o.status));
+  const day = new Date(); day.setHours(0, 0, 0, 0); const mon = new Date(day.getFullYear(), day.getMonth(), 1);
+  const sum = a => a.reduce((s, o) => s + o.subtotal, 0);
+  const today = mine.filter(o => (o.deliveredAt || o.createdAt) >= day), month = mine.filter(o => (o.deliveredAt || o.createdAt) >= mon);
+  const comm = mine.reduce((s, o) => s + o.platformFee + o.brokerFee, 0);
+  return `<div class="tiles"><div class="tile hl"><span>دخل اليوم</span><b class="num">${money(sum(today))}</b><small>${today.length} طلب</small></div>
+    <div class="tile"><span>دخل الشهر</span><b class="num">${money(sum(month))}</b><small>${month.length} طلب</small></div>
+    <div class="tile"><span>تقييمك</span><b class="num">${u.ratingCount ? avg(u).toFixed(1) : '—'}</b><small>من ${u.ratingCount} تقييم</small></div>
+    <div class="tile"><span>العمولة المستحقة</span><b class="num">${money(comm)}</b><small>${db.settings.trial ? 'مجانية في التجربة' : 'للمنصة والمنسّق'}</small></div></div>
+    <section><div class="sec-h"><h2>آخر الطلبات المنتهية</h2></div>${listOr(mine.sort(byNew).slice(0, 10), 'ما فيه طلبات منتهية بعد.')}</section>`;
+};
+VIEWS.p_shop = u => {
+  const c = CAT(u.cat);
+  return card('بيانات المحل', `<form data-form="shop" class="stack">
+    <label class="fld" for="s-name"><span>اسم المحل أو الفني</span><input id="s-name" name="name" value="${esc(u.name)}" required></label>
+    <label class="fld" for="s-hours"><span>أوقات العمل</span><input id="s-hours" name="hours" value="${esc(u.hours)}" placeholder="مثال: 7 ص – 11 م"></label>
+    ${c.visit ? `<label class="fld" for="s-visit"><span>رسم الزيارة (ر.س)</span><input id="s-visit" name="visitFee" type="number" min="0" value="${u.visitFee}"></label>`
+      : `<div class="row2"><label class="fld" for="s-fee"><span>رسم التوصيل (ر.س)</span><input id="s-fee" name="deliveryFee" type="number" min="0" step="0.5" value="${u.deliveryFee}"></label>
+      <label class="fld" for="s-min"><span>أقل طلب (ر.س)</span><input id="s-min" name="minOrder" type="number" min="0" value="${u.minOrder}"></label></div>
+      <label class="toggle-row" for="s-delivers"><span><b>أوصّل الطلبات</b><small class="muted">إذا أطفأته يكون الاستلام من المحل فقط</small></span><input type="checkbox" id="s-delivers" name="delivers" ${u.delivers ? 'checked' : ''}></label>
+      <label class="toggle-row" for="s-courier"><span><b>التوصيل عن طريق مندوب</b><small class="muted">المندوب يستلم من المحل ويحصّل من العميل</small></span><input type="checkbox" id="s-courier" name="usesCourier" ${u.usesCourier ? 'checked' : ''}></label>`}
+    <div class="field-label">الأحياء اللي تخدمها</div><div class="checks">${db.settings.districts.map((d, i) => `<label for="s-d${i}"><input type="checkbox" id="s-d${i}" name="districts" value="${esc(d)}" ${u.districts.includes(d) ? 'checked' : ''}>${esc(d)}</label>`).join('')}</div>
+    <button class="btn dark block">حفظ</button></form>`) + accountCard();
+};
+const accountCard = () => card('', `<div class="actions"><button class="btn ghost block" data-act="sheet" data-type="pin">${icon('key', 'sm')} تغيير الرمز السري</button><button class="btn danger block" data-act="logout">${icon('logout', 'sm')} تسجيل الخروج</button></div>`);
+
+/* ============================================================
+   المندوب / المنسّق / الإدارة
+   ============================================================ */
+VIEWS.c_tasks = u => { const t = db.orders.filter(availTask).sort(byNew); return (t.length ? `<p class="muted sm">طلبات جاهزة في المحلات تنتظر مندوب. اقبل المهمة واستلم من المحل.</p>` : '') + listOr(t, 'ما فيه مهام متاحة الآن.') };
+VIEWS.c_mine = u => {
+  const t = db.orders.filter(o => o.courierId === u.id).sort(byNew), act = t.filter(o => ['in_progress', 'with_courier'].includes(o.status));
+  return `<section><div class="sec-h"><h2>جارية</h2></div>${listOr(act, 'ما عندك مهام جارية.')}</section><section><div class="sec-h"><h2>منتهية</h2></div>${listOr(t.filter(o => !act.includes(o)), 'ما فيه مهام منتهية.')}</section>`;
+};
+VIEWS.c_wallet = u => {
+  const t = db.orders.filter(o => o.courierId === u.id && ['delivered', 'closed'].includes(o.status));
+  const col = t.reduce((s, o) => s + o.total, 0), shops = t.reduce((s, o) => s + o.subtotal, 0), earn = t.reduce((s, o) => s + o.deliveryFee, 0);
+  return `<div class="tiles"><div class="tile hl"><span>أرباح التوصيل</span><b class="num">${money(earn)}</b><small>${t.length} مهمة</small></div>
+    <div class="tile"><span>مبالغ حصّلتها</span><b class="num">${money(col)}</b><small>من العملاء</small></div></div>
+    ${card('المستحق للمحلات', `<p class="sm">حصّلت من العملاء ${money(col)}: منها ${money(shops)} قيمة طلبات تسلّمها للمحلات، و${money(earn)} رسوم توصيل لك.</p>`)}
+    ${accountCard()}`;
+};
+VIEWS.b_open = u => { const t = db.orders.filter(o => o.status === 'new' && !o.providerId).sort((a, b) => a.createdAt - b.createdAt); return (t.length ? `<p class="muted sm">طلبات مفتوحة ما قبلها أحد بعد، الأقدم أولاً.</p>` : '') + listOr(t, 'كل الطلبات المفتوحة لها مقدم خدمة.') };
+VIEWS.b_mine = u => listOr(db.orders.filter(o => o.brokerId === u.id).sort(byNew), 'ما توليت أي طلب بعد. شوف "تنتظر مقدم".');
+VIEWS.b_wallet = u => {
+  const t = db.orders.filter(o => o.brokerId === u.id), done = t.filter(o => ['delivered', 'closed'].includes(o.status));
+  return `<div class="tiles"><div class="tile hl"><span>عمولتك</span><b class="num">${money(done.reduce((s, o) => s + o.brokerFee, 0))}</b><small>${db.settings.trial ? 'مجانية في التجربة' : `${db.settings.brokerRate}% من قيمة الطلب`}</small></div>
+    <div class="tile"><span>طلبات أسندتها</span><b class="num">${t.length}</b><small>${done.length} منها منتهية</small></div></div>${accountCard()}`;
+};
+VIEWS.a_overview = u => {
+  const os = db.orders, done = os.filter(o => ['delivered', 'closed'].includes(o.status)), us = db.users || [], s = db.settings;
+  const byCat = CATS.map(c => ({ c, n: os.filter(o => o.cat === c.id).length })).filter(x => x.n).sort((a, b) => b.n - a.n), mx = Math.max(1, ...byCat.map(x => x.n));
+  return `${s.trial ? `<div class="note info">${icon('shield', 'sm')} فترة التجربة مفعّلة حتى ${esc(s.trialEnds)}، والعمولة صفر على الطلبات الجديدة.</div>` : ''}
+  <div class="tiles"><div class="tile hl"><span>كل الطلبات</span><b class="num">${os.length}</b><small>${os.filter(o => ACTIVE.includes(o.status)).length} جارية الآن</small></div>
+    <div class="tile"><span>قيمة المنفّذ</span><b class="num">${money(done.reduce((a, o) => a + o.total, 0))}</b><small>${done.length} طلب منتهٍ</small></div>
+    <div class="tile"><span>طالبو الخدمة</span><b class="num">${us.filter(x => x.role === 'customer').length}</b><small>حساب مسجّل</small></div>
+    <div class="tile"><span>مقدمو الخدمة</span><b class="num">${us.filter(x => x.role === 'provider' && x.status === 'active').length}</b><small>${us.filter(x => x.status === 'pending').length} بانتظار الاعتماد</small></div></div>
+  ${byCat.length ? card('الطلبات حسب الخدمة', `<div class="hbar">${byCat.map(x => `<div><span>${x.c.name}</span><i style="width:${x.n / mx * 100}%"></i><em>${x.n}</em></div>`).join('')}</div>`) : ''}
+  ${accountCard()}`;
+};
+VIEWS.a_users = u => {
+  const all = (db.users || []).filter(x => x.id !== u.id).sort((a, b) => b.createdAt - a.createdAt), pend = all.filter(x => x.status === 'pending');
+  const k = state.sub.a_users, list = k === 'pending' ? pend : all;
+  const row = x => {
+    const acts = [];
+    if (x.status === 'pending') acts.push(`<div class="pair"><button class="btn good" data-act="uStatus" data-id="${x.id}" data-k="active">اعتماد</button><button class="btn danger" data-act="uStatus" data-id="${x.id}" data-k="rejected">رفض</button></div>`);
+    else {
+      const b = [];
+      if (x.status === 'active') b.push(`<button class="btn ghost sm" data-act="uStatus" data-id="${x.id}" data-k="blocked">إيقاف</button>`);
+      if (x.status === 'blocked' || x.status === 'rejected') b.push(`<button class="btn good sm" data-act="uStatus" data-id="${x.id}" data-k="active">تفعيل</button>`);
+      if (x.role === 'customer') b.push(`<button class="btn ghost sm" data-act="uRole" data-id="${x.id}" data-k="broker">اجعله منسّقاً</button>`);
+      if (x.role === 'broker') b.push(`<button class="btn ghost sm" data-act="uRole" data-id="${x.id}" data-k="customer">إلغاء صفة المنسّق</button>`);
+      b.push(`<button class="btn ghost sm" data-act="sheet" data-type="resetPin" data-id="${x.id}">${icon('key', 'xs')} الرمز</button>`);
+      acts.push(`<div class="chips">${b.join('')}</div>`);
+    }
+    const st = { active: 'good', pending: 'info', blocked: 'bad', rejected: 'bad' }[x.status];
+    return `<div class="card" data-s="${esc(norm(x.name + ' ' + x.phone))}"><div class="ohead-top"><div><b>${esc(x.name)}</b><p class="muted sm">${ROLE[x.role]}${x.role === 'provider' ? ` · ${CAT(x.cat).name} · ${x.districts.map(esc).join('، ')}` : x.district ? ` · حي ${esc(x.district)}` : ''}${x.vehicle ? ` · ${esc(x.vehicle)}` : ''}</p>
+      <p class="muted xs">${phone(x.phone)} · ${ago(x.createdAt)}${x.locked ? ' · <b style="color:var(--bad)">مقفل بعد محاولات خاطئة</b>' : ''}</p></div><span class="pill t-${st}">${STATUS_U[x.status]}</span></div>${acts.join('')}</div>`;
+  };
+  return seg('a_users', [['pending', 'بانتظار الاعتماد', pend.length], ['all', 'الكل', 0]]) +
+    (list.length ? `<div data-filter-root="users" class="stack"><label class="search" for="f-users">${icon('search', 'sm')}<input id="f-users" data-filter="users" value="${esc(state.filters.users || '')}" placeholder="ابحث بالاسم أو الجوال" autocomplete="off" aria-label="بحث"></label><div class="list">${list.map(row).join('')}</div><div class="empty fempty" hidden>ما فيه نتائج.</div></div>`
+      : empty(k === 'pending' ? 'ما فيه طلبات انضمام تنتظر الاعتماد.' : 'ما فيه مستخدمون بعد.'));
+};
+VIEWS.a_orders = u => {
+  const os = db.orders.slice().sort(byNew), k = state.sub.a_orders;
+  const f = { active: o => ACTIVE.includes(o.status), open: o => o.status === 'new' && !o.providerId, done: o => ['delivered', 'closed'].includes(o.status), out: o => ['cancelled', 'rejected'].includes(o.status), all: () => true }[k];
+  return seg('a_orders', [['active', 'جارية'], ['open', 'مفتوحة'], ['done', 'منتهية'], ['out', 'ملغاة'], ['all', 'الكل']]) + listOr(os.filter(f), 'ما فيه طلبات هنا.');
+};
+VIEWS.a_settings = u => {
+  const s = db.settings;
+  return card('العمولة والتجربة', `<form data-form="settings" class="stack">
+    <label class="toggle-row" for="st-trial"><span><b>فترة التجربة المجانية</b><small class="muted">العمولة صفر على الطلبات الجديدة</small></span><input type="checkbox" id="st-trial" name="trial" ${s.trial ? 'checked' : ''}></label>
+    <label class="fld" for="st-end"><span>نهاية التجربة</span><input id="st-end" name="trialEnds" type="date" value="${esc(s.trialEnds)}"></label>
+    <label class="fld" for="st-p"><span>عمولة المنصة بدون منسّق (%)</span><input id="st-p" name="platformRate" type="number" min="0" max="50" step="0.5" value="${s.platformRate}"></label>
+    <div class="row2"><label class="fld" for="st-bp"><span>المنصة مع منسّق (%)</span><input id="st-bp" name="brokerPlatformRate" type="number" min="0" max="50" step="0.5" value="${s.brokerPlatformRate}"></label>
+    <label class="fld" for="st-b"><span>المنسّق (%)</span><input id="st-b" name="brokerRate" type="number" min="0" max="50" step="0.5" value="${s.brokerRate}"></label></div>
+    <label class="fld" for="st-d"><span>الأحياء المخدومة (حي في كل سطر)</span><textarea id="st-d" name="districts" rows="4">${esc(s.districts.join('\n'))}</textarea></label>
+    <p class="muted xs">تغيير النسب يسري على الطلبات الجديدة فقط.</p>
+    <button class="btn dark block">حفظ الإعدادات</button></form>`);
+};
+
+/* ============================================================
+   النوافذ المنبثقة
+   ============================================================ */
+function sheetHtml() {
+  const s = state.sheet; if (!s) return '';
+  const u = me(); let h = '';
+  if (s.type === 'me') h = `<h2>${esc(u.name)}</h2><p class="muted sm">${ROLE[u.role]} · ${phone(u.phone)}</p>
+    <div class="actions">${u.role === 'customer' ? `<button class="btn ghost block" data-act="tab" data-k="account">${icon('user', 'sm')} بياناتي وعنواني</button>` : ''}
+    <button class="btn ghost block" data-act="sheet" data-type="pin">${icon('key', 'sm')} تغيير الرمز السري</button>
+    <button class="btn danger block" data-act="logout">${icon('logout', 'sm')} تسجيل الخروج</button></div>`;
+  if (s.type === 'pin') h = `<h2>تغيير الرمز السري</h2><form data-form="pin" class="stack">
+    <label class="fld" for="pn-old"><span>الرمز الحالي</span><input id="pn-old" name="oldPin" type="password" inputmode="numeric" maxlength="4" dir="ltr" required></label>
+    <div class="row2"><label class="fld" for="pn-new"><span>الرمز الجديد</span><input id="pn-new" name="newPin" type="password" inputmode="numeric" maxlength="4" dir="ltr" required></label>
+    <label class="fld" for="pn-new2"><span>أعد كتابته</span><input id="pn-new2" name="newPin2" type="password" inputmode="numeric" maxlength="4" dir="ltr" required></label></div>
+    <button class="btn primary block">حفظ الرمز</button></form>`;
+  if (s.type === 'resetPin') { const x = (db.users || []).find(y => y.id === s.id); h = `<h2>رمز جديد لـ ${esc(x?.name)}</h2><p class="muted sm">اكتب رمزاً من 4 أرقام وبلّغه لصاحب الحساب. يُفك القفل تلقائياً.</p><form data-form="resetPin" class="stack">
+    <label class="fld" for="rp"><span>الرمز الجديد</span><input id="rp" name="pin" type="text" inputmode="numeric" maxlength="4" dir="ltr" required></label><button class="btn primary block">حفظ</button></form>` }
+  if (s.type === 'cancel') h = `<h2>إلغاء الطلب #${s.id}</h2><p class="muted sm">وش السبب؟</p><div class="opts">${CANCEL_REASONS.map(r => `<button class="opt ${s.reason === r ? 'on' : ''}" data-act="pickReason" data-r="${r}">${r}</button>`).join('')}</div>
+      <button class="btn danger block" data-act="doCancel" ${s.reason ? '' : 'disabled'}>تأكيد الإلغاء</button><button class="btn ghost block" data-act="close">تراجع</button>`;
+  if (s.type === 'assign') {
+    const o = O(s.id), ps = o ? providersIn(o.address.district, o.cat) : [];
+    h = `<h2>أسند الطلب #${s.id}</h2><p class="muted sm">اختر مقدم ${CAT(o?.cat).name} في حي ${esc(o?.address.district)}. يوصله الطلب وحده${o?.type === 'text' ? ' ويرسل عرض السعر' : ''}.</p>
+      <div class="plist">${ps.map(p => `<button class="pitem" data-act="doAssign" data-p="${p.id}"><span class="who-av">${esc(p.name[0])}</span><span class="pi-txt"><b>${esc(p.name)}</b><small class="muted">${ratingText(p)}</small></span></button>`).join('') || empty('ما فيه مقدمو خدمة في هذا الحي.')}</div>`;
+  }
+  if (s.type === 'item') {
+    const cat = CATALOG[u.cat], it = s.id ? (db.menu || []).find(m => m.id === s.id) : { name: '', price: '', sec: 'other' };
+    h = `<h2>${s.id ? 'تعديل صنف' : 'صنف خاص'}</h2><form data-form="item" class="stack">
+      <label class="fld" for="it-name"><span>اسم الصنف</span><input id="it-name" name="name" value="${esc(it?.name)}" required placeholder="مثال: خبز تميس"></label>
+      <div class="${cat ? 'row2' : ''}"><label class="fld" for="it-price"><span>السعر (ر.س)</span><input id="it-price" name="price" type="number" min="0" step="0.25" value="${it?.price}" required inputmode="decimal"></label>
+      ${cat ? `<label class="fld" for="it-sec"><span>القسم</span><select id="it-sec" name="sec">${[...cat.sections, { id: 'other', name: 'أصناف أخرى' }].map(x => `<option value="${x.id}" ${it?.sec === x.id ? 'selected' : ''}>${x.name}</option>`).join('')}</select></label>` : ''}</div>
+      ${it?.cid && cat ? `<p class="muted xs">السعر المقترح في القائمة الجاهزة: ${money(cat.items.find(c => c.id === it.cid)?.price)}</p>` : ''}
+      <button class="btn primary block">حفظ</button>${s.id ? `<button type="button" class="btn danger block" data-act="delItem">${icon('trash', 'sm')} حذف الصنف من قائمتي</button>` : ''}</form>`;
+  }
+  if (s.type === 'catalog') {
+    const cat = CATALOG[u.cat], have = new Set((db.menu || []).filter(i => i.cid).map(i => i.cid));
+    s.sel = s.sel || []; s.sec = s.sec || 'all';
+    const list = cat.items.filter(it => s.sec === 'all' || it.sec === s.sec);
+    h = `<h2>قائمة ${CAT(u.cat).name} الجاهزة</h2><p class="muted sm">حدّد الأصناف المتوفرة عندك. الأسعار مقترحة وتقدر تعدّلها بعد الإضافة.</p>
+      <div data-filter-root="cat" class="stack"><label class="search" for="f-cat">${icon('search', 'sm')}<input id="f-cat" data-filter="cat" value="${esc(state.filters.cat || '')}" placeholder="ابحث في ${cat.items.length} صنف" autocomplete="off" aria-label="بحث"></label>
+      <div class="chips scroll">${[{ id: 'all', name: 'الكل' }, ...cat.sections].map(x => `<button type="button" class="chip ${s.sec === x.id ? 'on' : ''}" data-act="catSec" data-id="${x.id}">${x.name}</button>`).join('')}</div>
+      <div>${list.map(it => { const own = have.has(it.id); return `<label class="cchk" data-s="${esc(norm(it.name))}" for="cc-${it.id}"><input type="checkbox" id="cc-${it.id}" name="cid" value="${it.id}" ${own || s.sel.includes(it.id) ? 'checked' : ''} ${own ? 'disabled' : ''}><span class="nm">${esc(it.name)}${own ? ' <span class="tag">في قائمتك</span>' : ''}</span><span class="muted sm num">${money(it.price)}</span></label>` }).join('')}</div>
+      <div class="empty fempty" hidden>ما لقينا صنف بهذا الاسم. تقدر تضيفه كصنف خاص.</div></div>
+      <div class="sheet-foot"><button type="button" class="btn ghost" data-act="selVisible">حدّد الظاهر</button><button type="button" class="btn primary" style="flex:1" data-act="addCatalog" ${s.sel.length ? '' : 'disabled'}>أضف المحدد (${s.sel.length})</button></div>`;
+  }
+  return `<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${h}</div></div>`;
+}
+
+/* ============================================================
+   الأحداث
+   ============================================================ */
+let toastT;
+function toast(m) { const h = $('#toast-host'); h.innerHTML = `<div class="toast" role="status">${esc(m)}</div>`; clearTimeout(toastT); toastT = setTimeout(() => h.innerHTML = '', 3200) }
+function go(v, id) { state.stack.push({ v, id }); if (v === 'provider') { state.compose.target = id; state.filters.cm = ''; delete state.menus[id] } render(); window.scrollTo(0, 0) }
+function openOrder(id) { state.stack = [{ v: 'order', id }]; state.rate = 5; state.rateText = ''; render(); window.scrollTo(0, 0) }
+const resetCompose = () => { state.compose = { text: '', cat: '', when: 'أقرب وقت', photo: null, target: null, scope: 'fav' } };
+
+const ACT = {
+  retry() { state.boot = 'loading'; render(); boot() },
+  changeApi() { state.boot = 'setup'; render() },
+  refresh() { run('sync', {}, () => me().status === 'active' ? 'تم اعتماد حسابك' : 'حسابك ما زال بانتظار الاعتماد') },
+  authMode(d) { state.auth = d.k; render(); window.scrollTo(0, 0) },
+  regRole(d) { state.reg.role = d.k; render() },
+  logout() { const t = token; state.sheet = null; logoutLocal(); render(); fetch(apiUrl, { method: 'POST', body: JSON.stringify({ action: 'logout', token: t }) }).catch(() => { }) },
+  tab(d) { state.tab = d.k; state.stack = []; state.sheet = null; render(); window.scrollTo(0, 0) },
+  sub(d) { state.sub[d.key] = d.k; render() },
+  open(d) { if (d.v === 'order') { state.rate = 5; state.rateText = '' } go(d.v, d.v === 'order' ? +d.id : d.id) },
+  back() { const t = state.stack.pop(); if (t && t.v === 'provider') state.compose.target = null; render() },
+  sheet(d) { if (d.type === 'catalog') state.filters.cat = ''; state.sheet = { type: d.type, id: d.id ? (['item', 'resetPin'].includes(d.type) ? d.id : +d.id) : undefined }; render() },
+  close() { state.sheet = null; render() },
+  scrim(d, e) { if (e.target.classList.contains('scrim')) { state.sheet = null; render() } },
+  pickcat(d) { state.compose.cat = state.compose.cat === d.id ? '' : d.id; state.compose.scope = 'fav'; render() },
+  scope(d) { state.compose.scope = d.k; render() },
+  unphoto() { state.compose.photo = null; render() },
+  askCat(d) { state.compose.cat = d.id; state.compose.target = null; state.compose.scope = 'fav'; state.stack = []; state.tab = 'home'; render(); window.scrollTo(0, 0); setTimeout(() => $('#c-text')?.focus(), 50) },
+  fav(d) { run('toggleFavorite', { pid: d.id }, j => j.added ? 'أُضيف لمفضلتك' : 'أُزيل من مفضلتك') },
+  jump(d) { document.getElementById(d.id)?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' }) },
+  qty(d) {
+    const top = state.stack.at(-1), pid = top?.id, m = state.menus[pid] || [], it = m.find(x => x.id === d.id); if (!it) return;
+    if (!state.cart || state.cart.pid !== pid) { if (state.cart && Object.keys(state.cart.items).length) toast('بدأت سلة جديدة من هذا المحل'); state.cart = { pid, items: {} }; state.co = { fulfil: P(pid)?.delivers ? 'delivery' : 'pickup', note: '', when: 'أقرب وقت' } }
+    const q = (state.cart.items[it.id] || 0) + (+d.d); if (q <= 0) delete state.cart.items[it.id]; else state.cart.items[it.id] = q; render();
+  },
+  fulfil(d) { state.co.fulfil = d.k; render() },
+  placeOrder() {
+    const c = state.cart, lines = Object.entries(c.items).map(([id, qty]) => ({ id, qty }));
+    run('createMenuOrder', { pid: c.pid, lines, fulfil: state.co.fulfil, note: state.co.note.trim(), when: state.co.when }, () => `وصل طلبك إلى ${P(c.pid)?.name || 'المحل'}`,
+      j => { state.cart = null; state.compose.target = null; state.stack = [{ v: 'order', id: j.orderId }]; window.scrollTo(0, 0) });
+  },
+  accept(d) { run('accept', { id: d.id }, 'قبلت الطلب') },
+  reject(d) { run('reject', { id: d.id }, 'اعتذرت عن الطلب', () => { if (!O(d.id)) state.stack = [] }) },
+  acceptQuote(d) { run('acceptQuote', { id: d.id, quoteId: d.q }, () => `قبلت عرض ${O(d.id)?.providerName || ''}`) },
+  start(d) { run('start', { id: d.id }, 'بدأ التنفيذ') },
+  requestCourier(d) { run('requestCourier', { id: d.id }, 'طلبنا مندوب، والمهمة ظاهرة للمندوبين') },
+  courierTake(d) { run('courierTake', { id: d.id }, 'المهمة لك. توجّه للمحل واستلم الطلب') },
+  courierPicked(d) { run('courierPicked', { id: d.id }, 'استلمت الطلب. العميل يعرف إنك في الطريق') },
+  complete(d) { run('complete', { id: d.id }, 'تم تسجيل التسليم والتحصيل') },
+  openToAll(d) { run('openToAll', { id: d.id }, 'عمّمت الطلب على كل مقدمي الخدمة في الحي') },
+  star(d) { state.rate = +d.n; render() },
+  rate(d) { run('rate', { id: d.id, stars: state.rate, comment: state.rateText.trim() }, 'شكراً على تقييمك', () => { state.rateText = '' }) },
+  pickReason(d) { state.sheet.reason = d.r; render() },
+  doCancel() { const id = state.sheet.id, reason = state.sheet.reason; run('cancel', { id, reason }, 'أُلغي الطلب', () => { state.sheet = null }) },
+  doAssign(d) { const id = state.sheet.id; run('assign', { id, pid: d.p }, () => `أسندت الطلب إلى ${P(d.p)?.name || ''}`, () => { state.sheet = null }) },
+  toggleItem(d) { run('toggleItem', { itemId: d.id }) },
+  delItem() { const id = state.sheet.id; run('delItem', { itemId: id }, 'حُذف الصنف', () => { state.sheet = null }) },
+  catSec(d) { state.sheet.sec = d.id; render() },
+  selVisible() { document.querySelectorAll('.sheet .cchk:not([hidden]) input[name=cid]:not(:disabled)').forEach(c => { if (!state.sheet.sel.includes(c.value)) state.sheet.sel.push(c.value) }); render() },
+  addCatalog() { const cat = CATALOG[me().cat], items = cat.items.filter(i => state.sheet.sel.includes(i.id)).map(i => ({ cid: i.id, sec: i.sec, name: i.name, price: i.price })); run('addItems', { items }, j => `أُضيف ${j.added} صنف لقائمتك`, () => { state.sheet = null; state.filters.cat = '' }) },
+  addAllCatalog() { const cat = CATALOG[me().cat]; run('addItems', { items: cat.items.map(i => ({ cid: i.id, sec: i.sec, name: i.name, price: i.price })) }, j => `أُضيف ${j.added} صنف. عدّل الأسعار من زر التعديل`) },
+  uStatus(d) { run('setUserStatus', { userId: d.id, status: d.k }, { active: 'تم التفعيل', blocked: 'تم إيقاف الحساب', rejected: 'تم رفض الطلب' }[d.k]) },
+  uRole(d) { run('setRole', { userId: d.id, role: d.k }, d.k === 'broker' ? 'صار منسّقاً' : 'رجع طالب خدمة') }
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el || el.disabled) return;
+  const fn = ACT[el.dataset.act]; if (!fn) return;
+  if (el.dataset.act === 'scrim' && el !== e.target) return;
+  e.preventDefault(); fn(el.dataset, e);
+});
+document.addEventListener('input', e => {
+  const f = e.target.dataset.filter; if (f) { state.filters[f] = e.target.value; applyFilters(); return }
+  const b = e.target.dataset.bind; if (!b) return; const [o, k] = b.split('.'); if (o === 'state') state[k] = e.target.value; else state[o][k] = e.target.value;
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.name === 'cid' && state.sheet?.type === 'catalog') {
+    const sel = state.sheet.sel, v = t.value; if (t.checked) { if (!sel.includes(v)) sel.push(v) } else sel.splice(sel.indexOf(v), 1);
+    const b = document.querySelector('[data-act=addCatalog]'); if (b) { b.disabled = !sel.length; b.textContent = `أضف المحدد (${sel.length})` } return;
+  }
+  if (t.name === 'regDistricts') { const ds = state.reg.districts, v = t.value; if (t.checked) { if (!ds.includes(v)) ds.push(v) } else ds.splice(ds.indexOf(v), 1); return }
+  if (t.id === 'c-photo') { const f = t.files && t.files[0]; if (!f) return; shrinkImage(f).then(u => { state.compose.photo = u; render() }).catch(() => toast('تعذّرت قراءة الصورة، جرّب صورة ثانية')) }
+});
+function shrinkImage(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let side = 720, q = .7, url = '';
+        for (let i = 0; i < 8; i++) {
+          const s = Math.min(1, side / Math.max(img.width, img.height)), c = document.createElement('canvas');
+          c.width = Math.round(img.width * s); c.height = Math.round(img.height * s); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+          url = c.toDataURL('image/jpeg', q); if (url.length < 45000) return res(url);
+          side *= .82; q = Math.max(.4, q - .07);
+        }
+        rej(new Error('big'));
+      };
+      img.onerror = rej; img.src = r.result;
+    };
+    r.onerror = rej; r.readAsDataURL(file);
+  });
+}
+
+const FORMS = {
+  setup(f) { const url = new FormData(f).get('url').trim(); if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) { toast('الرابط لازم يكون من script.google.com'); return } apiUrl = url; lsSet(LS_API, url); state.boot = 'loading'; render(); boot() },
+  login(f) {
+    const fd = new FormData(f), ph = digits(fd.get('phone')), pin = digits(fd.get('pin'));
+    if (ph.length < 9) { toast('اكتب رقم الجوال'); return } if (pin.length !== 4) { toast('الرمز السري 4 أرقام'); return }
+    run('login', { phone: ph, pin }, () => `أهلاً ${me().name}`, () => { state.boot = 'ready'; state.tab = ''; state.stack = [] });
+  },
+  register(f) {
+    const r = state.reg;
+    if (!r.name.trim()) { toast('اكتب الاسم'); return }
+    if (!/^0?5\d{8}$/.test(digits(r.phone))) { toast('رقم الجوال لازم يبدأ بـ 05 ويتكون من 10 أرقام'); return }
+    if (!/^\d{4}$/.test(digits(r.pin))) { toast('الرمز السري 4 أرقام'); return }
+    if (digits(r.pin) !== digits(r.pin2)) { toast('الرمزان غير متطابقين'); return }
+    if (r.role === 'provider' && !r.cat) { toast('اختر نوع الخدمة'); return }
+    if (r.role === 'provider' && !r.districts.length) { toast('اختر حياً واحداً على الأقل'); return }
+    const districts = state.config?.districts || [];
+    run('register', { role: r.role, name: r.name.trim(), phone: digits(r.phone), pin: digits(r.pin), district: r.district || districts[0], details: r.details.trim(), cat: r.cat, hours: r.hours.trim(), vehicle: r.vehicle.trim(), districts: r.districts },
+      () => me().status === 'active' ? `أهلاً ${me().name}، حسابك جاهز` : 'وصل طلب انضمامك للإدارة', () => { state.boot = 'ready'; state.tab = ''; state.reg = { role: 'customer', name: '', phone: '', pin: '', pin2: '', district: '', details: '', cat: '', hours: '', vehicle: '', districts: [] } });
+  },
+  'text-order'(f) {
+    const c = state.compose, mode = f.dataset.mode, target = mode === 'target' ? c.target : null;
+    const text = ($('#c-text').value || '').trim(); c.text = text;
+    const cat = target ? P(target)?.cat : c.cat;
+    if (!text) { toast('اكتب طلبك أول'); $('#c-text').focus(); return }
+    if (!cat) { toast('اختر نوع الخدمة'); return }
+    const favs = target ? [] : favProviders(cat), useFav = !target && favs.length && c.scope === 'fav';
+    const targets = target ? [target] : useFav ? favs.map(p => p.id) : [];
+    run('createTextOrder', { cat, text, when: c.when, photo: c.photo || '', targets },
+      () => target ? `وصل طلبك إلى ${P(target)?.name}` : useFav ? `وصل طلبك لمفضلتك (${targets.length})` : 'وصل طلبك لكل مقدمي الخدمة في الحي',
+      j => { resetCompose(); state.stack = [{ v: 'order', id: j.orderId }]; window.scrollTo(0, 0) });
+  },
+  quote(f) { const fd = new FormData(f), price = +fd.get('price'); if (!(price > 0)) { toast('اكتب السعر'); return } run('quote', { id: +f.dataset.id, price, when: fd.get('when'), note: (fd.get('note') || '').trim() }, 'وصل عرضك للعميل') },
+  chat(f) { const t = (new FormData(f).get('text') || '').trim(); if (!t) return; run('message', { id: +f.dataset.id, text: t }, null, () => setTimeout(() => $('#chat-text')?.focus(), 30)) },
+  profile(f) { const fd = new FormData(f); run('saveProfile', { name: fd.get('name').trim(), district: fd.get('district'), details: fd.get('details').trim() }, 'حُفظت بياناتك') },
+  pin(f) {
+    const fd = new FormData(f), n = digits(fd.get('newPin'));
+    if (!/^\d{4}$/.test(n)) { toast('الرمز الجديد 4 أرقام'); return } if (n !== digits(fd.get('newPin2'))) { toast('الرمزان غير متطابقين'); return }
+    run('changePin', { oldPin: digits(fd.get('oldPin')), newPin: n }, 'تغيّر الرمز السري', () => { state.sheet = null });
+  },
+  resetPin(f) { const pin = digits(new FormData(f).get('pin')); if (!/^\d{4}$/.test(pin)) { toast('الرمز 4 أرقام'); return } const id = state.sheet.id; run('resetPin', { userId: id, pin }, 'تم تعيين الرمز الجديد', () => { state.sheet = null }) },
+  shop(f) {
+    const fd = new FormData(f), ds = fd.getAll('districts'); if (!ds.length) { toast('اختر حياً واحداً على الأقل'); return }
+    run('saveShop', { name: fd.get('name').trim(), hours: fd.get('hours').trim(), districts: ds, visitFee: fd.get('visitFee'), deliveryFee: fd.get('deliveryFee'), minOrder: fd.get('minOrder'), delivers: fd.get('delivers') === 'on', usesCourier: fd.get('usesCourier') === 'on' }, 'حُفظت بيانات المحل');
+  },
+  item(f) {
+    const fd = new FormData(f), name = fd.get('name').trim(), price = fd.get('price'); if (!name || price === '') { toast('اكتب الاسم والسعر'); return }
+    run('saveItem', { itemId: state.sheet.id || '', name, price, sec: fd.get('sec') || '' }, 'حُفظ الصنف', () => { state.sheet = null });
+  },
+  settings(f) {
+    const fd = new FormData(f), ds = fd.get('districts').split(/\n|،|,/).map(x => x.trim()).filter(Boolean);
+    run('saveSettings', { trial: fd.get('trial') === 'on', trialEnds: fd.get('trialEnds'), platformRate: fd.get('platformRate'), brokerPlatformRate: fd.get('brokerPlatformRate'), brokerRate: fd.get('brokerRate'), districts: ds }, 'حُفظت الإعدادات');
+  }
+};
+document.addEventListener('submit', e => { const f = e.target.closest('form[data-form]'); if (!f) return; e.preventDefault(); FORMS[f.dataset.form]?.(f) });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.sheet) { state.sheet = null; render() } });
+
+/* ---------- التشغيل ---------- */
+async function boot() {
+  if (!apiUrl) { state.boot = 'setup'; return render() }
+  if (token) {
+    try { await call('sync'); state.boot = 'ready'; return render() }
+    catch (e) { if (token) { state.boot = 'error'; state.bootError = e.message; return render() } }
+  }
+  try { state.config = (await call('config')).config; state.boot = 'auth' }
+  catch (e) { state.boot = 'error'; state.bootError = e.message }
+  render();
+}
+render(); boot();
+
+</script>
+</body>
+</html>
