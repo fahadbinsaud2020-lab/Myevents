@@ -310,6 +310,15 @@ details.more[open] summary{margin-bottom:12px}
 .stars span{color:var(--line)} .stars span.on{color:var(--accent)}
 .stars.ro{justify-content:flex-start}
 input:disabled{opacity:.7}
+.trx{display:block}
+details.orig{margin-top:4px}
+details.orig summary{font-size:12px;color:var(--muted);cursor:pointer;list-style:none}
+details.orig summary::-webkit-details-marker{display:none}
+details.orig[open] summary{margin-bottom:2px}
+details.orig span{font-size:13px;color:var(--muted)}
+.ar-sub{display:block;font-size:12px;color:var(--muted);font-weight:400}
+.hint{margin-top:-4px;display:flex;gap:4px;align-items:center}
+[lang=ur]{font-family:'Noto Nastaliq Urdu','Jameel Noori Nastaleeq',var(--font);line-height:1.9}
 </style>
 </head>
 <body>
@@ -370,6 +379,7 @@ const IC={
 };
 
 IC.leaf = '<path d="M5 19c0-8 6-14 15-14 0 9-6 15-14 15"/><path d="M5 19l7-7"/>';
+IC.bell = '<path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"/><path d="M10 20a2 2 0 0 0 4 0"/>';
 IC.logout = '<path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4M6 12h10"/>';
 IC.key = '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3"/>';
 IC.refresh = '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>';
@@ -421,6 +431,263 @@ const CATALOG = Object.fromEntries(Object.entries(CATALOG_SRC).map(([cat, secs])
   items: secs.flatMap(([sec, , list]) => list.map((x, i) => { const [name, price] = x.split('|'); return { id: `${cat}-${sec}-${i + 1}`, sec, name, price: +price } }))
 }]));
 
+/* ---------- ترجمة القوائم الجاهزة: English | اردو | বাংলা | हिन्दी ---------- */
+const LANG_NAMES = { ar: 'العربية', en: 'English', ur: 'اردو', bn: 'বাংলা', hi: 'हिन्दी' };
+const LANG_DIR = { ar: 'rtl', en: 'ltr', ur: 'rtl', bn: 'ltr', hi: 'ltr' };
+const TR_LANGS = ['en', 'ur', 'bn', 'hi'];
+const SEC_TR_SRC = {
+  dairy: 'Dairy & cheese|دودھ اور پنیر|দুগ্ধজাত ও পনির|डेयरी और चीज़',
+  bakery: 'Bakery|بیکری|বেকারি|बेकरी',
+  eggs: 'Eggs|انڈے|ডিম|अंडे',
+  breakfast: 'Breakfast & dates|ناشتہ اور کھجور|নাস্তা ও খেজুর|नाश्ता और खजूर',
+  grains: 'Rice, grains & pasta|چاول، دالیں اور پاستا|চাল, ডাল ও পাস্তা|चावल, दालें और पास्ता',
+  canned: 'Canned food|ڈبے کی اشیاء|টিনজাত খাবার|डिब्बाबंद सामान',
+  oils: 'Oil & ghee|تیل اور گھی|তেল ও ঘি|तेल और घी',
+  spices: 'Sugar, salt & spices|چینی، نمک اور مصالحے|চিনি, লবণ ও মসলা|चीनी, नमक और मसाले',
+  tea: 'Tea & coffee|چائے اور کافی|চা ও কফি|चाय और कॉफ़ी',
+  drinks: 'Water & drinks|پانی اور مشروبات|পানি ও পানীয়|पानी और पेय',
+  frozen: 'Poultry & frozen|مرغی اور منجمد اشیاء|মুরগি ও হিমায়িত|चिकन और फ्रोज़न',
+  snacks: 'Sweets & snacks|مٹھائیاں اور اسنیکس|মিষ্টি ও স্ন্যাকস|मिठाई और स्नैक्स',
+  cleaning: 'Cleaning|صفائی کا سامان|পরিষ্কারক|सफ़ाई का सामान',
+  paper: 'Tissues & paper|ٹشو اور کاغذی اشیاء|টিস্যু ও কাগজ|टिश्यू और पेपर',
+  care: 'Personal care|ذاتی نگہداشت|ব্যক্তিগত যত্ন|निजी देखभाल',
+  baby: 'Baby care|بچوں کا سامان|শিশুর পণ্য|बच्चों का सामान',
+  veg: 'Vegetables|سبزیاں|সবজি|सब्ज़ियाँ',
+  fruit: 'Fruits|پھل|ফল|फल',
+  herbs: 'Leafy greens & herbs|ہری پتیاں اور جڑی بوٹیاں|শাক ও ভেষজ|पत्तेदार साग और जड़ी-बूटियाँ',
+  other: 'Other items|دیگر اشیاء|অন্যান্য পণ্য|अन्य सामान'
+};
+const ITEM_TR_SRC = {
+  grocery: {
+    dairy: [
+      'Fresh full-fat milk 1 L|تازہ فل کریم دودھ 1 L|তাজা ফুল ক্রিম দুধ 1 L|ताज़ा फुल क्रीम दूध 1 L',
+      'Fresh full-fat milk 2 L|تازہ فل کریم دودھ 2 L|তাজা ফুল ক্রিম দুধ 2 L|ताज़ा फुल क्रीम दूध 2 L',
+      'Low-fat milk 2 L|کم چکنائی والا دودھ 2 L|লো ফ্যাট দুধ 2 L|लो फैट दूध 2 L',
+      'Laban (buttermilk) 1 L|لبن (لسی) 1 L|লাবান (মাঠা) 1 L|लबन (छाछ) 1 L',
+      'Laban (buttermilk) 2 L|لبن (لسی) 2 L|লাবান (মাঠা) 2 L|लबन (छाछ) 2 L',
+      'Yogurt 170 g × 6|دہی 170 g × 6|দই 170 g × 6|दही 170 g × 6',
+      'Yogurt family pack 1 kg|دہی فیملی پیک 1 kg|দই ফ্যামিলি প্যাক 1 kg|दही फैमिली पैक 1 kg',
+      'Labneh (thick yogurt) 400 g|لبنہ (گاڑھا دہی) 400 g|লাবনেহ (ঘন দই) 400 g|लबनेह (गाढ़ा दही) 400 g',
+      'Cream (qishta) 100 g|بالائی 100 g|মালাই (ক্রিম) 100 g|मलाई 100 g',
+      'Butter 100 g|مکھن 100 g|মাখন 100 g|मक्खन 100 g',
+      'Evaporated milk 170 ml|ڈبے والا دودھ (ایواپوریٹڈ) 170 ml|টিনের দুধ (ইভাপোরেটেড) 170 ml|डिब्बा दूध (इवैपोरेटेड) 170 ml',
+      'Cheese slices 200 g|پنیر سلائس 200 g|চিজ স্লাইস 200 g|चीज़ स्लाइस 200 g',
+      'Cheese triangles 16 pcs|تکونی پنیر 16 pcs|ত্রিকোণ চিজ 16 pcs|तिकोना चीज़ 16 pcs',
+      'Cream cheese 500 g|کریم چیز 500 g|ক্রিম চিজ 500 g|क्रीम चीज़ 500 g',
+      'White cheese 500 g|سفید پنیر 500 g|সাদা পনির 500 g|सफ़ेद पनीर 500 g'
+    ],
+    bakery: [
+      'Samoli bread 6 pcs|سامولی روٹی 6 pcs|সামুলি রুটি 6 pcs|सामूली ब्रेड 6 pcs',
+      'Arabic bread 5 pcs|عربی روٹی 5 pcs|আরবি রুটি 5 pcs|अरबी रोटी 5 pcs',
+      'White toast bread, large|سفید ڈبل روٹی، بڑی|সাদা পাউরুটি, বড়|सफ़ेद ब्रेड, बड़ी',
+      'Brown toast bread|براؤن ڈبل روٹی|ব্রাউন পাউরুটি|ब्राउन ब्रेड',
+      'Burger buns 6 pcs|برگر بن 6 pcs|বার্গার বান 6 pcs|बर्गर बन 6 pcs',
+      'Croissants 6 pcs|کروسان 6 pcs|ক্রোয়াসাঁ 6 pcs|क्रोसां 6 pcs',
+      'Rusks 400 g|رس 400 g|টোস্ট বিস্কুট 400 g|रस्क 400 g'
+    ],
+    eggs: [
+      'Eggs 15 pcs|انڈے 15 pcs|ডিম 15 pcs|अंडे 15 pcs',
+      'Eggs 30 pcs|انڈے 30 pcs|ডিম 30 pcs|अंडे 30 pcs'
+    ],
+    breakfast: [
+      'Sukkari dates 1 kg|سکری کھجور 1 kg|সুক্কারি খেজুর 1 kg|सुक्करी खजूर 1 kg',
+      'Khalas dates 1 kg|خلاص کھجور 1 kg|খালাস খেজুর 1 kg|खलास खजूर 1 kg',
+      'Honey 500 g|شہد 500 g|মধু 500 g|शहद 500 g',
+      'Jam 450 g|جام 450 g|জ্যাম 450 g|जैम 450 g',
+      'Tahini (sesame paste) 400 g|طحینہ (تل کا پیسٹ) 400 g|তাহিনি (তিলের পেস্ট) 400 g|ताहिनी (तिल का पेस्ट) 400 g',
+      'Halawa (sesame sweet) 400 g|حلوہ طحینیہ 400 g|তিলের হালুয়া 400 g|तिल हलवा 400 g',
+      'Chocolate spread 350 g|چاکلیٹ اسپریڈ 350 g|চকলেট স্প্রেড 350 g|चॉकलेट स्प्रेड 350 g',
+      'Peanut butter 340 g|پینٹ بٹر 340 g|পিনাট বাটার 340 g|पीनट बटर 340 g',
+      'Olives 450 g|زیتون 450 g|জলপাই 450 g|जैतून 450 g',
+      'Oats 500 g|جئی (اوٹس) 500 g|ওটস 500 g|ओट्स 500 g',
+      'Corn flakes 375 g|کارن فلیکس 375 g|কর্ন ফ্লেক্স 375 g|कॉर्न फ्लेक्स 375 g'
+    ],
+    grains: [
+      'Basmati rice 5 kg|باسمتی چاول 5 kg|বাসমতি চাল 5 kg|बासमती चावल 5 kg',
+      'Basmati rice 10 kg|باسمتی چاول 10 kg|বাসমতি চাল 10 kg|बासमती चावल 10 kg',
+      'Egyptian rice 2 kg|مصری چاول 2 kg|মিশরীয় চাল 2 kg|मिस्री चावल 2 kg',
+      'White flour 1 kg|میدہ 1 kg|ময়দা 1 kg|मैदा 1 kg',
+      'Pasta 400 g|میکرونی (پاستا) 400 g|পাস্তা 400 g|पास्ता 400 g',
+      'Vermicelli 400 g|سویاں 400 g|সেমাই 400 g|सेवइयां 400 g',
+      'Red lentils 1 kg|مسور کی دال 1 kg|মসুর ডাল 1 kg|मसूर दाल 1 kg',
+      'Dried chickpeas 1 kg|کابلی چنے 1 kg|কাবুলি ছোলা 1 kg|काबुली चना 1 kg',
+      'Bulgur 1 kg|دلیہ (برغل) 1 kg|বুলগুর গম 1 kg|दलिया (बुलगुर) 1 kg',
+      'Dried white beans 1 kg|سفید لوبیا 1 kg|সাদা শিমের বীজ 1 kg|सफ़ेद राजमा 1 kg'
+    ],
+    canned: [
+      'Foul medames (fava beans) 400 g|فول (باقلا) ڈبہ 400 g|ফুল (ফাভা বিন) টিন 400 g|फूल (फावा बीन्स) डिब्बा 400 g',
+      'Canned chickpeas 400 g|ڈبے والے چنے 400 g|টিনের ছোলা 400 g|डिब्बाबंद छोले 400 g',
+      'Tuna 160 g|ٹونا مچھلی 160 g|টুনা মাছ 160 g|टूना मछली 160 g',
+      'Sweet corn 400 g|سویٹ کارن 400 g|মিষ্টি ভুট্টা 400 g|स्वीट कॉर्न 400 g',
+      'Tomato paste 400 g|ٹماٹر پیسٹ 400 g|টমেটো পেস্ট 400 g|टमाटर पेस्ट 400 g',
+      'Canned white beans 400 g|ڈبے والا سفید لوبیا 400 g|টিনের সাদা শিম 400 g|डिब्बाबंद सफ़ेद बीन्स 400 g',
+      'Canned mushrooms 400 g|ڈبے والی کھمبی 400 g|টিনের মাশরুম 400 g|डिब्बाबंद मशरूम 400 g'
+    ],
+    oils: [
+      'Sunflower oil 1.5 L|سورج مکھی کا تیل 1.5 L|সূর্যমুখী তেল 1.5 L|सूरजमुखी तेल 1.5 L',
+      'Corn oil 1.5 L|مکئی کا تیل 1.5 L|ভুট্টার তেল 1.5 L|मक्के का तेल 1.5 L',
+      'Olive oil 500 ml|زیتون کا تیل 500 ml|জলপাই তেল 500 ml|जैतून का तेल 500 ml',
+      'Vegetable ghee 1 kg|بناسپتی گھی 1 kg|ডালডা (ভেজিটেবল ঘি) 1 kg|वनस्पति घी 1 kg',
+      'Cow ghee 400 g|دیسی گھی 400 g|গাওয়া ঘি 400 g|देसी घी 400 g'
+    ],
+    spices: [
+      'White sugar 2 kg|چینی 2 kg|চিনি 2 kg|चीनी 2 kg',
+      'White sugar 5 kg|چینی 5 kg|চিনি 5 kg|चीनी 5 kg',
+      'Table salt 700 g|نمک 700 g|লবণ 700 g|नमक 700 g',
+      'Mixed spices 100 g|مکس مصالحہ 100 g|মিশ্র মসলা 100 g|मिक्स मसाला 100 g',
+      'Cumin 100 g|زیرہ 100 g|জিরা 100 g|जीरा 100 g',
+      'Black pepper 100 g|کالی مرچ 100 g|গোলমরিচ 100 g|काली मिर्च 100 g',
+      'Turmeric 100 g|ہلدی 100 g|হলুদ গুঁড়া 100 g|हल्दी 100 g',
+      'Cardamom 100 g|الائچی 100 g|এলাচ 100 g|इलायची 100 g',
+      'Chicken stock cubes 24 pcs|چکن اسٹاک کیوب 24 pcs|চিকেন স্টক কিউব 24 pcs|चिकन स्टॉक क्यूब 24 pcs',
+      'Instant yeast 5 sachets|خمیر (ییسٹ) 5 ساشے|ইস্ট 5 প্যাকেট|यीस्ट 5 पाउच',
+      'Baking powder 100 g|بیکنگ پاؤڈر 100 g|বেকিং পাউডার 100 g|बेकिंग पाउडर 100 g'
+    ],
+    tea: [
+      'Black tea 100 bags|چائے 100 ٹی بیگ|চা 100 টি ব্যাগ|चाय 100 टी बैग',
+      'Green tea 25 bags|سبز چائے 25 ٹی بیگ|গ্রিন টি 25 টি ব্যাগ|ग्रीन टी 25 टी बैग',
+      'Arabic coffee 250 g|عربی قہوہ 250 g|আরবি কফি 250 g|अरबी कॉफ़ी 250 g',
+      'Instant coffee 200 g|انسٹنٹ کافی 200 g|ইনস্ট্যান্ট কফি 200 g|इंस्टेंट कॉफ़ी 200 g',
+      'Coffee 3-in-1 × 30|کافی تھری اِن ون × 30|কফি 3-ইন-1 × 30|कॉफ़ी 3-इन-1 × 30',
+      'Milk powder 900 g|خشک دودھ 900 g|গুঁড়া দুধ 900 g|मिल्क पाउडर 900 g'
+    ],
+    drinks: [
+      'Water, 40 small bottles|پانی، 40 چھوٹی بوتلیں|পানি, 40টি ছোট বোতল|पानी, 40 छोटी बोतलें',
+      'Water 1.5 L × 6|پانی 1.5 L × 6|পানি 1.5 L × 6|पानी 1.5 L × 6',
+      'Orange juice 1 L|اورنج جوس 1 L|কমলার জুস 1 L|संतरे का जूस 1 L',
+      'Mixed juice 200 ml × 6|مکس جوس 200 ml × 6|মিক্স জুস 200 ml × 6|मिक्स जूस 200 ml × 6',
+      'Soft drink cans 330 ml × 6|کولڈ ڈرنک 330 ml × 6|কোমল পানীয় 330 ml × 6|कोल्ड ड्रिंक 330 ml × 6',
+      'Soft drink 2.25 L|کولڈ ڈرنک 2.25 L|কোমল পানীয় 2.25 L|कोल्ड ड्रिंक 2.25 L'
+    ],
+    frozen: [
+      'Fresh chilled chicken 1 kg|تازہ مرغی (ٹھنڈی) 1 kg|তাজা মুরগি (ঠান্ডা) 1 kg|ताज़ा मुर्गी (ठंडी) 1 kg',
+      'Frozen chicken 1 kg|منجمد مرغی 1 kg|হিমায়িত মুরগি 1 kg|फ्रोज़न मुर्गी 1 kg',
+      'Chicken breast 1 kg|چکن بریسٹ 1 kg|মুরগির বুকের মাংস 1 kg|चिकन ब्रेस्ट 1 kg',
+      'Frozen minced meat 400 g|منجمد قیمہ 400 g|হিমায়িত কিমা 400 g|फ्रोज़न कीमा 400 g',
+      'Frozen mixed vegetables 450 g|منجمد مکس سبزی 450 g|হিমায়িত মিক্স সবজি 450 g|फ्रोज़न मिक्स सब्ज़ी 450 g',
+      'Frozen french fries 2.5 kg|منجمد فرنچ فرائز 2.5 kg|হিমায়িত ফ্রেঞ্চ ফ্রাই 2.5 kg|फ्रोज़न फ्रेंच फ्राइज़ 2.5 kg',
+      'Frozen samosa 20 pcs|منجمد سموسے 20 pcs|হিমায়িত সমুচা 20 pcs|फ्रोज़न समोसे 20 pcs',
+      'Chicken nuggets 400 g|چکن نگٹس 400 g|চিকেন নাগেটস 400 g|चिकन नगेट्स 400 g',
+      'Ice cream 2 L|آئس کریم 2 L|আইসক্রিম 2 L|आइसक्रीम 2 L'
+    ],
+    snacks: [
+      'Chips, family pack 165 g|چپس فیملی پیک 165 g|চিপস ফ্যামিলি প্যাক 165 g|चिप्स फैमिली पैक 165 g',
+      'Small chips × 20|چھوٹے چپس × 20|ছোট চিপস × 20|छोटे चिप्स × 20',
+      'Biscuits × 12|بسکٹ × 12|বিস্কুট × 12|बिस्कुट × 12',
+      'Chocolate bar 100 g|چاکلیٹ بار 100 g|চকলেট বার 100 g|चॉकलेट बार 100 g',
+      'Small cakes × 12|چھوٹے کیک × 12|ছোট কেক × 12|छोटे केक × 12',
+      'Mixed nuts 300 g|مکس میوہ 300 g|মিক্স বাদাম 300 g|मिक्स नट्स 300 g'
+    ],
+    cleaning: [
+      'Dishwashing liquid 1 L|برتن دھونے کا مائع 1 L|থালা-বাসন ধোয়ার লিকুইড 1 L|बर्तन धोने का लिक्विड 1 L',
+      'Laundry powder 2.5 kg|کپڑے دھونے کا پاؤڈر 2.5 kg|কাপড় ধোয়ার পাউডার 2.5 kg|कपड़े धोने का पाउडर 2.5 kg',
+      'Floor cleaner 3 L|فرش صاف کرنے والا 3 L|ফ্লোর ক্লিনার 3 L|फ़र्श क्लीनर 3 L',
+      'Bleach 2 L|بلیچ 2 L|ব্লিচ 2 L|ब्लीच 2 L',
+      'Fabric softener 3 L|فیبرک سافٹنر 3 L|ফেব্রিক সফটনার 3 L|फ़ैब्रिक सॉफ़्टनर 3 L',
+      'Glass cleaner 750 ml|شیشہ صاف کرنے والا 750 ml|গ্লাস ক্লিনার 750 ml|ग्लास क्लीनर 750 ml',
+      'Dish sponges 5 pcs|برتن دھونے کا اسفنج 5 pcs|থালা ধোয়ার স্পঞ্জ 5 pcs|बर्तन धोने का स्पंज 5 pcs',
+      'Large garbage bags × 30|بڑے کچرے کے تھیلے × 30|বড় ময়লার ব্যাগ × 30|बड़े कचरे के बैग × 30',
+      'Insect spray 300 ml|کیڑے مار اسپرے 300 ml|পোকামাকড় মারার স্প্রে 300 ml|कीटनाशक स्प्रे 300 ml'
+    ],
+    paper: [
+      'Facial tissues, 5 boxes|ٹشو پیپر، 5 ڈبے|টিস্যু, 5 বক্স|टिश्यू, 5 डिब्बे',
+      'Toilet rolls × 10|ٹوائلٹ رول × 10|টয়লেট টিস্যু × 10|टॉयलेट रोल × 10',
+      'Kitchen rolls × 4|کچن رول × 4|কিচেন টিস্যু × 4|किचन रोल × 4',
+      'Aluminium foil 30 m|ایلومینیم فوائل 30 m|অ্যালুমিনিয়াম ফয়েল 30 m|एल्युमिनियम फॉयल 30 m',
+      'Cling film 30 m|کلنگ فلم 30 m|ক্লিং ফিল্ম 30 m|क्लिंग फ़िल्म 30 m',
+      'Paper cups × 50|کاغذی کپ × 50|কাগজের কাপ × 50|पेपर कप × 50',
+      'Foam plates × 25|فوم پلیٹیں × 25|ফোমের প্লেট × 25|फोम प्लेट × 25'
+    ],
+    care: [
+      'Liquid hand soap 500 ml|ہینڈ واش 500 ml|হ্যান্ড ওয়াশ 500 ml|हैंड वॉश 500 ml',
+      'Shampoo 400 ml|شیمپو 400 ml|শ্যাম্পু 400 ml|शैम्पू 400 ml',
+      'Toothpaste 100 ml|ٹوتھ پیسٹ 100 ml|টুথপেস্ট 100 ml|टूथपेस्ट 100 ml',
+      'Toothbrush|ٹوتھ برش|টুথব্রাশ|टूथब्रश',
+      'Deodorant|ڈیوڈرنٹ|ডিওডোরেন্ট|डियोडरेंट',
+      'Wet wipes × 64|گیلے ٹشو × 64|ভেজা টিস্যু × 64|वेट वाइप्स × 64'
+    ],
+    baby: [
+      'Diapers size 4, pack|بچوں کے ڈائپر سائز 4، پیک|ডায়াপার সাইজ 4, প্যাক|डायपर साइज़ 4, पैक',
+      'Baby wipes × 72|بے بی وائپس × 72|বেবি ওয়াইপস × 72|बेबी वाइप्स × 72',
+      'Baby formula milk 400 g|بچوں کا دودھ (فارمولا) 400 g|শিশুর গুঁড়া দুধ 400 g|बेबी फ़ॉर्मूला दूध 400 g'
+    ]
+  },
+  veg: {
+    veg: [
+      'Tomatoes 1 kg|ٹماٹر 1 kg|টমেটো 1 kg|टमाटर 1 kg',
+      'Cucumbers 1 kg|کھیرا 1 kg|শসা 1 kg|खीरा 1 kg',
+      'Potatoes 1 kg|آلو 1 kg|আলু 1 kg|आलू 1 kg',
+      'Red onions 1 kg|لال پیاز 1 kg|লাল পেঁয়াজ 1 kg|लाल प्याज़ 1 kg',
+      'White onions 1 kg|سفید پیاز 1 kg|সাদা পেঁয়াজ 1 kg|सफ़ेद प्याज़ 1 kg',
+      'Carrots 1 kg|گاجر 1 kg|গাজর 1 kg|गाजर 1 kg',
+      'Zucchini 1 kg|توری (زوکینی) 1 kg|জুকিনি 1 kg|तोरी (ज़ुकीनी) 1 kg',
+      'Eggplant 1 kg|بینگن 1 kg|বেগুন 1 kg|बैंगन 1 kg',
+      'Colored bell peppers 1 kg|رنگین شملہ مرچ 1 kg|রঙিন ক্যাপসিকাম 1 kg|रंगीन शिमला मिर्च 1 kg',
+      'Green bell pepper 1 kg|ہری شملہ مرچ 1 kg|সবুজ ক্যাপসিকাম 1 kg|हरी शिमला मिर्च 1 kg',
+      'Hot green chili 250 g|ہری مرچ 250 g|কাঁচা মরিচ 250 g|हरी मिर्च 250 g',
+      'Garlic 250 g|لہسن 250 g|রসুন 250 g|लहसुन 250 g',
+      'Lemons 1 kg|لیموں 1 kg|লেবু 1 kg|नींबू 1 kg',
+      'Cabbage 1 pc|بند گوبھی 1 pc|বাঁধাকপি 1 pc|पत्ता गोभी 1 pc',
+      'Cauliflower 1 pc|پھول گوبھی 1 pc|ফুলকপি 1 pc|फूल गोभी 1 pc',
+      'Okra 1 kg|بھنڈی 1 kg|ঢেঁড়স 1 kg|भिंडी 1 kg',
+      'Green beans 1 kg|سبز پھلیاں 1 kg|শিম 1 kg|हरी फलियां 1 kg',
+      'Corn on the cob 1 pc|بھٹہ (مکئی) 1 pc|ভুট্টা 1 pc|भुट्टा 1 pc'
+    ],
+    fruit: [
+      'Bananas 1 kg|کیلا 1 kg|কলা 1 kg|केला 1 kg',
+      'Red apples 1 kg|لال سیب 1 kg|লাল আপেল 1 kg|लाल सेब 1 kg',
+      'Green apples 1 kg|سبز سیب 1 kg|সবুজ আপেল 1 kg|हरा सेब 1 kg',
+      'Oranges 1 kg|مالٹا 1 kg|কমলা 1 kg|संतरा 1 kg',
+      'Mandarins 1 kg|کینو 1 kg|ছোট কমলা (ম্যান্ডারিন) 1 kg|किन्नू (मैंडरिन) 1 kg',
+      'Grapes 1 kg|انگور 1 kg|আঙুর 1 kg|अंगूर 1 kg',
+      'Pomegranates 1 kg|انار 1 kg|ডালিম 1 kg|अनार 1 kg',
+      'Mangoes 1 kg|آم 1 kg|আম 1 kg|आम 1 kg',
+      'Watermelon 1 pc|تربوز 1 pc|তরমুজ 1 pc|तरबूज़ 1 pc',
+      'Cantaloupe 1 pc|خربوزہ 1 pc|বাঙ্গি (খরমুজ) 1 pc|खरबूजा 1 pc',
+      'Strawberries 250 g|اسٹرابیری 250 g|স্ট্রবেরি 250 g|स्ट्रॉबेरी 250 g',
+      'Kiwi 1 kg|کیوی 1 kg|কিউই 1 kg|कीवी 1 kg',
+      'Avocado 1 kg|ایووکاڈو 1 kg|অ্যাভোকাডো 1 kg|एवोकाडो 1 kg',
+      'Guava 1 kg|امرود 1 kg|পেয়ারা 1 kg|अमरूद 1 kg',
+      'Pineapple 1 pc|انناس 1 pc|আনারস 1 pc|अनानास 1 pc'
+    ],
+    herbs: [
+      'Parsley, 1 bunch|پارسلے، 1 گٹھی|পার্সলে, 1 আঁটি|अजमोद (पार्सले), 1 गड्डी',
+      'Coriander, 1 bunch|ہرا دھنیا، 1 گٹھی|ধনেপাতা, 1 আঁটি|हरा धनिया, 1 गड्डी',
+      'Mint, 1 bunch|پودینہ، 1 گٹھی|পুদিনা, 1 আঁটি|पुदीना, 1 गड्डी',
+      'Arugula (rocket), 1 bunch|جرجیر (راکٹ)، 1 گٹھی|আরুগুলা শাক, 1 আঁটি|अरुगुला (रॉकेट), 1 गड्डी',
+      'Dill, 1 bunch|سویا ساگ، 1 گٹھی|শুলফা শাক (ডিল), 1 আঁটি|सोआ (डिल), 1 गड्डी',
+      'Romaine lettuce 1 pc|سلاد پتہ (رومین) 1 pc|লেটুস 1 pc|रोमेन लेट्यूस 1 pc',
+      'Spinach, 1 bunch|پالک، 1 گٹھی|পালং শাক, 1 আঁটি|पालक, 1 गड्डी',
+      'Spring onions, 1 bunch|ہری پیاز، 1 گٹھی|পেঁয়াজকলি, 1 আঁটি|हरा प्याज़, 1 गड्डी',
+      'Basil, 1 bunch|نیازبو (ریحان)، 1 گٹھی|তুলসী (বেসিল), 1 আঁটি|तुलसी (बेसिल), 1 गड्डी'
+    ]
+  }
+};
+const ITEM_TR = {}, SEC_TR = {};
+TR_LANGS.forEach((l, li) => {
+  ITEM_TR[l] = {}; SEC_TR[l] = {};
+  Object.entries(SEC_TR_SRC).forEach(([k, v]) => { SEC_TR[l][k] = v.split('|')[li] });
+  Object.entries(ITEM_TR_SRC).forEach(([cat, secs]) => Object.entries(secs).forEach(([sec, arr]) => arr.forEach((v, i) => { ITEM_TR[l][`${cat}-${sec}-${i + 1}`] = v.split('|')[li] })));
+});
+
+const myLang = () => (db && db.me && db.me.lang) || 'ar';
+function showTr(orig, tr) {
+  const L = myLang();
+  if (!orig) return '';
+  if (!tr || norm(tr) === norm(orig)) return `<span dir="auto">${esc(orig)}</span>`;
+  return `<span class="trx" lang="${L}" dir="${LANG_DIR[L]}">${esc(tr)}</span><details class="orig"><summary>${L === 'ar' ? 'النص الأصلي' : 'عرض النص العربي · Original'}</summary><span dir="auto">${esc(orig)}</span></details>`;
+}
+function itemTrName(it, o, idx) {
+  const L = myLang(); if (L === 'ar') return '';
+  return (it.cid && ITEM_TR[L] && ITEM_TR[L][it.cid]) || (o && o.itemsTr && o.itemsTr[idx]) || '';
+}
+function itemLabel(it, o, idx) {
+  const t = itemTrName(it, o, idx), L = myLang();
+  return t ? `<span lang="${L}" dir="${LANG_DIR[L]}">${esc(t)}</span><small class="ar-sub">${esc(it.name)}</small>` : esc(it.name);
+}
+const secLabel = g => { const L = myLang(); const t = L !== 'ar' && SEC_TR[L] && SEC_TR[L][g.id]; return t ? `<span lang="${L}" dir="${LANG_DIR[L]}">${esc(t)}</span> <small class="muted">${g.name}</small>` : g.name };
+const langSelect = (id, cur, attrs = '') => `<select id="${id}" ${attrs}>${Object.entries(LANG_NAMES).map(([k, v]) => `<option value="${k}" ${cur === k ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
+
 /* ---------- constants ---------- */
 const ROLE = { customer: 'طالب خدمة', provider: 'مقدم خدمة', courier: 'مندوب توصيل', broker: 'منسّق', admin: 'مدير المنصة' };
 const STATUS_U = { active: 'مفعّل', pending: 'بانتظار الاعتماد', blocked: 'موقوف', rejected: 'مرفوض' };
@@ -469,7 +736,8 @@ async function call(action, payload = {}) {
   try { j = await res.json() } catch (e) { throw new Error('رد غير متوقع من الخادم. تأكد من رابط Apps Script') }
   if (!j.ok) {
     if (j.code === 'AUTH') logoutLocal();
-    throw new Error(j.error || 'صار خطأ، حاول مرة ثانية');
+    const generic = !j.error || /^صار خطأ في الخادم/.test(j.error);
+    throw new Error((j.error || 'صار خطأ، حاول مرة ثانية') + (generic && j.detail ? ` (التفاصيل: ${j.detail})` : ''));
   }
   if (j.token) { token = j.token; lsSet(LS_TOKEN, token) }
   if (j.data) db = j.data;
@@ -480,6 +748,7 @@ async function run(action, payload, okMsg, after) {
   state.busy = true; document.body.classList.add('busy');
   try {
     const j = await call(action, payload);
+    setAlertBaseline();
     if (after) after(j);
     render();
     if (okMsg) toast(typeof okMsg === 'function' ? okMsg(j) : okMsg);
@@ -488,23 +757,89 @@ async function run(action, payload, okMsg, after) {
   finally { state.busy = false; document.body.classList.remove('busy') }
 }
 function logoutLocal() {
-  token = ''; lsSet(LS_TOKEN, ''); db = null;
+  token = ''; lsSet(LS_TOKEN, ''); db = null; alertSeen = null;
   Object.assign(state, { boot: 'auth', auth: 'login', tab: '', stack: [], cart: null, sheet: null, menus: {}, photos: {} });
 }
 const isTyping = () => { const a = document.activeElement; return a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) };
 async function quietSync() {
   if (state.boot !== 'ready' || state.busy || state.sheet || isTyping() || document.visibilityState !== 'visible') return;
-  try { await call('sync'); render() } catch (e) { if (!token) render() }
+  try { await call('sync'); render(); checkAlerts() } catch (e) { if (!token) render() }
 }
-setInterval(quietSync, 25000);
+setInterval(quietSync, 20000);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') quietSync() });
+
+/* ============================================================
+   التنبيهات: صوت واهتزاز وإشعار
+   ============================================================ */
+const LS_SOUND = 'weshtabi_sound';
+const soundOn = () => lsGet(LS_SOUND) !== 'off';
+let alertSeen = null, actx = null, unread = 0;
+function unlockAudio() {
+  try { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume() } catch (e) { }
+}
+['click', 'touchstart', 'keydown'].forEach(ev => document.addEventListener(ev, unlockAudio, { capture: true, passive: true }));
+function chime(force) {
+  if ((!soundOn() && !force) || !actx) return;
+  const t = actx.currentTime;
+  [[880, 0], [1318.5, .15]].forEach(([f, d]) => {
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(.0001, t + d); g.gain.exponentialRampToValueAtTime(.4, t + d + .02); g.gain.exponentialRampToValueAtTime(.0001, t + d + .5);
+    o.connect(g); g.connect(actx.destination); o.start(t + d); o.stop(t + d + .55);
+  });
+}
+function alertMap() {
+  const m = new Map(), u = db && db.me;
+  if (!u || u.status !== 'active') return m;
+  const add = (k, t) => { if (t) m.set(k, t) };
+  for (const o of db.orders) {
+    const others = o.messages.filter(x => !x.mine).length;
+    if (others) add(`m:${o.id}:${others}`, `رسالة جديدة في طلب #${o.id}`);
+    if (u.role === 'customer') {
+      if (o.quoteCount) add(`q:${o.id}:${o.quoteCount}`, `وصلك عرض سعر على طلب #${o.id}`);
+      add(`s:${o.id}:${o.status}`, { accepted: o.type === 'menu' ? `${o.providerName} قبل طلبك #${o.id}` : '', in_progress: `بدأ تنفيذ طلبك #${o.id}`, with_courier: `طلبك #${o.id} مع المندوب في الطريق`, delivered: `تم تسليم طلبك #${o.id}`, rejected: `اعتذر مقدم الخدمة عن طلبك #${o.id}` }[o.status]);
+    }
+    if (u.role === 'provider') {
+      if (o.status === 'new') add(`n:${o.id}`, o.providerId === u.id || o.targetedToMe ? `طلب جديد موجّه لك #${o.id}` : `طلب جديد في الحي #${o.id}`);
+      if (o.providerId === u.id) {
+        add(`s:${o.id}:${o.status}`, { accepted: o.type === 'text' ? `العميل قبل عرضك على طلب #${o.id}` : '', with_courier: `المندوب استلم طلب #${o.id}`, delivered: o.courierId ? `تم تسليم طلب #${o.id} للعميل` : '', closed: `العميل قيّم طلب #${o.id}`, cancelled: `أُلغي طلب #${o.id}` }[o.status]);
+        if (o.courierId) add(`c:${o.id}`, `${o.courierName} قبل مهمة توصيل طلب #${o.id}`);
+      }
+    }
+    if (u.role === 'courier') {
+      if (availTask(o)) add(`t:${o.id}`, `مهمة توصيل جديدة من ${o.providerName}`);
+      if (o.courierId === u.id && o.status === 'cancelled') add(`s:${o.id}:cancelled`, `أُلغي طلب #${o.id}`);
+    }
+    if (u.role === 'broker' && o.status === 'new' && !o.providerId) add(`b:${o.id}`, `طلب جديد ينتظر مقدم خدمة #${o.id}`);
+  }
+  if (u.role === 'admin') (db.users || []).filter(x => x.status === 'pending').forEach(x => add(`u:${x.id}`, `طلب انضمام جديد: ${x.name}`));
+  return m;
+}
+function setAlertBaseline() { alertSeen = new Set(alertMap().keys()) }
+function checkAlerts() {
+  const m = alertMap();
+  if (!alertSeen) { alertSeen = new Set(m.keys()); return }
+  const fresh = [...m].filter(([k]) => !alertSeen.has(k));
+  alertSeen = new Set(m.keys());
+  if (!fresh.length) return;
+  ring(fresh.length === 1 ? fresh[0][1] : `${fresh.length} تحديثات جديدة · ${fresh[0][1]}`);
+}
+function ring(text) {
+  toast(text); chime();
+  try { if (soundOn() && navigator.vibrate) navigator.vibrate([150, 80, 150]) } catch (e) { }
+  if (document.hidden) {
+    unread++; document.title = `(${unread}) وش تبي`;
+    try { if ('Notification' in window && Notification.permission === 'granted') new Notification('وش تبي', { body: text, tag: 'weshtabi', renotify: true }) } catch (e) { }
+  }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) { unread = 0; document.title = 'وش تبي' } });
 
 /* ============================================================
    الحالة
    ============================================================ */
 const state = {
   boot: 'loading', bootError: '', config: null, busy: false, auth: 'login',
-  reg: { role: 'customer', name: '', phone: '', pin: '', pin2: '', district: '', details: '', cat: '', hours: '', vehicle: '', districts: [] },
+  reg: { role: 'customer', name: '', phone: '', pin: '', pin2: '', district: '', details: '', cat: '', hours: '', vehicle: '', districts: [], lang: 'ar' },
   tab: '', stack: [], cart: null, co: { fulfil: 'delivery', note: '', when: 'أقرب وقت' },
   compose: { text: '', cat: '', when: 'أقرب وقت', photo: null, target: null, scope: 'fav' },
   sub: { orders: 'current', p_orders: 'targeted', a_orders: 'active', a_users: 'pending' },
@@ -602,6 +937,7 @@ function authView() {
         ${f('r-hours', 'hours', 'أوقات العمل', 'placeholder="مثال: 7 ص – 11 م"')}
         <div class="field-label">الأحياء اللي تخدمها</div><div class="checks">${districts.map((d, i) => `<label for="rd${i}"><input type="checkbox" id="rd${i}" name="regDistricts" value="${esc(d)}" ${r.districts.includes(d) ? 'checked' : ''}>${esc(d)}</label>`).join('')}</div>` : ''}
       ${r.role === 'courier' ? f('r-vehicle', 'vehicle', 'السيارة', 'placeholder="مثال: هايلكس 2019"') : ''}
+      ${r.role !== 'customer' ? `<label class="fld" for="r-lang"><span>لغتك لقراءة الطلبات · Your language</span>${langSelect('r-lang', r.lang, 'data-bind="reg.lang"')}</label>` : ''}
       ${r.role !== 'customer' ? `<div class="note info">${icon('shield', 'sm')} حسابك يتفعّل بعد اعتماد إدارة المنصة.</div>` : ''}
       <button class="btn primary block">إنشاء الحساب</button></form></section>
     <section class="card center-t"><p>عندك حساب؟</p><button class="btn ghost block" data-act="authMode" data-k="login">سجّل دخولك</button></section></div></div>`;
@@ -617,7 +953,7 @@ function orderCard(o) {
   let title;
   if (u.role === 'customer') title = o.providerName || (o.targetCount ? (o.targetCount === 1 ? o.targetNames[0] : `مفضلتك في ${cat.name} (${o.targetCount})`) : `كل مقدمي ${cat.name} في الحي`);
   else title = o.customerName;
-  const sum = o.type === 'menu' ? o.items.map(i => `${i.name}${i.qty > 1 ? ` ×${i.qty}` : ''}`).join('، ') : o.text;
+  const sum = o.type === 'menu' ? o.items.map((i, x) => `${itemTrName(i, o, x) || i.name}${i.qty > 1 ? ` ×${i.qty}` : ''}`).join(myLang() === 'ar' ? '، ' : ', ') : (o.textTr || o.text);
   const tags = [];
   if (o.type === 'text' && o.status === 'new') {
     if (u.role === 'provider') { if (quotedByMe(o)) tags.push('<span class="tag">أرسلت عرضك</span>'); else if (o.targetedToMe) tags.push('<span class="tag accent">موجّه لك</span>') }
@@ -628,7 +964,7 @@ function orderCard(o) {
   if (o.brokerId && u.role !== 'customer') tags.push('<span class="tag">عبر منسّق</span>');
   return `<button class="ocard t-${ST[o.status].t}" data-act="open" data-v="order" data-id="${o.id}">
     <span class="ocard-top"><span class="ocard-title"><span class="ocat">${icon(cat.icon, 'sm')}</span><b>${esc(title)}</b></span>${pill(o)}</span>
-    <span class="ocard-sum">${esc(sum)}</span>
+    <span class="ocard-sum" dir="auto">${esc(sum)}</span>
     <span class="ocard-meta"><span>#${o.id} · ${esc(o.address.district)} · ${ago(o.createdAt)}</span>${o.total ? `<b class="num">${money(o.total)}</b>` : ''}</span>
     ${tags.length ? `<span class="tags">${tags.join('')}</span>` : ''}</button>`;
 }
@@ -650,6 +986,7 @@ function composeForm(mode) {
   const label = t ? `أرسل الطلب إلى ${esc(t.name)}` : !c.cat ? 'أرسل الطلب' : scope === 'fav' ? `أرسل لمفضلتي في ${CAT(c.cat).name} (${favs.length})` : `أرسل لكل مقدمي ${CAT(c.cat).name} في الحي${all ? ` (${all})` : ''}`;
   return `<form data-form="text-order" data-mode="${mode}" class="stack" novalidate>
     <textarea id="c-text" data-bind="compose.text" rows="3" aria-label="اكتب طلبك" placeholder="${visit || !t ? 'اكتب طلبك بكلماتك… مثال: أبي سبّاك يصلح تسريب تحت مغسلة المطبخ' : 'اكتب اللي تبيه وما لقيته في القائمة'}">${esc(c.text)}</textarea>
+    <p class="muted xs hint">${icon('chat', 'xs')} بعض مقدمي الخدمة يقرأون طلبك مترجماً للغتهم، فاكتب بوضوح ومن غير اختصارات.</p>
     ${t ? `<div class="target">${icon('store', 'sm')} يوصل إلى <b>${esc(t.name)}</b> وحده</div>`
       : `<div class="field-label">نوع الخدمة</div><div class="chips scroll">${CATS.map(k => `<button type="button" class="chip ${c.cat === k.id ? 'on' : ''}" data-act="pickcat" data-id="${k.id}" aria-pressed="${c.cat === k.id}">${icon(k.icon, 'sm')}${k.name}</button>`).join('')}</div>
         ${favs.length ? `<div class="field-label">يوصل إلى</div><div class="seg">
@@ -743,8 +1080,8 @@ function groupBySec(p, items) {
 function menuBrowser(p, items, row, key) {
   const groups = groupBySec(p, items);
   const tools = `<div class="menu-tools"><label class="search" for="f-${key}">${icon('search', 'sm')}<input id="f-${key}" data-filter="${key}" value="${esc(state.filters[key] || '')}" placeholder="ابحث في ${items.length} صنف" autocomplete="off" aria-label="بحث في الأصناف"></label>
-    ${groups.length > 1 ? `<div class="chips scroll">${groups.map(g => `<button type="button" class="chip" data-act="jump" data-id="${key}-${g.id}">${g.name}</button>`).join('')}</div>` : ''}</div>`;
-  return `<div data-filter-root="${key}" class="stack">${tools}${groups.map(g => `<section class="card msec fgroup" id="${key}-${g.id}">${g.name ? `<div class="msec-h"><h3>${g.name}</h3><span class="muted xs">${g.items.length} صنف</span></div>` : ''}<div>${g.items.map(row).join('')}</div></section>`).join('')}<div class="empty fempty" hidden>ما لقينا صنف بهذا الاسم.</div></div>`;
+    ${groups.length > 1 ? `<div class="chips scroll">${groups.map(g => `<button type="button" class="chip" data-act="jump" data-id="${key}-${g.id}">${key === 'pm' ? secLabel(g) : g.name}</button>`).join('')}</div>` : ''}</div>`;
+  return `<div data-filter-root="${key}" class="stack">${tools}${groups.map(g => `<section class="card msec fgroup" id="${key}-${g.id}">${g.name ? `<div class="msec-h"><h3>${key === 'pm' ? secLabel(g) : g.name}</h3><span class="muted xs">${g.items.length} صنف</span></div>` : ''}<div>${g.items.map(row).join('')}</div></section>`).join('')}<div class="empty fempty" hidden>ما لقينا صنف بهذا الاسم.</div></div>`;
 }
 function applyFilters() {
   document.querySelectorAll('[data-filter]').forEach(inp => {
@@ -819,11 +1156,11 @@ function loadPhoto(id) {
     .finally(() => { const t = state.stack.at(-1); if (t && t.v === 'order' && t.id === id) render() });
 }
 function contentCard(o) {
-  if (o.type === 'menu') return card('الأصناف', `<div class="lines">${o.items.map(i => `<div class="line"><span>${esc(i.name)} <span class="muted">× ${i.qty}</span></span><span class="num">${money(i.price * i.qty)}</span></div>`).join('')}</div>
-    ${o.text ? `<div class="note">${icon('chat', 'sm')}<span>${esc(o.text)}</span></div>` : ''}<div class="meta-row">${icon('truck', 'xs')} ${fulfilLabel(o)} · ${icon('clock', 'xs')} ${esc(o.when)}</div>`);
+  if (o.type === 'menu') return card('الأصناف', `<div class="lines">${o.items.map((i, x) => `<div class="line"><span>${itemLabel(i, o, x)} <span class="muted">× ${i.qty}</span></span><span class="num">${money(i.price * i.qty)}</span></div>`).join('')}</div>
+    ${o.text ? `<div class="note">${icon('chat', 'sm')}<span>${showTr(o.text, o.textTr)}</span></div>` : ''}<div class="meta-row">${icon('truck', 'xs')} ${fulfilLabel(o)} · ${icon('clock', 'xs')} ${esc(o.when)}</div>`);
   let ph = '';
   if (o.hasPhoto) { if (state.photos[o.id] === undefined) { loadPhoto(o.id); ph = '<div class="spin" role="status" aria-label="جارٍ تحميل الصورة"></div>' } else if (state.photos[o.id]) ph = `<img class="photo" src="${state.photos[o.id]}" alt="صورة مرفقة بالطلب">` }
-  return card('الطلب', `<p class="req">${esc(o.text)}</p>${ph}<div class="meta-row">${icon('pin', 'xs')} ${fulfilLabel(o)} · ${icon('clock', 'xs')} ${esc(o.when)}</div>`);
+  return card('الطلب', `<div class="req">${showTr(o.text, o.textTr)}</div>${ph}<div class="meta-row">${icon('pin', 'xs')} ${fulfilLabel(o)} · ${icon('clock', 'xs')} ${esc(o.when)}</div>`);
 }
 function quotesCard(o) {
   const u = me();
@@ -834,7 +1171,7 @@ function quotesCard(o) {
       const best = i === 0 && qs.length > 1; return `<div class="quote ${best ? 'best' : ''}">
       <div class="q-top"><b>${esc(q.pname)}${isFav(q.pid) ? ` ${icon('star', 'xs')}` : ''}</b><span class="q-price">${money(q.price)}</span></div>
       <div class="muted sm"><span class="star">${ratingText(P(q.pid))}</span> · ${icon('clock', 'xs')} ${esc(q.when)}</div>
-      ${q.note ? `<p class="sm">${esc(q.note)}</p>` : ''}${best ? '<span><span class="tag good">الأقل سعراً</span></span>' : ''}
+      ${q.note ? `<div class="sm">${showTr(q.note, q.noteTr)}</div>` : ''}${best ? '<span><span class="tag good">الأقل سعراً</span></span>' : ''}
       <button class="btn ${best ? 'primary' : 'ghost'} sm" data-act="acceptQuote" data-id="${o.id}" data-q="${q.id}">اقبل هذا العرض</button></div>` }).join('')}</div>`);
   }
   if (u.role === 'provider') {
@@ -901,14 +1238,14 @@ function ratingCard(o) {
       <textarea id="rate-text" data-bind="state.rateText" rows="2" placeholder="كلمة عن الخدمة (اختياري)">${esc(state.rateText)}</textarea>
       <button class="btn primary block" data-act="rate" data-id="${o.id}">أرسل التقييم</button>`);
   }
-  if (o.rating) return card('التقييم', `<div class="stars ro">${[1, 2, 3, 4, 5].map(n => `<span class="${n <= o.rating.stars ? 'on' : ''}">${icon('star')}</span>`).join('')}</div>${o.rating.comment ? `<p class="sm">"${esc(o.rating.comment)}"</p>` : ''}`);
+  if (o.rating) return card('التقييم', `<div class="stars ro">${[1, 2, 3, 4, 5].map(n => `<span class="${n <= o.rating.stars ? 'on' : ''}">${icon('star')}</span>`).join('')}</div>${o.rating.comment ? `<div class="sm">${showTr(o.rating.comment, o.ratingTr)}</div>` : ''}`);
   return '';
 }
 function chatCard(o) {
   const u = me(), part = [o.customerId, o.providerId, o.brokerId, o.courierId].includes(u.id);
   if (!part && u.role !== 'admin') return '';
   if (!o.providerId) return card('المحادثة', '<p class="muted sm">تُفتح المحادثة أول ما يُحدَّد مقدم الخدمة.</p>');
-  const msgs = o.messages.map(m => `<div class="msg ${m.mine ? 'me' : ''}"><span class="msg-by">${esc(m.byName)}</span>${esc(m.text)}<span class="msg-t">${ago(m.at)}</span></div>`).join('');
+  const msgs = o.messages.map(m => `<div class="msg ${m.mine ? 'me' : ''}"><span class="msg-by">${esc(m.byName)}</span>${showTr(m.text, m.textTr)}<span class="msg-t">${ago(m.at)}</span></div>`).join('');
   const closed = ['closed', 'cancelled', 'rejected'].includes(o.status);
   return card('المحادثة', `${msgs ? `<div class="msgs">${msgs}</div>` : '<p class="muted sm">ما فيه رسائل بعد.</p>'}
     ${!closed && part ? `<form data-form="chat" data-id="${o.id}" class="chat-in"><input id="chat-text" name="text" placeholder="اكتب رسالة لأطراف الطلب" autocomplete="off" aria-label="رسالة"><button class="btn dark" aria-label="إرسال">${icon('send', 'sm')}</button></form>` : ''}`);
@@ -946,7 +1283,7 @@ VIEWS.p_menu = u => {
     <button class="btn ghost block" data-act="sheet" data-type="catalog">أختار الأصناف بنفسي</button>
     <button class="btn ghost block" data-act="sheet" data-type="item">أضيف صنف خاص</button></div></section>`;
   const off = items.filter(i => !i.available).length;
-  const row = i => `<div class="item ${i.available ? '' : 'off'}" data-s="${esc(norm(i.name))}"><span class="nm"><b>${esc(i.name)}</b><span class="muted sm num">${money(i.price)}${i.available ? '' : ' · غير متوفر'}</span></span>
+  const row = i => `<div class="item ${i.available ? '' : 'off'}" data-s="${esc(norm(i.name + ' ' + itemTrName(i)))}"><span class="nm"><b>${itemLabel(i)}</b><span class="muted sm num">${money(i.price)}${i.available ? '' : ' · غير متوفر'}</span></span>
     <span class="iact"><button class="switch ${i.available ? 'on' : ''}" data-act="toggleItem" data-id="${i.id}" role="switch" aria-checked="${i.available}" aria-label="متوفر: ${esc(i.name)}"></button>
     <button class="iconbtn light" data-act="sheet" data-type="item" data-id="${i.id}" aria-label="تعديل ${esc(i.name)}">${icon('edit', 'sm')}</button></span></div>`;
   return `<div class="${cat ? 'row2' : 'actions'}">${cat ? `<button class="btn primary" data-act="sheet" data-type="catalog">${icon('plus', 'sm')} من القائمة الجاهزة</button>` : ''}<button class="btn ${cat ? 'ghost' : 'primary block'}" data-act="sheet" data-type="item">${cat ? '' : icon('plus', 'sm') + ' '}صنف خاص</button></div>
@@ -1064,7 +1401,14 @@ function sheetHtml() {
   if (s.type === 'me') h = `<h2>${esc(u.name)}</h2><p class="muted sm">${ROLE[u.role]} · ${phone(u.phone)}</p>
     <div class="actions">${u.role === 'customer' ? `<button class="btn ghost block" data-act="tab" data-k="account">${icon('user', 'sm')} بياناتي وعنواني</button>` : ''}
     <button class="btn ghost block" data-act="sheet" data-type="pin">${icon('key', 'sm')} تغيير الرمز السري</button>
-    <button class="btn danger block" data-act="logout">${icon('logout', 'sm')} تسجيل الخروج</button></div>`;
+    <button class="btn danger block" data-act="logout">${icon('logout', 'sm')} تسجيل الخروج</button></div>
+    ${u.role !== 'admin' ? `<h3 class="card-h">لغة الترجمة · Language</h3>
+    <label class="fld" for="lang-sel"><span>${u.role === 'customer' ? 'الرسائل الواردة من مقدمي الخدمة تُترجم لهذه اللغة' : 'الطلبات والرسائل تُترجم لهذه اللغة · Orders are translated to this language'}</span>${langSelect('lang-sel', myLang())}</label>` : ''}
+    <h3 class="card-h">التنبيهات</h3>
+    <div class="toggle-row"><span><b>التنبيه الصوتي</b><small class="muted">صوت واهتزاز لما يوصلك طلب أو عرض أو رسالة</small></span><button class="switch ${soundOn() ? 'on' : ''}" data-act="toggleSound" role="switch" aria-checked="${soundOn()}" aria-label="التنبيه الصوتي"></button></div>
+    <div class="row2"><button class="btn ghost" data-act="testSound">${icon('bell', 'sm')} جرّب الصوت</button>
+    ${'Notification' in window ? (Notification.permission === 'granted' ? '<span class="tag good" style="align-self:center;justify-self:start">إشعارات المتصفح مفعّلة</span>' : `<button class="btn ghost" data-act="askNotif">إشعارات المتصفح</button>`) : ''}</div>
+    <p class="muted xs">التنبيه يشتغل والتطبيق مفتوح، حتى لو كان في تبويب ثاني.</p>`;
   if (s.type === 'pin') h = `<h2>تغيير الرمز السري</h2><form data-form="pin" class="stack">
     <label class="fld" for="pn-old"><span>الرمز الحالي</span><input id="pn-old" name="oldPin" type="password" inputmode="numeric" maxlength="4" dir="ltr" required></label>
     <div class="row2"><label class="fld" for="pn-new"><span>الرمز الجديد</span><input id="pn-new" name="newPin" type="password" inputmode="numeric" maxlength="4" dir="ltr" required></label>
@@ -1095,7 +1439,7 @@ function sheetHtml() {
     h = `<h2>قائمة ${CAT(u.cat).name} الجاهزة</h2><p class="muted sm">حدّد الأصناف المتوفرة عندك. الأسعار مقترحة وتقدر تعدّلها بعد الإضافة.</p>
       <div data-filter-root="cat" class="stack"><label class="search" for="f-cat">${icon('search', 'sm')}<input id="f-cat" data-filter="cat" value="${esc(state.filters.cat || '')}" placeholder="ابحث في ${cat.items.length} صنف" autocomplete="off" aria-label="بحث"></label>
       <div class="chips scroll">${[{ id: 'all', name: 'الكل' }, ...cat.sections].map(x => `<button type="button" class="chip ${s.sec === x.id ? 'on' : ''}" data-act="catSec" data-id="${x.id}">${x.name}</button>`).join('')}</div>
-      <div>${list.map(it => { const own = have.has(it.id); return `<label class="cchk" data-s="${esc(norm(it.name))}" for="cc-${it.id}"><input type="checkbox" id="cc-${it.id}" name="cid" value="${it.id}" ${own || s.sel.includes(it.id) ? 'checked' : ''} ${own ? 'disabled' : ''}><span class="nm">${esc(it.name)}${own ? ' <span class="tag">في قائمتك</span>' : ''}</span><span class="muted sm num">${money(it.price)}</span></label>` }).join('')}</div>
+      <div>${list.map(it => { const own = have.has(it.id); return `<label class="cchk" data-s="${esc(norm(it.name + ' ' + itemTrName({ cid: it.id })))}" for="cc-${it.id}"><input type="checkbox" id="cc-${it.id}" name="cid" value="${it.id}" ${own || s.sel.includes(it.id) ? 'checked' : ''} ${own ? 'disabled' : ''}><span class="nm">${itemLabel({ name: it.name, cid: it.id })}${own ? ' <span class="tag">في قائمتك</span>' : ''}</span><span class="muted sm num">${money(it.price)}</span></label>` }).join('')}</div>
       <div class="empty fempty" hidden>ما لقينا صنف بهذا الاسم. تقدر تضيفه كصنف خاص.</div></div>
       <div class="sheet-foot"><button type="button" class="btn ghost" data-act="selVisible">حدّد الظاهر</button><button type="button" class="btn primary" style="flex:1" data-act="addCatalog" ${s.sel.length ? '' : 'disabled'}>أضف المحدد (${s.sel.length})</button></div>`;
   }
@@ -1162,6 +1506,9 @@ const ACT = {
   selVisible() { document.querySelectorAll('.sheet .cchk:not([hidden]) input[name=cid]:not(:disabled)').forEach(c => { if (!state.sheet.sel.includes(c.value)) state.sheet.sel.push(c.value) }); render() },
   addCatalog() { const cat = CATALOG[me().cat], items = cat.items.filter(i => state.sheet.sel.includes(i.id)).map(i => ({ cid: i.id, sec: i.sec, name: i.name, price: i.price })); run('addItems', { items }, j => `أُضيف ${j.added} صنف لقائمتك`, () => { state.sheet = null; state.filters.cat = '' }) },
   addAllCatalog() { const cat = CATALOG[me().cat]; run('addItems', { items: cat.items.map(i => ({ cid: i.id, sec: i.sec, name: i.name, price: i.price })) }, j => `أُضيف ${j.added} صنف. عدّل الأسعار من زر التعديل`) },
+  toggleSound() { lsSet(LS_SOUND, soundOn() ? 'off' : ''); unlockAudio(); if (soundOn()) chime(true); render() },
+  testSound() { unlockAudio(); setTimeout(() => chime(true), 60); try { navigator.vibrate && navigator.vibrate([150, 80, 150]) } catch (e) { } },
+  askNotif() { try { Notification.requestPermission().then(p => { toast(p === 'granted' ? 'تفعّلت إشعارات المتصفح' : 'ما تفعّلت الإشعارات. تقدر تسمح بها من إعدادات المتصفح'); render() }) } catch (e) { toast('المتصفح ما يدعم الإشعارات') } },
   uStatus(d) { run('setUserStatus', { userId: d.id, status: d.k }, { active: 'تم التفعيل', blocked: 'تم إيقاف الحساب', rejected: 'تم رفض الطلب' }[d.k]) },
   uRole(d) { run('setRole', { userId: d.id, role: d.k }, d.k === 'broker' ? 'صار منسّقاً' : 'رجع طالب خدمة') }
 };
@@ -1181,6 +1528,7 @@ document.addEventListener('change', e => {
     const sel = state.sheet.sel, v = t.value; if (t.checked) { if (!sel.includes(v)) sel.push(v) } else sel.splice(sel.indexOf(v), 1);
     const b = document.querySelector('[data-act=addCatalog]'); if (b) { b.disabled = !sel.length; b.textContent = `أضف المحدد (${sel.length})` } return;
   }
+  if (t.id === 'lang-sel') { run('setLang', { lang: t.value }, `${LANG_NAMES[t.value]} ✓`); return }
   if (t.name === 'regDistricts') { const ds = state.reg.districts, v = t.value; if (t.checked) { if (!ds.includes(v)) ds.push(v) } else ds.splice(ds.indexOf(v), 1); return }
   if (t.id === 'c-photo') { const f = t.files && t.files[0]; if (!f) return; shrinkImage(f).then(u => { state.compose.photo = u; render() }).catch(() => toast('تعذّرت قراءة الصورة، جرّب صورة ثانية')) }
 });
@@ -1221,8 +1569,8 @@ const FORMS = {
     if (r.role === 'provider' && !r.cat) { toast('اختر نوع الخدمة'); return }
     if (r.role === 'provider' && !r.districts.length) { toast('اختر حياً واحداً على الأقل'); return }
     const districts = state.config?.districts || [];
-    run('register', { role: r.role, name: r.name.trim(), phone: digits(r.phone), pin: digits(r.pin), district: r.district || districts[0], details: r.details.trim(), cat: r.cat, hours: r.hours.trim(), vehicle: r.vehicle.trim(), districts: r.districts },
-      () => me().status === 'active' ? `أهلاً ${me().name}، حسابك جاهز` : 'وصل طلب انضمامك للإدارة', () => { state.boot = 'ready'; state.tab = ''; state.reg = { role: 'customer', name: '', phone: '', pin: '', pin2: '', district: '', details: '', cat: '', hours: '', vehicle: '', districts: [] } });
+    run('register', { role: r.role, name: r.name.trim(), phone: digits(r.phone), pin: digits(r.pin), district: r.district || districts[0], details: r.details.trim(), cat: r.cat, hours: r.hours.trim(), vehicle: r.vehicle.trim(), districts: r.districts, lang: r.lang },
+      () => me().status === 'active' ? `أهلاً ${me().name}، حسابك جاهز` : 'وصل طلب انضمامك للإدارة', () => { state.boot = 'ready'; state.tab = ''; state.reg = { role: 'customer', name: '', phone: '', pin: '', pin2: '', district: '', details: '', cat: '', hours: '', vehicle: '', districts: [], lang: 'ar' } });
   },
   'text-order'(f) {
     const c = state.compose, mode = f.dataset.mode, target = mode === 'target' ? c.target : null;
@@ -1265,7 +1613,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.shee
 async function boot() {
   if (!apiUrl) { state.boot = 'setup'; return render() }
   if (token) {
-    try { await call('sync'); state.boot = 'ready'; return render() }
+    try { await call('sync'); state.boot = 'ready'; setAlertBaseline(); return render() }
     catch (e) { if (token) { state.boot = 'error'; state.bootError = e.message; return render() } }
   }
   try { state.config = (await call('config')).config; state.boot = 'auth' }
