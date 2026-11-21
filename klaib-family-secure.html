@@ -131,11 +131,10 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <section id="branches" class=" view">
 <h2>فروع العائلة</h2>
 <div class="grid" id="brGrid"></div>
-<p class="note">اضغط على الفرع لعرض أخباره ومناسباته وشجرته.</p>
+<p class="note">اضغط على الفرع لعرض أخباره ومناسباته.</p>
 </section>
 <section id="branch" class="view">
 <h2 id="bTitle"></h2>
-<div class="bbar"><button class="chip" id="bTree">🌳 شجرة الفرع</button><button class="chip" id="bBack">← كل الفروع</button></div>
 <h3 class="sub">أخبار الفرع</h3><div class="news" id="bNews"></div>
 <h3 class="sub" style="margin-top:18px">مناسبات الفرع القادمة</h3><div class="news" id="bEv"></div>
 </section>
@@ -241,8 +240,7 @@ function sel(i){cur=i;chips();news()}
 $('chips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==null)sel(+i)};
 $('brGrid').innerHTML=BR.map(function(n,i){return '<div class="card br" data-i="'+i+'"><i>'+(i+1)+'</i><b>'+n+'</b></div>'}).join('');
 $('brGrid').onclick=function(e){var c=e.target.closest('.br');if(c){BSEL=+c.getAttribute('data-i');location.hash='#branch';go('branch')}};
-$('bBack').onclick=function(){location.hash='#branches'};
-$('bTree').onclick=function(){tSel(BSEL);location.hash='#trees'};
+
 events();
 $('bs').innerHTML='<option>من فرع: غير محدد</option>'+BR.map(function(n){return '<option>'+n+'</option>'}).join('');
 stats();
