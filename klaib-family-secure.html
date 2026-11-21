@@ -59,6 +59,20 @@ form{display:grid;gap:10px}input,select,textarea{width:100%;padding:10px;border:
 .gate h1{font-family:Amiri,serif;color:var(--pri);margin:0 0 4px}.gate p{color:var(--mute);margin:4px 0 14px}.gate input,.gate select{margin:5px 0;text-align:center}
 .gate .btn{width:100%;margin-top:8px}.gate .err{color:#c0392b;min-height:22px;font-size:14px}
 .adm table{width:100%;border-collapse:collapse;font-size:14px}.adm td{border-bottom:1px solid var(--line);padding:6px}.adm .chip{margin:0 2px}
+.tl{position:relative;padding-inline-start:26px}.tl::before{content:"";position:absolute;inset-inline-start:8px;top:0;bottom:0;width:2px;background:var(--gold)}
+.tl .it{position:relative;margin-bottom:12px}.tl .it::before{content:"";position:absolute;inset-inline-start:-24px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--pri);border:2px solid var(--gold)}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+#top{flex:none;background:linear-gradient(160deg,var(--pri2),var(--pri));text-align:center;padding:calc(8px + env(safe-area-inset-top,0px)) 8px 0;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:5}
+#top h1{font-family:Amiri,serif;font-size:clamp(24px,5vw,36px);margin:0;color:#f3dfa6;line-height:1.5}
+#top nav{position:static;background:none;justify-content:safe center;padding:4px 2px 8px}
+#top nav a.on{background:rgba(255,255,255,.22);color:#f3dfa6;font-weight:700}
+main{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;padding:8px 0}
+.view{display:none;margin:auto;width:100%;max-width:960px;padding:16px 14px}.view.on{display:block}
+#home{text-align:center}.tag-line{font-family:Amiri,serif;font-size:clamp(20px,4vw,28px);color:var(--pri);margin:0 0 20px}
+#home .stats{margin:0 auto;padding:0}
+a.stat{display:block;text-decoration:none;color:inherit;transition:.2s}a.stat:hover{transform:translateY(-3px);border-color:var(--gold)}
+h3.sub{color:var(--mute);font-weight:500;margin:0 0 14px;font-size:16px}
+#app>footer{flex:none;padding:6px 10px;font-size:12px}
 footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-size:14px}
 .note{color:var(--mute);font-size:12px}
 </style>
@@ -73,53 +87,50 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <div id="sDeny" hidden><p>هذا الحساب موقوف. تواصل مع الأدمن.</p><button class="chip" data-out="1">خروج</button></div>
 <div class="err" id="gerr"></div></div></div>
 <div id="app" style="display:none">
-<nav><a href="#home">الرئيسية</a><a href="#about">عن العائلة</a><a href="#branches">الفروع</a><a href="#trees">الأشجار</a><a href="#news">الأخبار</a><a href="#events">المناسبات</a><a href="#tools">خدماتنا</a><a href="#contact">تواصل</a><a href="#admin" id="navAdm" style="display:none">الإدارة</a><a href="#" data-out="1">خروج</a></nav>
-
-<header class="hero" id="home">
-<div style="font-size:15px;opacity:.85">بسم الله الرحمن الرحيم</div>
-<h1>عائلة كليب بن عور</h1>
-<p>أصلٌ ثابت وفروعٌ ممتدة… نجتمع على الود والتواصل وصلة الرحم.</p>
-<a class="btn" href="#news">آخر الأخبار</a><a class="btn o" href="#contact">تواصل معنا</a>
-</header>
-
+<header id="top"><h1>عائلة كليب بن عور</h1>
+<nav><a href="#home">الرئيسية</a><a href="#about">عن العائلة</a><a href="#council">المجلس</a><a href="#branches">الفروع</a><a href="#trees">الأشجار</a><a href="#news">الأخبار</a><a href="#events">المناسبات</a><a href="#tools">خدماتنا</a><a href="#contact">تواصل</a><a href="#admin" id="navAdm" style="display:none">الإدارة</a><a href="#" data-out="1">خروج</a></nav></header>
+<main id="main">
+<div id="home" class="view on"><p class="tag-line">أصلٌ ثابت وفروعٌ ممتدة… نجتمع على الود والتواصل وصلة الرحم.</p>
 <div class="stats">
-<div class="stat"><b>12</b><span>فرعًا</span></div>
-<div class="stat"><b id="sNews">0</b><span>خبر</span></div>
-<div class="stat"><b id="sEv">0</b><span>مناسبة قادمة</span></div>
-<div class="stat"><b>١</b><span>عائلة واحدة</span></div>
-</div>
+<a class="stat" href="#branches"><b>12</b><span>فرعًا</span></a>
+<a class="stat" href="#news"><b id="sNews">0</b><span>خبر</span></a>
+<a class="stat" href="#events"><b id="sEv">0</b><span>مناسبة قادمة</span></a>
+<a class="stat" href="#about"><b>١</b><span>عائلة واحدة</span></a>
+</div></div>
 
-<section id="about">
+<section id="about" class=" view">
 <h2>عن العائلة</h2>
 <div class="card">تجمع عائلة كليب بن عور فروع كريمة، يجمعها النسب والمحبة والتكافل. يهدف هذا الموقع إلى تقريب أفراد العائلة، ونشر أخبارها ومناسباتها، وتوثيق شجرتها، وتسهيل التواصل بين فروعها.
 <p class="note">يمكن تعديل هذا النص وإضافة نبذة تاريخية عن جد العائلة وأصلها.</p></div>
 </section>
 
-<section id="branches">
+<section id="council" class=" view"><h2>مجلس العائلة</h2><h3 class="sub">السجل التاريخي لأنشطة المجلس</h3><div class="tl" id="cList"></div></section>
+
+<section id="branches" class=" view">
 <h2>فروع العائلة</h2>
 <div class="grid" id="brGrid"></div>
 <p class="note">اضغط على الفرع لعرض أخباره.</p>
 </section>
 
-<section id="trees">
+<section id="trees" class=" view">
 <h2>أشجار العائلة</h2>
 <div class="chips" id="tChips"></div>
 <div class="card" id="tView"></div>
 <p class="note">الشجرة الجماعية تضم جميع الفروع، ولكل فرع شجرته الخاصة.</p>
 </section>
 
-<section id="news">
+<section id="news" class=" view">
 <h2>أخبار العائلة</h2>
 <div class="chips" id="chips"></div>
 <div class="news" id="newsList"></div>
 </section>
 
-<section id="events">
+<section id="events" class=" view">
 <h2>المناسبات القادمة</h2>
 <div id="evList"></div>
 </section>
 
-<section id="tools" class="tools">
+<section id="tools" class="tools  view">
 <h2>خدمات العائلة</h2>
 <div class="grid">
 <div class="card"><a href="https://livefamilytrees.com/trees/?t=251208ZRvE1162206422" target="_blank"><b>🌳 شجرة العائلة</b><br><small>استعراض الأنساب والفروع</small></a></div>
@@ -129,7 +140,7 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 </div>
 </section>
 
-<section id="contact">
+<section id="contact" class=" view">
 <h2>تواصل وتفاعل</h2>
 <div class="card">
 <form id="f">
@@ -143,7 +154,7 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 </div>
 </section>
 
-<section id="admin" class="adm" style="display:none"><h2>لوحة الأدمن</h2>
+<section id="admin" class="adm view"><h2>لوحة الأدمن</h2>
 <div class="card"><b>طلبات الانضمام</b><table id="tPend"></table></div>
 <div class="card" style="margin-top:10px"><b>الأعضاء</b><table id="tMem"></table></div>
 <div class="card" style="margin-top:10px"><b>إضافة أعضاء (سطر لكل عضو: الفرع، الاسم، الجوال)</b><textarea id="imp" autocomplete="off" rows="4" placeholder="مزِيد، فلان بن فلان، 0551234567"></textarea><button class="btn" id="impBtn">اعتماد القائمة</button></div>
@@ -152,6 +163,10 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <select id="nB"></select><input id="nT" autocomplete="off" placeholder="العنوان"><textarea id="nX" autocomplete="off" rows="3" placeholder="نص الخبر"></textarea>
 <input id="nD" autocomplete="off" type="date"><label><input id="nP" type="checkbox" style="width:auto"> تثبيت في الأعلى</label>
 <button class="btn" id="nBtn">نشر الخبر</button><table id="aNews"></table></div>
+<div class="card" style="margin-top:10px"><b>سجل المجلس: إضافة نشاط</b>
+<input id="cT" autocomplete="off" placeholder="الحدث (مثل: الاجتماع العاشر)"><input id="cD" type="date" autocomplete="off"><input id="cP" autocomplete="off" placeholder="المكان"><input id="cR" autocomplete="off" placeholder="المسؤول"><textarea id="cS" rows="2" autocomplete="off" placeholder="الملخص"></textarea>
+<button class="btn" id="cBtn">إضافة للسجل</button><table id="aCo"></table>
+<p class="note">استيراد السجل الحالي (مرة واحدة): ملف klaib-council.json</p><input type="file" id="cSeed" accept=".json"></div>
 <div class="card" style="margin-top:10px"><b>إضافة مناسبة</b>
 <input id="eT" autocomplete="off" placeholder="عنوان المناسبة"><input id="eD" autocomplete="off" type="date"><input id="eP" autocomplete="off" placeholder="المكان"><input id="eL" autocomplete="off" placeholder="رابط اختياري (https://...)" dir="ltr">
 <button class="btn" id="eBtn">إضافة المناسبة</button><table id="aEv"></table></div>
@@ -160,7 +175,8 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <select id="tuB"></select><textarea id="tuX" rows="4" autocomplete="off" placeholder="الصق صفوف الفرع هنا"></textarea><button class="btn" id="tuBtn">تحديث شجرة الفرع</button></div>
 <div class="card" style="margin-top:10px"><b>رفع بيانات الأشجار (ملف klaib-seed.json)</b><input type="file" id="seed" accept=".json"><p class="note" id="seedMsg"></p></div>
 </section>
-<footer>© عائلة كليب بن عور — جميع الحقوق محفوظة<br>«وَاتَّقُوا اللَّهَ الَّذِي تَسَاءَلُونَ بِهِ وَالْأَرْحَامَ»</footer>
+</main>
+<footer>© عائلة كليب بن عور — «وَاتَّقُوا اللَّهَ الَّذِي تَسَاءَلُونَ بِهِ وَالْأَرْحَامَ»</footer>
 
 </div>
 <script>
@@ -173,6 +189,8 @@ var $=function(i){return document.getElementById(i)};
 function chips(){var h='<button class="chip'+(cur==-2?' on':'')+'" data-i="-2">الكل</button><button class="chip'+(cur==-1?' on':'')+'" data-i="-1">أخبار جماعية</button>';
 BR.forEach(function(n,i){h+='<button class="chip'+(cur==i?' on':'')+'" data-i="'+i+'">'+n+'</button>'});$('chips').innerHTML=h}
 function fmtD(iso){try{var d=new Date(iso+'T12:00:00');return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(d)+' — '+new Intl.DateTimeFormat('ar-SA',{day:'numeric',month:'long',year:'numeric',calendar:'gregory'}).format(d)}catch(e){return iso||''}}
+var COUNCIL=[];
+function council(){$('cList').innerHTML=COUNCIL.length?COUNCIL.map(function(r,i){return '<div class="it card"><span class="tag">'+(i+1)+'</span><b>'+nz(r.t)+'</b><br><small>'+fmtD(r.d)+'</small>'+(r.p?'<div>📍 '+nz(r.p)+'</div>':'')+(r.o?'<div>👤 '+nz(r.o)+'</div>':'')+'<div>'+(r.s?nz(r.s):'<span class="note">لم يُسجَّل ملخص بعد</span>')+'</div></div>'}).join(''):'<div class="card">لا توجد سجلات بعد.</div>'}
 function news(){var l=NEWS.filter(function(n){return cur==-2||n.b==cur});
 $('newsList').innerHTML=l.length?l.map(function(n){return '<div class="card">'+(n.p?'📌 ':'')+'<span class="tag">'+(n.b<0?'جماعي':BR[n.b])+'</span>'+(n.k&&n.k!='خبر'?'<span class="tag" style="background:var(--pri);color:#fff">'+nz(n.k)+'</span>':'')+'<b>'+nz(n.t)+'</b><br><small>'+fmtD(n.d)+'</small><div>'+nz(n.x)+'</div></div>'}).join(''):'<div class="card">لا توجد أخبار حاليًا.</div>'}
 function events(){var td=new Date().toISOString().slice(0,10),l=EV.filter(function(e){return e.d>=td});
@@ -181,7 +199,7 @@ function stats(){var td=new Date().toISOString().slice(0,10);$('sNews').textCont
 function sel(i){cur=i;chips();news()}
 $('chips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==null)sel(+i)};
 $('brGrid').innerHTML=BR.map(function(n,i){return '<div class="card br" data-i="'+i+'"><i>'+(i+1)+'</i><b>'+n+'</b></div>'}).join('');
-$('brGrid').onclick=function(e){var c=e.target.closest('.br');if(c){sel(+c.getAttribute('data-i'));$('news').scrollIntoView()}};
+$('brGrid').onclick=function(e){var c=e.target.closest('.br');if(c){sel(+c.getAttribute('data-i'));go('news')}};
 events();
 $('bs').innerHTML='<option>من فرع: غير محدد</option>'+BR.map(function(n){return '<option>'+n+'</option>'}).join('');
 stats();
@@ -222,6 +240,13 @@ $('tChips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==nul
 $('tView').onclick=function(e){var o=document.querySelector('#tView .org');var z=e.target.getAttribute('data-z');if(z){ZOOM=z=='fit'?'fit':Math.max(.15,Math.min(2,ZOOM+(z=='in'?.15:-.15)));SL=null;tView();return}var m=e.target.getAttribute('data-m');if(m){MODE=m;OPEN={};SL=null;ZOOM=m=='all'?'fit':1;tView();return}if(e.target.closest('[data-root]')){tSel(-1);return}var nb=e.target.closest('.hk');if(nb){var id=+nb.getAttribute('data-id'),n=NODES[id],cur=OPEN[id]!==undefined?OPEN[id]:MODE=='all';if(!cur&&n&&n.par)n.par.k.forEach(function(x){if(x!==n)OPEN[x.id]=false});OPEN[id]=!cur;if(cur&&ZOOM<1)ZOOM=1;SL=o?o.scrollLeft:null;tView();return}var i=e.target.getAttribute('data-i');if(i!==null&&tc<0)tSel(+i)};
 tChips();tView();load();
 chips();news();
+var VIEWS=['home','about','council','branches','trees','news','events','tools','contact','admin'];
+function go(id){id=(id||location.hash||'').replace('#','');if(VIEWS.indexOf(id)<0)id='home';
+if(id=='admin'&&$('navAdm').style.display=='none')id='home';
+VIEWS.forEach(function(v){var e=$(v);if(e)e.classList.toggle('on',v==id)});
+Array.prototype.forEach.call(document.querySelectorAll('#top nav a'),function(a){a.classList.toggle('on',a.getAttribute('href')=='#'+id)});
+var m=$('main');if(m)m.scrollTop=0;if(id=='trees'&&T)tView()}
+window.addEventListener('hashchange',function(){go()});go();
 </script>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -247,7 +272,7 @@ let isAdmin=false;
 async function enter(m){isAdmin=m.role=='admin';$('gate').style.display='none';$('app').style.display='block';
 try{const q=await getDocs(collection(db,'trees'));window.T={};q.forEach(d=>{window.T[d.id]=build(JSON.parse(d.data().rows))});tView()}catch(e){}
 await loadFeed();
-if(m.role=='admin'){$('navAdm').style.display='';$('admin').style.display='block';adminLoad()}}
+if(m.role=='admin'){$('navAdm').style.display='';adminLoad()}}
 async function adminLoad(){const q=await getDocs(collection(db,'members'));let p='',a='';
 q.forEach(d=>{const m=d.data(),id=E(d.id),row='<tr><td>'+E(m.name)+'</td><td>'+E(m.branch)+'</td><td dir="ltr">'+id+'</td><td>';
 if(m.status=='pending')p+=row+'<button class="chip" data-a="ok" data-id="'+id+'">قبول</button><button class="chip" data-a="del" data-id="'+id+'">رفض</button></td></tr>';
@@ -261,13 +286,14 @@ $('imp').value='';alert('تم اعتماد '+n+' عضو');adminLoad()};
 $('seed').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());let n=0;
 for(const g in j){await setDoc(doc(db,'trees',g),{rows:JSON.stringify(j[g])});n++}$('seedMsg').textContent='تم رفع '+n+' شجرة. حدّث الصفحة.'}catch(x){$('seedMsg').textContent='تعذر رفع الملف'}};
 $('nB').innerHTML='<option>جماعي</option>'+BR.map(n=>'<option>'+n+'</option>').join('');
-async function loadFeed(){try{const[n,e]=await Promise.all([getDocs(collection(db,'news')),getDocs(collection(db,'events'))]);
+async function loadFeed(){try{const[n,e,cq]=await Promise.all([getDocs(collection(db,'news')),getDocs(collection(db,'events')),getDocs(collection(db,'council')).catch(()=>({docs:[]}))]);
+window.COUNCIL=cq.docs.map(d=>{const v=d.data();return{id:d.id,t:v.title,d:v.date,p:v.place,o:v.owner,s:v.summary}}).sort((a,b)=>String(a.d).localeCompare(String(b.d)));
 window.NEWS=n.docs.map(d=>{const v=d.data();return{id:d.id,b:BR.indexOf(v.branch),t:v.title,x:v.text,d:v.date,k:v.kind,p:!!v.pin}}).sort((a,b)=>(b.p-a.p)||String(b.d).localeCompare(String(a.d)));
 window.EV=e.docs.map(d=>{const v=d.data();return{id:d.id,t:v.title,d:v.date,p:v.place,l:v.link}}).sort((a,b)=>String(a.d).localeCompare(String(b.d)));
-news();events();stats();feedAdmin()}catch(x){if(isAdmin)alert('تعذر تحميل الأخبار ('+E(x.code||x.message)+')')}}
+news();events();stats();council();feedAdmin()}catch(x){if(isAdmin)alert('تعذر تحميل الأخبار ('+E(x.code||x.message)+')')}}
 function feedAdmin(){if(!isAdmin)return;const row=(c,i,t,d)=>'<tr><td>'+E(t)+'</td><td>'+E(d)+'</td><td><button class="chip" data-del="'+c+':'+E(i)+'">حذف</button></td></tr>';
 $('aNews').innerHTML=NEWS.map(n=>row('news',n.id,n.t,n.d)).join('')||'<tr><td>لا أخبار</td></tr>';
-$('aEv').innerHTML=EV.map(v=>row('events',v.id,v.t,v.d)).join('')||'<tr><td>لا مناسبات</td></tr>'}
+$('aEv').innerHTML=EV.map(v=>row('events',v.id,v.t,v.d)).join('')||'<tr><td>لا مناسبات</td></tr>';$('aCo').innerHTML=COUNCIL.map(r=>row('council',r.id,r.t,r.d)).join('')||'<tr><td>لا سجلات</td></tr>'}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b||!isAdmin)return;const[c,id]=b.dataset.del.split(':');if(confirm('تأكيد الحذف؟')){try{await deleteDoc(doc(db,c,id));loadFeed()}catch(x){alert('تعذر الحذف ('+E(x.code||x.message)+')')}}});
 $('nBtn').onclick=async()=>{const t=$('nT').value.trim(),x=$('nX').value.trim(),d=$('nD').value;if(t.length<2||x.length<2||!d)return alert('أكمل العنوان والنص والتاريخ');
 try{await addDoc(collection(db,'news'),{title:t,text:x,date:d,kind:$('nK').value,branch:$('nB').value,pin:$('nP').checked,createdAt:serverTimestamp()});$('nT').value=$('nX').value=$('nD').value='';$('nP').checked=false;$('nK').selectedIndex=0;$('nB').selectedIndex=0;await loadFeed();alert('تم نشر الخبر')}catch(x){alert('تعذر النشر ('+E(x.code||x.message)+')')}};
@@ -278,6 +304,9 @@ $('tuBtn').onclick=async()=>{const M=['اطار','جذع','عنوان'];const ro
 if(!rows.length)return alert('الصق صفوف الفرع كما نسختها من الشيت');
 if(!confirm('سيحل هذا محل شجرة "'+$('tuB').selectedOptions[0].text+'" ('+rows.length+' صف). متابعة؟'))return;
 try{await setDoc(doc(db,'trees',$('tuB').value),{rows:JSON.stringify(rows)});window.T[$('tuB').value]=build(rows);tView();$('tuX').value='';alert('تم تحديث الشجرة')}catch(x){alert('تعذر التحديث ('+E(x.code||x.message)+')')}};
+$('cBtn').onclick=async()=>{const t=$('cT').value.trim(),d=$('cD').value;if(t.length<2||!d)return alert('أكمل الحدث والتاريخ');
+try{await addDoc(collection(db,'council'),{title:t,date:d,place:$('cP').value.trim(),owner:$('cR').value.trim(),summary:$('cS').value.trim(),createdAt:serverTimestamp()});$('cT').value=$('cD').value=$('cP').value=$('cR').value=$('cS').value='';await loadFeed();alert('تمت الإضافة للسجل')}catch(x){alert('تعذرت الإضافة ('+E(x.code||x.message)+')')}};
+$('cSeed').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const a=JSON.parse(await f.text());for(const r of a){await setDoc(doc(db,'council','r'+String(r.n).padStart(2,'0')),{title:r.title,date:r.date,place:r.place||'',owner:r.owner||'',summary:r.summary||'',createdAt:serverTimestamp()})}await loadFeed();alert('تم استيراد '+a.length+' نشاطًا')}catch(x){alert('تعذر الاستيراد ('+E(x.code||x.message)+')')}};
 </script>
 </body>
 </html>
