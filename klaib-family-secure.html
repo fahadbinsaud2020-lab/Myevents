@@ -84,6 +84,12 @@ h3.sub{color:var(--mute);font-weight:500;margin:0 0 14px;font-size:16px}
 .today{margin:18px auto 14px;color:var(--mute);font-size:14px;line-height:1.9}.today i{font-family:Amiri,serif;font-size:18px;color:var(--pri)}
 .hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;text-align:right}
 .hgrid h3{margin:0 0 8px;font-size:16px;color:var(--pri)}.hi{margin-bottom:8px}.hi b{display:block;font-size:14px}.hi small{color:var(--mute)}
+.nc{cursor:pointer;transition:.15s}.nc:hover{border-color:var(--gold)}
+.nt{white-space:pre-line;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-top:4px}
+.hi.nc .nt{display:none}.rm{display:inline-block;margin-top:6px;font-size:13px;color:var(--pri);font-weight:700}.hi .rm{display:none}
+#dlg{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}#dlg[hidden]{display:none}
+.dbox{background:var(--card);color:var(--ink);border-radius:16px;max-width:640px;width:100%;max-height:85vh;overflow:auto;padding:18px;position:relative}
+.dbox #dX{position:sticky;top:0;float:left;margin:0 0 8px 8px}.dtx{white-space:pre-line;margin-top:12px;line-height:1.9;font-size:16px}
 .bbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}.more{font-size:13px;color:var(--pri);text-decoration:none;font-weight:700}
 .quick{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
 .quick a{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:84px;padding:10px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;text-decoration:none;color:var(--ink);font-size:22px}.quick a span{font-size:13px}.quick a:hover{border-color:var(--gold)}
@@ -203,6 +209,7 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <div class="card" style="margin-top:10px"><b>رفع بيانات الأشجار (ملف klaib-seed.json)</b><input type="file" id="seed" accept=".json"><p class="note" id="seedMsg"></p></div>
 </section>
 </main>
+<div id="dlg" hidden><div class="dbox"><button id="dX" class="chip" aria-label="إغلاق">✕ إغلاق</button><div id="dBody"></div></div></div>
 <footer>© عائلة كليب بن عور — «وَاتَّقُوا اللَّهَ الَّذِي تَسَاءَلُونَ بِهِ وَالْأَرْحَامَ»</footer>
 
 </div>
@@ -220,19 +227,26 @@ var COUNCIL=[];
 function council(){$('cList').innerHTML=COUNCIL.length?COUNCIL.map(function(r,i){return '<div class="it card"><span class="tag">'+(i+1)+'</span><b>'+nz(r.t)+'</b><br><small>'+fmtD(r.d)+'</small>'+(r.p?'<div>📍 '+nz(r.p)+'</div>':'')+(r.o?'<div>👤 '+nz(r.o)+'</div>':'')+'<div>'+(r.s?nz(r.s):'<span class="note">لم يُسجَّل ملخص بعد</span>')+'</div></div>'}).join(''):'<div class="card">لا توجد سجلات بعد.</div>'}
 function allNews(){var c=COUNCIL.map(function(r,i){return{id:'c'+i,b:-1,t:'اجتماع المجلس: '+(r.t||''),d:r.d,k:'المجلس',p:false,x:(r.p?'📍 المكان: '+r.p:'')+(r.o?'\n👤 '+r.o:'')+(r.s?'\n'+r.s:''),c:1}});
 return NEWS.concat(c).sort(function(a,b){return (b.p-a.p)||String(b.d).localeCompare(String(a.d))})}
+function nCard(n,br){return '<div class="card nc" data-nid="'+n.id+'" tabindex="0">'+(n.p?'📌 ':'')+(br?'<span class="tag">'+(n.b<0?'جماعي':BR[n.b])+'</span>':'')+(n.k&&n.k!='خبر'?'<span class="tag" style="background:var(--pri);color:#fff">'+nz(n.k)+'</span>':'')+'<b>'+nz(n.t)+'</b><br><small>'+fmtD(n.d)+'</small><div class="nt">'+nz(n.x)+'</div><span class="rm">عرض التفاصيل ←</span></div>'}
 function news(){var l=allNews().filter(function(n){return cur==-2||n.b==cur});
-$('newsList').innerHTML=l.length?l.map(function(n){return '<div class="card">'+(n.p?'📌 ':'')+'<span class="tag">'+(n.b<0?'جماعي':BR[n.b])+'</span>'+(n.k&&n.k!='خبر'?'<span class="tag" style="background:var(--pri);color:#fff">'+nz(n.k)+'</span>':'')+'<b>'+nz(n.t)+'</b><br><small>'+fmtD(n.d)+'</small><div style="white-space:pre-line">'+nz(n.x)+'</div></div>'}).join(''):'<div class="card">لا توجد أخبار حاليًا.</div>'}
+$('newsList').innerHTML=l.length?l.map(function(n){return nCard(n,1)}).join(''):'<div class="card">لا توجد أخبار حاليًا.</div>'}
+function showNews(id){var n=allNews().filter(function(x){return String(x.id)==String(id)})[0];if(!n)return;
+$('dBody').innerHTML='<div style="margin-bottom:6px">'+(n.p?'📌 ':'')+'<span class="tag">'+(n.b<0?'جماعي':BR[n.b])+'</span>'+(n.k&&n.k!='خبر'?'<span class="tag" style="background:var(--pri);color:#fff">'+nz(n.k)+'</span>':'')+'</div><h3 style="margin:4px 0 6px;color:var(--pri)">'+nz(n.t)+'</h3><small class="note">'+fmtD(n.d)+'</small><div class="dtx">'+nz(n.x||'لا توجد تفاصيل إضافية.')+'</div>';
+$('dlg').hidden=false;document.body.style.overflow='hidden'}
+function hideNews(){$('dlg').hidden=true;document.body.style.overflow=''}
+document.addEventListener('click',function(e){var c=e.target.closest('[data-nid]');if(c){showNews(c.getAttribute('data-nid'));return}if(e.target.id=='dlg'||e.target.closest('#dX'))hideNews()});
+document.addEventListener('keydown',function(e){if(e.key=='Escape')hideNews();if(e.key=='Enter'){var c=e.target.closest&&e.target.closest('.nc');if(c)showNews(c.getAttribute('data-nid'))}});
 function evCard(e,tag){var d=new Date(e.d+'T12:00:00');return '<div class="card ev"><div class="d"><b style="font-size:22px">'+d.getDate()+'</b><br>'+new Intl.DateTimeFormat('ar-SA',{month:'long',calendar:'gregory'}).format(d)+'</div><div>'+(tag?'<span class="tag">'+(e.b<0?'جماعي':BR[e.b])+'</span>':'')+'<b>'+nz(e.t)+'</b><br><small class="note">'+fmtD(e.d)+(e.p?' — '+nz(e.p):'')+'</small>'+(/^https?:\/\//.test(e.l||'')?'<br><a href="'+nz(e.l).replace(/["']/g,'')+'" target="_blank" rel="noopener">الرابط</a>':'')+'</div></div>'}
 function events(){var td=new Date().toISOString().slice(0,10),l=EV.filter(function(e){return e.d>=td});
 $('evList').innerHTML=l.length?l.map(function(e){return evCard(e,1)}).join(''):'<div class="card">لا توجد مناسبات قادمة.</div>'}
 function branchView(){if(BSEL<0)return;var td=new Date().toISOString().slice(0,10);$('bTitle').textContent='فرع '+BR[BSEL];
 var n=NEWS.filter(function(x){return x.b==BSEL}),e=EV.filter(function(x){return x.b==BSEL&&x.d>=td});
-$('bNews').innerHTML=n.length?n.map(function(n){return '<div class="card">'+(n.p?'📌 ':'')+(n.k&&n.k!='خبر'?'<span class="tag" style="background:var(--pri);color:#fff">'+nz(n.k)+'</span>':'')+'<b>'+nz(n.t)+'</b><br><small>'+fmtD(n.d)+'</small><div style="white-space:pre-line">'+nz(n.x)+'</div></div>'}).join(''):'<div class="card note">لا أخبار خاصة بهذا الفرع حاليًا.</div>';
+$('bNews').innerHTML=n.length?n.map(function(n){return nCard(n,0)}).join(''):'<div class="card note">لا أخبار خاصة بهذا الفرع حاليًا.</div>';
 $('bEv').innerHTML=e.length?e.map(function(x){return evCard(x,0)}).join(''):'<div class="card note">لا مناسبات قادمة لهذا الفرع.</div>'}
 function home(){var td=new Date().toISOString().slice(0,10),A=allNews().slice(0,3);
 var h=new Date(),hj='',gr='';try{hj=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(h);gr=new Intl.DateTimeFormat('ar-SA',{day:'numeric',month:'long',year:'numeric',calendar:'gregory'}).format(h)}catch(e){}
 $('today').innerHTML='<span>'+hj+'</span> · <span>'+gr+'</span><br><i>«وَاعْتَصِمُوا بِحَبْلِ اللَّهِ جَمِيعًا وَلَا تَفَرَّقُوا»</i>';
-$('hNews').innerHTML=A.length?A.map(function(n){return '<div class="hi"><b>'+nz(n.t)+'</b><small>'+fmtD(n.d)+'</small></div>'}).join(''):'<span class="note">لا أخبار بعد</span>';
+$('hNews').innerHTML=A.length?A.map(function(n){return '<div class="hi nc" data-nid="'+n.id+'" tabindex="0"><b>'+nz(n.t)+'</b><small>'+fmtD(n.d)+'</small></div>'}).join(''):'<span class="note">لا أخبار بعد</span>';
 var e=EV.filter(function(x){return x.d>=td})[0];$('hEv').innerHTML=e?'<div class="hi"><b>'+nz(e.t)+'</b><small>'+fmtD(e.d)+(e.p?' — '+nz(e.p):'')+'</small></div>':'<span class="note">لا مناسبات قادمة</span>';
 var c=COUNCIL[COUNCIL.length-1];$('hCo').innerHTML=c?'<div class="hi"><b>'+nz(c.t)+'</b><small>'+fmtD(c.d)+(c.p?' — '+nz(c.p):'')+'</small></div>':'<span class="note">لا سجلات بعد</span>'}
 function stats(){home();branchView();var td=new Date().toISOString().slice(0,10);$('sNews').textContent=allNews().length;$('sEv').textContent=EV.filter(function(e){return e.d>=td}).length}
@@ -281,7 +295,7 @@ $('tChips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==nul
 $('tView').onclick=function(e){var o=document.querySelector('#tView .org');var z=e.target.getAttribute('data-z');if(z){ZOOM=z=='fit'?'fit':Math.max(.15,Math.min(2,ZOOM+(z=='in'?.15:-.15)));SL=null;tView();return}var m=e.target.getAttribute('data-m');if(m){MODE=m;OPEN={};SL=null;ZOOM=m=='all'?'fit':1;tView();return}if(e.target.closest('[data-root]')){tSel(-1);return}var nb=e.target.closest('.hk');if(nb){var id=+nb.getAttribute('data-id'),n=NODES[id],cur=OPEN[id]!==undefined?OPEN[id]:MODE=='all';if(!cur&&n&&n.par)n.par.k.forEach(function(x){if(x!==n)OPEN[x.id]=false});OPEN[id]=!cur;if(cur&&ZOOM<1)ZOOM=1;SL=o?o.scrollLeft:null;tView();return}var i=e.target.getAttribute('data-i');if(i!==null&&tc<0)tSel(+i)};
 tChips();tView();load();
 chips();news();
-(function(){var src=document.querySelector('.hlogo').src,sz=[64,52,42,34],T=5.5,LAG=0.4,SEP=4,EDGE=16;
+(function(){var src=document.querySelector('.hlogo').src,sz=[64,52,42,34],OUT=2.6,HE=2.2,HS=1,T=OUT*2+HE+HS,LAG=0.3,SEP=4,EDGE=16;
 function fill(id,rev){var a=sz.slice();if(rev)a.reverse();$(id).innerHTML=a.map(function(v){return '<img src="'+src+'" alt="" style="--s:'+v+'px">'}).join('')}
 fill('lgR',true);fill('lgL',false);
 var G=[{el:$('lgR'),dir:1,rev:true},{el:$('lgL'),dir:-1,rev:false}],key='';
@@ -293,7 +307,7 @@ g.w=w;g.s=c.map(function(x){return Math.abs(x-c[0])});g.d=[0];g.P=[0];var sum=0;
 for(var k=1;k<v.length;k++){var d=(w[k-1]+w[k])/2+SEP;g.d[k]=d;sum+=d}
 var D=g.dir>0?(document.documentElement.clientWidth-EDGE-c[0]):(c[0]-EDGE);
 g.A0=Math.max(0,D-w[w.length-1]/2-sum);g.P[0]=g.A0;for(k=1;k<v.length;k++)g.P[k]=g.P[k-1]+g.d[k]})}
-function u(t){return (1-Math.cos(2*Math.PI*t/T))/2}
+function u(t){var m=((t%T)+T)%T;if(m<OUT)return (1-Math.cos(Math.PI*m/OUT))/2;if(m<OUT+HE)return 1;if(m<OUT+HE+OUT)return (1+Math.cos(Math.PI*(m-OUT-HE)/OUT))/2;return 0}
 function frame(ms){var t=ms/1000,k0=$('app').offsetWidth+'|'+document.documentElement.clientWidth+'|'+[].filter.call(document.querySelectorAll('.lg img'),function(i){return i.offsetWidth>0}).length;
 if(k0!==key){key=k0;geo()}
 if($('app').offsetWidth&&!still)G.forEach(function(g){if(!g.v)return;var prev=-1e9;
