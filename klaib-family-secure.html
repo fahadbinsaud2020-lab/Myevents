@@ -84,7 +84,7 @@ h3.sub{color:var(--mute);font-weight:500;margin:0 0 14px;font-size:16px}
 .today{margin:18px auto 14px;color:var(--mute);font-size:14px;line-height:1.9}.today i{font-family:Amiri,serif;font-size:18px;color:var(--pri)}
 .hgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;text-align:right}
 .hgrid h3{margin:0 0 8px;font-size:16px;color:var(--pri)}.hi{margin-bottom:8px}.hi b{display:block;font-size:14px}.hi small{color:var(--mute)}
-.more{font-size:13px;color:var(--pri);text-decoration:none;font-weight:700}
+.bbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}.more{font-size:13px;color:var(--pri);text-decoration:none;font-weight:700}
 .quick{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
 .quick a{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:84px;padding:10px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;text-decoration:none;color:var(--ink);font-size:22px}.quick a span{font-size:13px}.quick a:hover{border-color:var(--gold)}
 footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-size:14px}
@@ -131,7 +131,13 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <section id="branches" class=" view">
 <h2>فروع العائلة</h2>
 <div class="grid" id="brGrid"></div>
-<p class="note">اضغط على الفرع لعرض أخباره.</p>
+<p class="note">اضغط على الفرع لعرض أخباره ومناسباته وشجرته.</p>
+</section>
+<section id="branch" class="view">
+<h2 id="bTitle"></h2>
+<div class="bbar"><button class="chip" id="bTree">🌳 شجرة الفرع</button><button class="chip" id="bBack">← كل الفروع</button></div>
+<h3 class="sub">أخبار الفرع</h3><div class="news" id="bNews"></div>
+<h3 class="sub" style="margin-top:18px">مناسبات الفرع القادمة</h3><div class="news" id="bEv"></div>
 </section>
 
 <section id="trees" class=" view">
@@ -184,14 +190,14 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <select id="nK"><option>خبر</option><option>تهنئة</option><option>تعزية</option><option>إعلان</option></select>
 <select id="nB"></select><input id="nT" autocomplete="off" placeholder="العنوان"><textarea id="nX" autocomplete="off" rows="3" placeholder="نص الخبر"></textarea>
 <input id="nD" autocomplete="off" type="date"><label><input id="nP" type="checkbox" style="width:auto"> تثبيت في الأعلى</label>
-<button class="btn" id="nBtn">نشر الخبر</button><table id="aNews"></table></div>
+<button class="btn" id="nBtn">نشر الخبر</button> <button class="chip" id="nCancel" hidden>إلغاء التعديل</button><table id="aNews"></table></div>
 <div class="card" style="margin-top:10px"><b>سجل المجلس: إضافة نشاط</b>
 <input id="cT" autocomplete="off" placeholder="الحدث (مثل: الاجتماع العاشر)"><input id="cD" type="date" autocomplete="off"><input id="cP" autocomplete="off" placeholder="المكان"><input id="cR" autocomplete="off" placeholder="المسؤول"><textarea id="cS" rows="2" autocomplete="off" placeholder="الملخص"></textarea>
-<button class="btn" id="cBtn">إضافة للسجل</button><table id="aCo"></table>
+<button class="btn" id="cBtn">إضافة للسجل</button> <button class="chip" id="cCancel" hidden>إلغاء التعديل</button><table id="aCo"></table>
 <p class="note">استيراد السجل الحالي (مرة واحدة): ملف klaib-council.json</p><input type="file" id="cSeed" accept=".json"></div>
 <div class="card" style="margin-top:10px"><b>إضافة مناسبة</b>
-<input id="eT" autocomplete="off" placeholder="عنوان المناسبة"><input id="eD" autocomplete="off" type="date"><input id="eP" autocomplete="off" placeholder="المكان"><input id="eL" autocomplete="off" placeholder="رابط اختياري (https://...)" dir="ltr">
-<button class="btn" id="eBtn">إضافة المناسبة</button><table id="aEv"></table></div>
+<select id="eB"></select><input id="eT" autocomplete="off" placeholder="عنوان المناسبة"><input id="eD" autocomplete="off" type="date"><input id="eP" autocomplete="off" placeholder="المكان"><input id="eL" autocomplete="off" placeholder="رابط اختياري (https://...)" dir="ltr">
+<button class="btn" id="eBtn">إضافة المناسبة</button> <button class="chip" id="eCancel" hidden>إلغاء التعديل</button><table id="aEv"></table></div>
 <div class="card" style="margin-top:10px"><b>تحديث شجرة فرع من الشيت</b>
 <p class="note">في الشيت: افتح تبويب الفرع، حدّد الصفوف من العمود A إلى آخر عمود فيه أسماء، وانسخها (Ctrl+C)، ثم الصقها هنا. ستحل محل شجرة الفرع كاملة.</p>
 <select id="tuB"></select><textarea id="tuX" rows="4" autocomplete="off" placeholder="الصق صفوف الفرع هنا"></textarea><button class="btn" id="tuBtn">تحديث شجرة الفرع</button></div>
@@ -217,19 +223,26 @@ function allNews(){var c=COUNCIL.map(function(r,i){return{id:'c'+i,b:-1,t:'اج�
 return NEWS.concat(c).sort(function(a,b){return (b.p-a.p)||String(b.d).localeCompare(String(a.d))})}
 function news(){var l=allNews().filter(function(n){return cur==-2||n.b==cur});
 $('newsList').innerHTML=l.length?l.map(function(n){return '<div class="card">'+(n.p?'📌 ':'')+'<span class="tag">'+(n.b<0?'جماعي':BR[n.b])+'</span>'+(n.k&&n.k!='خبر'?'<span class="tag" style="background:var(--pri);color:#fff">'+nz(n.k)+'</span>':'')+'<b>'+nz(n.t)+'</b><br><small>'+fmtD(n.d)+'</small><div style="white-space:pre-line">'+nz(n.x)+'</div></div>'}).join(''):'<div class="card">لا توجد أخبار حاليًا.</div>'}
+function evCard(e,tag){var d=new Date(e.d+'T12:00:00');return '<div class="card ev"><div class="d"><b style="font-size:22px">'+d.getDate()+'</b><br>'+new Intl.DateTimeFormat('ar-SA',{month:'long',calendar:'gregory'}).format(d)+'</div><div>'+(tag?'<span class="tag">'+(e.b<0?'جماعي':BR[e.b])+'</span>':'')+'<b>'+nz(e.t)+'</b><br><small class="note">'+fmtD(e.d)+(e.p?' — '+nz(e.p):'')+'</small>'+(/^https?:\/\//.test(e.l||'')?'<br><a href="'+nz(e.l).replace(/["']/g,'')+'" target="_blank" rel="noopener">الرابط</a>':'')+'</div></div>'}
 function events(){var td=new Date().toISOString().slice(0,10),l=EV.filter(function(e){return e.d>=td});
-$('evList').innerHTML=l.length?l.map(function(e){var d=new Date(e.d+'T12:00:00');return '<div class="card ev"><div class="d"><b style="font-size:22px">'+d.getDate()+'</b><br>'+new Intl.DateTimeFormat('ar-SA',{month:'long',calendar:'gregory'}).format(d)+'</div><div><b>'+nz(e.t)+'</b><br><small class="note">'+fmtD(e.d)+(e.p?' — '+nz(e.p):'')+'</small>'+(/^https?:\/\//.test(e.l||'')?'<br><a href="'+nz(e.l).replace(/["']/g,'')+'" target="_blank" rel="noopener">الرابط</a>':'')+'</div></div>'}).join(''):'<div class="card">لا توجد مناسبات قادمة.</div>'}
+$('evList').innerHTML=l.length?l.map(function(e){return evCard(e,1)}).join(''):'<div class="card">لا توجد مناسبات قادمة.</div>'}
+function branchView(){if(BSEL<0)return;var td=new Date().toISOString().slice(0,10);$('bTitle').textContent='فرع '+BR[BSEL];
+var n=NEWS.filter(function(x){return x.b==BSEL}),e=EV.filter(function(x){return x.b==BSEL&&x.d>=td});
+$('bNews').innerHTML=n.length?n.map(function(n){return '<div class="card">'+(n.p?'📌 ':'')+(n.k&&n.k!='خبر'?'<span class="tag" style="background:var(--pri);color:#fff">'+nz(n.k)+'</span>':'')+'<b>'+nz(n.t)+'</b><br><small>'+fmtD(n.d)+'</small><div style="white-space:pre-line">'+nz(n.x)+'</div></div>'}).join(''):'<div class="card note">لا أخبار خاصة بهذا الفرع حاليًا.</div>';
+$('bEv').innerHTML=e.length?e.map(function(x){return evCard(x,0)}).join(''):'<div class="card note">لا مناسبات قادمة لهذا الفرع.</div>'}
 function home(){var td=new Date().toISOString().slice(0,10),A=allNews().slice(0,3);
 var h=new Date(),hj='',gr='';try{hj=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(h);gr=new Intl.DateTimeFormat('ar-SA',{day:'numeric',month:'long',year:'numeric',calendar:'gregory'}).format(h)}catch(e){}
 $('today').innerHTML='<span>'+hj+'</span> · <span>'+gr+'</span><br><i>«وَاعْتَصِمُوا بِحَبْلِ اللَّهِ جَمِيعًا وَلَا تَفَرَّقُوا»</i>';
 $('hNews').innerHTML=A.length?A.map(function(n){return '<div class="hi"><b>'+nz(n.t)+'</b><small>'+fmtD(n.d)+'</small></div>'}).join(''):'<span class="note">لا أخبار بعد</span>';
 var e=EV.filter(function(x){return x.d>=td})[0];$('hEv').innerHTML=e?'<div class="hi"><b>'+nz(e.t)+'</b><small>'+fmtD(e.d)+(e.p?' — '+nz(e.p):'')+'</small></div>':'<span class="note">لا مناسبات قادمة</span>';
 var c=COUNCIL[COUNCIL.length-1];$('hCo').innerHTML=c?'<div class="hi"><b>'+nz(c.t)+'</b><small>'+fmtD(c.d)+(c.p?' — '+nz(c.p):'')+'</small></div>':'<span class="note">لا سجلات بعد</span>'}
-function stats(){home();var td=new Date().toISOString().slice(0,10);$('sNews').textContent=allNews().length;$('sEv').textContent=EV.filter(function(e){return e.d>=td}).length}
+function stats(){home();branchView();var td=new Date().toISOString().slice(0,10);$('sNews').textContent=allNews().length;$('sEv').textContent=EV.filter(function(e){return e.d>=td}).length}
 function sel(i){cur=i;chips();news()}
 $('chips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==null)sel(+i)};
 $('brGrid').innerHTML=BR.map(function(n,i){return '<div class="card br" data-i="'+i+'"><i>'+(i+1)+'</i><b>'+n+'</b></div>'}).join('');
-$('brGrid').onclick=function(e){var c=e.target.closest('.br');if(c){sel(+c.getAttribute('data-i'));go('news')}};
+$('brGrid').onclick=function(e){var c=e.target.closest('.br');if(c){BSEL=+c.getAttribute('data-i');location.hash='#branch';go('branch')}};
+$('bBack').onclick=function(){location.hash='#branches'};
+$('bTree').onclick=function(){tSel(BSEL);location.hash='#trees'};
 events();
 $('bs').innerHTML='<option>من فرع: غير محدد</option>'+BR.map(function(n){return '<option>'+n+'</option>'}).join('');
 stats();
@@ -290,12 +303,12 @@ g.v.forEach(function(im,k){var x=g.s[k]+(g.P[k]-g.s[k])*u(t-k*LAG);if(k>0&&x<pre
 im.style.transform='translateX('+dx.toFixed(1)+'px) rotate('+(dx/(g.w[k]/2)*57.3).toFixed(0)+'deg)'})});
 requestAnimationFrame(frame)}
 requestAnimationFrame(frame)})();
-var VIEWS=['home','about','council','branches','trees','news','events','tools','contact','admin'];
+var VIEWS=['home','about','council','branches','branch','trees','news','events','tools','contact','admin'],BSEL=-1;
 function go(id){id=(id||location.hash||'').replace('#','');if(VIEWS.indexOf(id)<0)id='home';
-if(id=='admin'&&$('navAdm').style.display=='none')id='home';
+if(id=='admin'&&$('navAdm').style.display=='none')id='home';if(id=='branch'&&BSEL<0)id='branches';
 VIEWS.forEach(function(v){var e=$(v);if(e)e.classList.toggle('on',v==id)});
-Array.prototype.forEach.call(document.querySelectorAll('#top nav a'),function(a){a.classList.toggle('on',a.getAttribute('href')=='#'+id)});
-var m=$('main');if(m)m.scrollTop=0;if(id=='trees'&&T)tView()}
+Array.prototype.forEach.call(document.querySelectorAll('#top nav a'),function(a){a.classList.toggle('on',a.getAttribute('href')=='#'+(id=='branch'?'branches':id))});
+var m=$('main');if(m)m.scrollTop=0;if(id=='trees'&&T)tView();if(id=='branch')branchView()}
 window.addEventListener('hashchange',function(){go()});go();
 </script>
 <script type="module">
@@ -335,27 +348,39 @@ await setDoc(doc(db,'members',norm(c[2])),{name:c[1],branch:c[0],status:'approve
 $('imp').value='';alert('تم اعتماد '+n+' عضو');adminLoad()};
 $('seed').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());let n=0;
 for(const g in j){await setDoc(doc(db,'trees',g),{rows:JSON.stringify(j[g])});n++}$('seedMsg').textContent='تم رفع '+n+' شجرة. حدّث الصفحة.'}catch(x){$('seedMsg').textContent='تعذر رفع الملف'}};
-$('nB').innerHTML='<option>جماعي</option>'+BR.map(n=>'<option>'+n+'</option>').join('');
+$('nB').innerHTML=$('eB').innerHTML='<option>جماعي</option>'+BR.map(n=>'<option>'+n+'</option>').join('');
 async function loadFeed(){try{const[n,e,cq]=await Promise.all([getDocs(collection(db,'news')),getDocs(collection(db,'events')),getDocs(collection(db,'council')).catch(()=>({docs:[]}))]);
 window.COUNCIL=cq.docs.map(d=>{const v=d.data();return{id:d.id,t:v.title,d:v.date,p:v.place,o:v.owner,s:v.summary}}).sort((a,b)=>String(a.d).localeCompare(String(b.d)));
 window.NEWS=n.docs.map(d=>{const v=d.data();return{id:d.id,b:BR.indexOf(v.branch),t:v.title,x:v.text,d:v.date,k:v.kind,p:!!v.pin}}).sort((a,b)=>(b.p-a.p)||String(b.d).localeCompare(String(a.d)));
-window.EV=e.docs.map(d=>{const v=d.data();return{id:d.id,t:v.title,d:v.date,p:v.place,l:v.link}}).sort((a,b)=>String(a.d).localeCompare(String(b.d)));
+window.EV=e.docs.map(d=>{const v=d.data();return{id:d.id,b:BR.indexOf(v.branch),t:v.title,d:v.date,p:v.place,l:v.link}}).sort((a,b)=>String(a.d).localeCompare(String(b.d)));
 news();events();stats();council();feedAdmin()}catch(x){if(isAdmin)alert('تعذر تحميل الأخبار ('+E(x.code||x.message)+')')}}
-function feedAdmin(){if(!isAdmin)return;const row=(c,i,t,d)=>'<tr><td>'+E(t)+'</td><td>'+E(d)+'</td><td><button class="chip" data-del="'+c+':'+E(i)+'">حذف</button></td></tr>';
-$('aNews').innerHTML=NEWS.map(n=>row('news',n.id,n.t,n.d)).join('')||'<tr><td>لا أخبار</td></tr>';
-$('aEv').innerHTML=EV.map(v=>row('events',v.id,v.t,v.d)).join('')||'<tr><td>لا مناسبات</td></tr>';$('aCo').innerHTML=COUNCIL.map(r=>row('council',r.id,r.t,r.d)).join('')||'<tr><td>لا سجلات</td></tr>'}
+function feedAdmin(){if(!isAdmin)return;const row=(c,i,t,d)=>'<tr><td>'+E(t)+'</td><td>'+E(d)+'</td><td><button class="chip" data-edit="'+c+':'+E(i)+'">تعديل</button><button class="chip" data-del="'+c+':'+E(i)+'">حذف</button></td></tr>';
+$('aNews').innerHTML=NEWS.map(n=>row('news',n.id,n.t,n.d+' — '+(n.b<0?'جماعي':BR[n.b]))).join('')||'<tr><td>لا أخبار</td></tr>';
+$('aEv').innerHTML=EV.map(v=>row('events',v.id,v.t,v.d+' — '+(v.b<0?'جماعي':BR[v.b]))).join('')||'<tr><td>لا مناسبات</td></tr>';$('aCo').innerHTML=COUNCIL.map(r=>row('council',r.id,r.t,r.d)).join('')||'<tr><td>لا سجلات</td></tr>'}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-del]');if(!b||!isAdmin)return;const[c,id]=b.dataset.del.split(':');if(confirm('تأكيد الحذف؟')){try{await deleteDoc(doc(db,c,id));loadFeed()}catch(x){alert('تعذر الحذف ('+E(x.code||x.message)+')')}}});
-$('nBtn').onclick=async()=>{const t=$('nT').value.trim(),x=$('nX').value.trim(),d=$('nD').value;if(t.length<2||x.length<2||!d)return alert('أكمل العنوان والنص والتاريخ');
-try{await addDoc(collection(db,'news'),{title:t,text:x,date:d,kind:$('nK').value,branch:$('nB').value,pin:$('nP').checked,createdAt:serverTimestamp()});$('nT').value=$('nX').value=$('nD').value='';$('nP').checked=false;$('nK').selectedIndex=0;$('nB').selectedIndex=0;await loadFeed();alert('تم نشر الخبر')}catch(x){alert('تعذر النشر ('+E(x.code||x.message)+')')}};
-$('eBtn').onclick=async()=>{const t=$('eT').value.trim(),d=$('eD').value,l=$('eL').value.trim();if(t.length<2||!d)return alert('أكمل العنوان والتاريخ');if(l&&!/^https?:\/\//.test(l))return alert('الرابط يبدأ بـ https://');
-try{await addDoc(collection(db,'events'),{title:t,date:d,place:$('eP').value.trim(),link:l,createdAt:serverTimestamp()});$('eT').value=$('eP').value=$('eL').value=$('eD').value='';await loadFeed();alert('تمت إضافة المناسبة')}catch(x){alert('تعذر الإضافة ('+E(x.code||x.message)+')')}};
+const ED={news:null,events:null,council:null};
+const CF={news:{btn:'nBtn',cc:'nCancel',txt:'نشر الخبر',clr(){$('nT').value=$('nX').value=$('nD').value='';$('nP').checked=false;$('nK').selectedIndex=0;$('nB').selectedIndex=0}},
+events:{btn:'eBtn',cc:'eCancel',txt:'إضافة المناسبة',clr(){$('eT').value=$('eP').value=$('eL').value=$('eD').value='';$('eB').selectedIndex=0}},
+council:{btn:'cBtn',cc:'cCancel',txt:'إضافة للسجل',clr(){$('cT').value=$('cD').value=$('cP').value=$('cR').value=$('cS').value=''}}};
+function edDone(k){ED[k]=null;CF[k].clr();$(CF[k].btn).textContent=CF[k].txt;$(CF[k].cc).hidden=true}
+Object.keys(CF).forEach(k=>{$(CF[k].cc).onclick=()=>edDone(k)});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-edit]');if(!b||!isAdmin)return;const[c,id]=b.dataset.edit.split(':');
+if(c=='news'){const n=NEWS.find(x=>x.id==id);if(!n)return;$('nK').value=n.k||'خبر';$('nB').value=n.b<0?'جماعي':BR[n.b];$('nT').value=n.t;$('nX').value=n.x||'';$('nD').value=n.d;$('nP').checked=!!n.p}
+else if(c=='events'){const v=EV.find(x=>x.id==id);if(!v)return;$('eB').value=v.b<0?'جماعي':BR[v.b];$('eT').value=v.t;$('eD').value=v.d;$('eP').value=v.p||'';$('eL').value=v.l||''}
+else{const r=COUNCIL.find(x=>x.id==id);if(!r)return;$('cT').value=r.t;$('cD').value=r.d;$('cP').value=r.p||'';$('cR').value=r.o||'';$('cS').value=r.s||''}
+ED[c]=id;$(CF[c].btn).textContent='حفظ التعديل';$(CF[c].cc).hidden=false;$(CF[c].btn).scrollIntoView({block:'center'})});
+async function saveDoc(k,col,o,okNew,okEdit){const was=ED[k];try{if(was)await updateDoc(doc(db,col,was),o);else await addDoc(collection(db,col),{...o,createdAt:serverTimestamp()});edDone(k);await loadFeed();alert(was?okEdit:okNew)}catch(x){alert('تعذر الحفظ ('+E(x.code||x.message)+')')}}
+$('nBtn').onclick=()=>{const t=$('nT').value.trim(),x=$('nX').value.trim(),d=$('nD').value;if(t.length<2||x.length<2||!d)return alert('أكمل العنوان والنص والتاريخ');
+saveDoc('news','news',{title:t,text:x,date:d,kind:$('nK').value,branch:$('nB').value,pin:$('nP').checked},'تم نشر الخبر','تم حفظ تعديل الخبر')};
+$('eBtn').onclick=()=>{const t=$('eT').value.trim(),d=$('eD').value,l=$('eL').value.trim();if(t.length<2||!d)return alert('أكمل العنوان والتاريخ');if(l&&!/^https?:\/\//.test(l))return alert('الرابط يبدأ بـ https://');
+saveDoc('events','events',{title:t,date:d,place:$('eP').value.trim(),link:l,branch:$('eB').value},'تمت إضافة المناسبة','تم حفظ تعديل المناسبة')};
 $('tuB').innerHTML=BR.map((n,i)=>gidOf(i)?'<option value="'+gidOf(i)+'">'+n+'</option>':'').join('');
 $('tuBtn').onclick=async()=>{const M=['اطار','جذع','عنوان'];const rows=$('tuX').value.split('\n').map(l=>l.split('\t').map(x=>x.trim())).filter(c=>c.length>1&&c[0]&&M.indexOf(c[0])<0).map(c=>{c=c.slice(1);while(c.length&&!c[c.length-1])c.pop();return c}).filter(c=>c.length);
 if(!rows.length)return alert('الصق صفوف الفرع كما نسختها من الشيت');
 if(!confirm('سيحل هذا محل شجرة "'+$('tuB').selectedOptions[0].text+'" ('+rows.length+' صف). متابعة؟'))return;
 try{await setDoc(doc(db,'trees',$('tuB').value),{rows:JSON.stringify(rows)});window.T[$('tuB').value]=build(rows);tView();$('tuX').value='';alert('تم تحديث الشجرة')}catch(x){alert('تعذر التحديث ('+E(x.code||x.message)+')')}};
-$('cBtn').onclick=async()=>{const t=$('cT').value.trim(),d=$('cD').value;if(t.length<2||!d)return alert('أكمل الحدث والتاريخ');
-try{await addDoc(collection(db,'council'),{title:t,date:d,place:$('cP').value.trim(),owner:$('cR').value.trim(),summary:$('cS').value.trim(),createdAt:serverTimestamp()});$('cT').value=$('cD').value=$('cP').value=$('cR').value=$('cS').value='';await loadFeed();alert('تمت الإضافة للسجل')}catch(x){alert('تعذرت الإضافة ('+E(x.code||x.message)+')')}};
+$('cBtn').onclick=()=>{const t=$('cT').value.trim(),d=$('cD').value;if(t.length<2||!d)return alert('أكمل الحدث والتاريخ');
+saveDoc('council','council',{title:t,date:d,place:$('cP').value.trim(),owner:$('cR').value.trim(),summary:$('cS').value.trim()},'تمت الإضافة للسجل','تم حفظ التعديل')};
 $('cSeed').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const a=JSON.parse(await f.text());for(const r of a){await setDoc(doc(db,'council','r'+String(r.n).padStart(2,'0')),{title:r.title,date:r.date,place:r.place||'',owner:r.owner||'',summary:r.summary||'',createdAt:serverTimestamp()})}await loadFeed();alert('تم استيراد '+a.length+' نشاطًا')}catch(x){alert('تعذر الاستيراد ('+E(x.code||x.message)+')')}};
 </script>
 </body>
