@@ -75,10 +75,8 @@ h3.sub{color:var(--mute);font-weight:500;margin:0 0 14px;font-size:16px}
 #app>footer{flex:none;padding:6px 10px;font-size:12px}
 #top .brand{display:flex;align-items:center;justify-content:center;gap:12px;padding:0 6px}#top h1{flex:none}
 .hlogo{display:none}
-.lg img{animation-duration:var(--d,4s);animation-iteration-count:infinite;animation-name:bead;animation-timing-function:ease-in-out;animation-delay:var(--w,0s)}
-@keyframes bead{0%,100%{transform:translateX(-9px) rotate(-25deg)}50%{transform:translateX(9px) rotate(25deg)}}
-@media(prefers-reduced-motion:reduce){.lg img{animation:none!important}}
-.lg{display:flex;align-items:center;gap:14px;flex:none}
+.lg img{will-change:transform}
+.lg{display:flex;align-items:center;gap:14px;flex:none;position:relative}
 .lg img{border-radius:50%;background:#fff;padding:1px;box-shadow:0 0 0 1.5px #c9a24a;width:var(--s);height:var(--s)}
 @media(max-width:700px){#lgR img:nth-child(-n+1),#lgL img:nth-child(n+4){display:none}}
 @media(max-width:560px){#lgR img:nth-child(-n+2),#lgL img:nth-child(n+3){display:none}}
@@ -272,9 +270,26 @@ $('tChips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==nul
 $('tView').onclick=function(e){var o=document.querySelector('#tView .org');var z=e.target.getAttribute('data-z');if(z){ZOOM=z=='fit'?'fit':Math.max(.15,Math.min(2,ZOOM+(z=='in'?.15:-.15)));SL=null;tView();return}var m=e.target.getAttribute('data-m');if(m){MODE=m;OPEN={};SL=null;ZOOM=m=='all'?'fit':1;tView();return}if(e.target.closest('[data-root]')){tSel(-1);return}var nb=e.target.closest('.hk');if(nb){var id=+nb.getAttribute('data-id'),n=NODES[id],cur=OPEN[id]!==undefined?OPEN[id]:MODE=='all';if(!cur&&n&&n.par)n.par.k.forEach(function(x){if(x!==n)OPEN[x.id]=false});OPEN[id]=!cur;if(cur&&ZOOM<1)ZOOM=1;SL=o?o.scrollLeft:null;tView();return}var i=e.target.getAttribute('data-i');if(i!==null&&tc<0)tSel(+i)};
 tChips();tView();load();
 chips();news();
-(function(){var src=document.querySelector('.hlogo').src,sz=[64,52,42,34],T=3.2,LAG=0.32;
-function fill(id,rev){var a=sz.slice();if(rev)a.reverse();$(id).innerHTML=a.map(function(v,idx){var k=rev?(a.length-1-idx):idx;return '<img src="'+src+'" alt="" style="--s:'+v+'px;--d:'+T+'s;--w:'+(-(T-k*LAG)).toFixed(2)+'s">'}).join('')}
-fill('lgR',true);fill('lgL',false)})();
+(function(){var src=document.querySelector('.hlogo').src,sz=[64,52,42,34],T=5.5,LAG=0.4,SEP=4,EDGE=16;
+function fill(id,rev){var a=sz.slice();if(rev)a.reverse();$(id).innerHTML=a.map(function(v){return '<img src="'+src+'" alt="" style="--s:'+v+'px">'}).join('')}
+fill('lgR',true);fill('lgL',false);
+var G=[{el:$('lgR'),dir:1,rev:true},{el:$('lgL'),dir:-1,rev:false}],key='';
+var still=window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches;
+function geo(){G.forEach(function(g){var im=[].slice.call(g.el.children);im.forEach(function(i){i.style.transform=''});
+var v=im.filter(function(i){return i.offsetWidth>0});if(g.rev)v.reverse();g.v=v;if(!v.length)return;
+var c=v.map(function(i){var r=i.getBoundingClientRect();return r.left+r.width/2}),w=v.map(function(i){return i.offsetWidth});
+g.w=w;g.s=c.map(function(x){return Math.abs(x-c[0])});g.d=[0];g.P=[0];var sum=0;
+for(var k=1;k<v.length;k++){var d=(w[k-1]+w[k])/2+SEP;g.d[k]=d;sum+=d}
+var D=g.dir>0?(document.documentElement.clientWidth-EDGE-c[0]):(c[0]-EDGE);
+g.A0=Math.max(0,D-w[w.length-1]/2-sum);g.P[0]=g.A0;for(k=1;k<v.length;k++)g.P[k]=g.P[k-1]+g.d[k]})}
+function u(t){return (1-Math.cos(2*Math.PI*t/T))/2}
+function frame(ms){var t=ms/1000,k0=$('app').offsetWidth+'|'+document.documentElement.clientWidth+'|'+[].filter.call(document.querySelectorAll('.lg img'),function(i){return i.offsetWidth>0}).length;
+if(k0!==key){key=k0;geo()}
+if($('app').offsetWidth&&!still)G.forEach(function(g){if(!g.v)return;var prev=-1e9;
+g.v.forEach(function(im,k){var x=g.s[k]+(g.P[k]-g.s[k])*u(t-k*LAG);if(k>0&&x<prev+g.d[k])x=prev+g.d[k];prev=x;var dx=(x-g.s[k])*g.dir;
+im.style.transform='translateX('+dx.toFixed(1)+'px) rotate('+(dx/(g.w[k]/2)*57.3).toFixed(0)+'deg)'})});
+requestAnimationFrame(frame)}
+requestAnimationFrame(frame)})();
 var VIEWS=['home','about','council','branches','trees','news','events','tools','contact','admin'];
 function go(id){id=(id||location.hash||'').replace('#','');if(VIEWS.indexOf(id)<0)id='home';
 if(id=='admin'&&$('navAdm').style.display=='none')id='home';
