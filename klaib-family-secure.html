@@ -75,17 +75,10 @@ h3.sub{color:var(--mute);font-weight:500;margin:0 0 14px;font-size:16px}
 #app>footer{flex:none;padding:6px 10px;font-size:12px}
 #top .brand{display:flex;align-items:center;justify-content:center;gap:12px;padding:0 6px}#top h1{flex:none}
 .hlogo{display:none}
-.lg img{animation-duration:var(--d,4s);animation-iteration-count:infinite;animation-timing-function:ease-in-out;animation-delay:var(--w,0s)}
-@keyframes a1{50%{transform:translateY(-6px)}}
-@keyframes a2{50%{transform:scale(1.14)}}
-@keyframes a3{to{transform:rotate(360deg)}}
-@keyframes a4{0%,100%{transform:rotate(-10deg)}50%{transform:rotate(10deg)}}
-@keyframes a5{0%,100%{transform:scale(1);box-shadow:0 0 0 1.5px #c9a24a}50%{transform:scale(1.06);box-shadow:0 0 0 2px #f3dfa6,0 0 14px 4px rgba(243,223,166,.7)}}
-@keyframes a6{0%,35%{transform:rotateY(0)}65%,100%{transform:rotateY(360deg)}}
-@keyframes a7{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
-@keyframes a8{0%,100%{transform:translateY(0) scale(1)}25%{transform:translateY(-5px) scale(1.08)}75%{transform:translateY(3px) scale(.94)}}
+.lg img{animation-duration:var(--d,4s);animation-iteration-count:infinite;animation-name:bead;animation-timing-function:ease-in-out;animation-delay:var(--w,0s)}
+@keyframes bead{0%,100%{transform:translateX(-9px) rotate(-25deg)}50%{transform:translateX(9px) rotate(25deg)}}
 @media(prefers-reduced-motion:reduce){.lg img{animation:none!important}}
-.lg{display:flex;align-items:center;gap:6px;flex:none}
+.lg{display:flex;align-items:center;gap:14px;flex:none}
 .lg img{border-radius:50%;background:#fff;padding:1px;box-shadow:0 0 0 1.5px #c9a24a;width:var(--s);height:var(--s)}
 @media(max-width:700px){#lgR img:nth-child(-n+1),#lgL img:nth-child(n+4){display:none}}
 @media(max-width:560px){#lgR img:nth-child(-n+2),#lgL img:nth-child(n+3){display:none}}
@@ -279,8 +272,8 @@ $('tChips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==nul
 $('tView').onclick=function(e){var o=document.querySelector('#tView .org');var z=e.target.getAttribute('data-z');if(z){ZOOM=z=='fit'?'fit':Math.max(.15,Math.min(2,ZOOM+(z=='in'?.15:-.15)));SL=null;tView();return}var m=e.target.getAttribute('data-m');if(m){MODE=m;OPEN={};SL=null;ZOOM=m=='all'?'fit':1;tView();return}if(e.target.closest('[data-root]')){tSel(-1);return}var nb=e.target.closest('.hk');if(nb){var id=+nb.getAttribute('data-id'),n=NODES[id],cur=OPEN[id]!==undefined?OPEN[id]:MODE=='all';if(!cur&&n&&n.par)n.par.k.forEach(function(x){if(x!==n)OPEN[x.id]=false});OPEN[id]=!cur;if(cur&&ZOOM<1)ZOOM=1;SL=o?o.scrollLeft:null;tView();return}var i=e.target.getAttribute('data-i');if(i!==null&&tc<0)tSel(+i)};
 tChips();tView();load();
 chips();news();
-(function(){var src=document.querySelector('.hlogo').src,sz=[64,52,42,34],AN=['a1 4s','a5 3s','a3 14s linear','a4 3.6s','a2 3.2s','a6 7s','a7 3.4s','a8 4.4s'];
-function fill(id,rev){var a=sz.slice();if(rev)a.reverse();$(id).innerHTML=a.map(function(v,k){var m=AN[(rev?k+4:k)%8].split(' ');return '<img src="'+src+'" alt="" style="--s:'+v+'px;--d:'+m[1]+';--w:-'+(k*0.7)+'s;animation-name:'+m[0]+(m[2]?';animation-timing-function:'+m[2]:'')+'">'}).join('')}
+(function(){var src=document.querySelector('.hlogo').src,sz=[64,52,42,34],T=3.2,LAG=0.32;
+function fill(id,rev){var a=sz.slice();if(rev)a.reverse();$(id).innerHTML=a.map(function(v,idx){var k=rev?(a.length-1-idx):idx;return '<img src="'+src+'" alt="" style="--s:'+v+'px;--d:'+T+'s;--w:'+(-(T-k*LAG)).toFixed(2)+'s">'}).join('')}
 fill('lgR',true);fill('lgL',false)})();
 var VIEWS=['home','about','council','branches','trees','news','events','tools','contact','admin'];
 function go(id){id=(id||location.hash||'').replace('#','');if(VIEWS.indexOf(id)<0)id='home';
