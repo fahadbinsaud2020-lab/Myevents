@@ -93,6 +93,8 @@ h3.sub{color:var(--mute);font-weight:500;margin:0 0 14px;font-size:16px}
 .dbox{background:var(--card);color:var(--ink);border-radius:16px;max-width:640px;width:100%;max-height:85vh;overflow:auto;padding:18px;position:relative}
 .dbox #dX{position:sticky;top:0;float:left;margin:0 0 8px 8px}.dtx{white-space:pre-line;margin-top:12px;line-height:1.9;font-size:16px}
 .br.off{cursor:default;opacity:.75}.br.off:hover{transform:none;border-color:var(--line)}.br.off small{display:block;margin-top:4px;font-size:12px;color:var(--mute)}
+.cp{display:none}.cp.on{display:block}.fc{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}.fc small{color:var(--mute);display:block}.fc .chip{background:var(--pri);color:#fff}
+.idea{white-space:pre-line;line-height:2;font-size:17px}
 .bbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}.more{font-size:13px;color:var(--pri);text-decoration:none;font-weight:700}
 .quick{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:16px}
 .quick a{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:84px;padding:10px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;text-decoration:none;color:var(--ink);font-size:22px}.quick a span{font-size:13px}.quick a:hover{border-color:var(--gold)}
@@ -135,7 +137,10 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <p class="note">يمكن تعديل هذا النص وإضافة نبذة تاريخية عن جد العائلة وأصلها.</p></div>
 </section>
 
-<section id="council" class=" view"><h2>مجلس العائلة</h2><h3 class="sub">السجل التاريخي لأنشطة المجلس</h3><div class="tl" id="cList"></div></section>
+<section id="council" class=" view"><h2>مجلس العائلة</h2>
+<div class="chips" id="cTabs"></div>
+<div class="cp" id="cIdea"></div><div class="cp" id="cCharter"></div><div class="cp" id="cDec"></div>
+<div class="cp" id="cLog"><h3 class="sub">السجل التاريخي لأنشطة المجلس</h3><div class="tl" id="cList"></div></div></section>
 
 <section id="branches" class=" view">
 <h2>فروع العائلة</h2>
@@ -203,6 +208,9 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <input id="cT" autocomplete="off" placeholder="الحدث (مثل: الاجتماع العاشر)"><input id="cD" type="date" autocomplete="off"><input id="cP" autocomplete="off" placeholder="المكان"><input id="cR" autocomplete="off" placeholder="المسؤول"><textarea id="cS" rows="2" autocomplete="off" placeholder="الملخص"></textarea>
 <button class="btn" id="cBtn">إضافة للسجل</button> <button class="chip" id="cCancel" hidden>إلغاء التعديل</button><table id="aCo"></table>
 <p class="note">استيراد السجل الحالي (مرة واحدة): ملف klaib-council.json</p><input type="file" id="cSeed" accept=".json"></div>
+<div class="card" style="margin-top:10px"><b>المجلس: الفكرة</b><textarea id="ideaX" rows="6" autocomplete="off" placeholder="اكتب فكرة تأسيس المجلس"></textarea><button class="btn" id="ideaBtn">حفظ الفكرة</button></div>
+<div class="card" style="margin-top:10px"><b>المجلس: الميثاق (وثيقة واحدة — PDF أو Word أو صورة، حتى 6 ميغابايت)</b><input type="file" id="chF" accept=".pdf,.doc,.docx,image/*"><button class="btn" id="chBtn">رفع الميثاق</button> <span class="note" id="chMsg"></span><div id="chCur"></div></div>
+<div class="card" style="margin-top:10px"><b>المجلس: إضافة قرار (وثيقة)</b><input id="dcT" autocomplete="off" placeholder="عنوان القرار"><input id="dcD" type="date" autocomplete="off"><input id="dcN" autocomplete="off" placeholder="ملاحظة مختصرة (اختياري)"><input type="file" id="dcF" accept=".pdf,.doc,.docx,image/*"><button class="btn" id="dcBtn">إضافة القرار</button> <span class="note" id="dcMsg"></span><table id="aDc"></table></div>
 <div class="card" style="margin-top:10px"><b>إضافة مناسبة</b>
 <select id="eB"></select><input id="eT" autocomplete="off" placeholder="عنوان المناسبة"><input id="eD" autocomplete="off" type="date"><input id="eP" autocomplete="off" placeholder="اسم المكان / القصر (مثل: قصر الأفراح)"><input id="eL" autocomplete="off" placeholder="رابط موقع المكان (اختياري) https://..." dir="ltr">
 <button class="btn" id="eBtn">إضافة المناسبة</button> <button class="chip" id="eCancel" hidden>إلغاء التعديل</button><table id="aEv"></table></div>
@@ -227,7 +235,17 @@ function chips(){var h='<button class="chip'+(cur==-2?' on':'')+'" data-i="-2">�
 BR.forEach(function(n,i){h+='<button class="chip'+(cur==i?' on':'')+'" data-i="'+i+'">'+n+'</button>'});$('chips').innerHTML=h}
 function fmtD(iso){try{var d=new Date(iso+'T12:00:00');return new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{day:'numeric',month:'long',year:'numeric'}).format(d)+' — '+new Intl.DateTimeFormat('ar-SA',{day:'numeric',month:'long',year:'numeric',calendar:'gregory'}).format(d)}catch(e){return iso||''}}
 var COUNCIL=[];
-function council(){$('cList').innerHTML=COUNCIL.length?COUNCIL.map(function(r,i){return '<div class="it card"><span class="tag">'+(i+1)+'</span><b>'+nz(r.t)+'</b><br><small>'+fmtD(r.d)+'</small>'+(r.p?'<div>📍 '+nz(r.p)+'</div>':'')+(r.o?'<div>👤 '+nz(r.o)+'</div>':'')+'<div>'+(r.s?nz(r.s):'<span class="note">لم يُسجَّل ملخص بعد</span>')+'</div></div>'}).join(''):'<div class="card">لا توجد سجلات بعد.</div>'}
+var CT='idea',IDEA='',CHARTER=null,DECS=[];
+var CTABS=[['idea','💡 الفكرة'],['charter','📜 الميثاق'],['dec','📑 القرارات'],['log','🗂️ السجل التاريخي']];
+function fsz(n){return n>1048576?(n/1048576).toFixed(1)+' م.ب':Math.max(1,Math.round(n/1024))+' ك.ب'}
+function fbtn(id,name,type){return '<button class="chip" data-file="'+nz(id)+'" data-name="'+nz(name).replace(/["']/g,'')+'" data-type="'+nz(type).replace(/["']/g,'')+'">فتح الوثيقة</button>'}
+function renderCouncil(){$('cTabs').innerHTML=CTABS.map(function(t){return '<button class="chip'+(CT==t[0]?' on':'')+'" data-ct="'+t[0]+'">'+t[1]+'</button>'}).join('');
+['idea','charter','dec','log'].forEach(function(k){var e=$({idea:'cIdea',charter:'cCharter',dec:'cDec',log:'cLog'}[k]);e.classList.toggle('on',k==CT)});
+$('cIdea').innerHTML='<h3 class="sub">فكرة تأسيس المجلس</h3><div class="card idea">'+(IDEA?nz(IDEA):'<span class="note">لم تُضف الفكرة بعد.</span>')+'</div>';
+$('cCharter').innerHTML='<h3 class="sub">ميثاق المجلس</h3>'+(CHARTER?'<div class="card fc"><div><b>📜 '+nz(CHARTER.name)+'</b><small>'+fsz(CHARTER.size)+(CHARTER.date?' — '+fmtD(CHARTER.date):'')+'</small></div>'+fbtn(CHARTER.id,CHARTER.name,CHARTER.type)+'</div>':'<div class="card note">لم يُرفع الميثاق بعد.</div>');
+$('cDec').innerHTML='<h3 class="sub">قرارات المجلس (حسب التسلسل الزمني)</h3><div class="tl">'+(DECS.length?DECS.map(function(r,i){return '<div class="it card fc"><div><span class="tag">'+(i+1)+'</span><b>'+nz(r.t)+'</b><small>'+fmtD(r.d)+'</small>'+(r.x?'<div>'+nz(r.x)+'</div>':'')+'</div>'+fbtn(r.fid,r.fn,r.ft)+'</div>'}).join(''):'<div class="card note">لا توجد قرارات بعد.</div>')+'</div>'}
+$('cTabs').onclick=function(e){var t=e.target.getAttribute('data-ct');if(t){CT=t;renderCouncil()}};
+function council(){renderCouncil();$('cList').innerHTML=COUNCIL.length?COUNCIL.map(function(r,i){return '<div class="it card"><span class="tag">'+(i+1)+'</span><b>'+nz(r.t)+'</b><br><small>'+fmtD(r.d)+'</small>'+(r.p?'<div>📍 '+nz(r.p)+'</div>':'')+(r.o?'<div>👤 '+nz(r.o)+'</div>':'')+'<div>'+(r.s?nz(r.s):'<span class="note">لم يُسجَّل ملخص بعد</span>')+'</div></div>'}).join(''):'<div class="card">لا توجد سجلات بعد.</div>'}
 function allNews(){var c=COUNCIL.map(function(r,i){return{id:'c'+i,b:-1,t:'اجتماع المجلس: '+(r.t||''),d:r.d,k:'المجلس',p:false,x:(r.p?'📍 المكان: '+r.p:'')+(r.o?'\n👤 '+r.o:'')+(r.s?'\n'+r.s:''),c:1}});
 return NEWS.concat(c).sort(function(a,b){return (b.p-a.p)||String(b.d).localeCompare(String(a.d))})}
 function nCard(n,br){return '<div class="card nc" data-nid="'+n.id+'" tabindex="0">'+(n.p?'📌 ':'')+(br?'<span class="tag">'+(n.b<0?'جماعي':BR[n.b])+'</span>':'')+(n.k&&n.k!='خبر'?'<span class="tag" style="background:var(--pri);color:#fff">'+nz(n.k)+'</span>':'')+'<b>'+nz(n.t)+'</b><br><small>'+fmtD(n.d)+'</small><div class="nt">'+nz(n.x)+'</div><span class="rm">عرض التفاصيل ←</span></div>'}
@@ -298,7 +316,7 @@ function tSel(i){tc=i;OPEN={};MODE='min';SL=null;ZOOM=1;tChips();tView()}
 $('tChips').onclick=function(e){var i=e.target.getAttribute('data-i');if(i!==null)tSel(+i)};
 $('tView').onclick=function(e){var o=document.querySelector('#tView .org');var z=e.target.getAttribute('data-z');if(z){ZOOM=z=='fit'?'fit':Math.max(.15,Math.min(2,ZOOM+(z=='in'?.15:-.15)));SL=null;tView();return}var m=e.target.getAttribute('data-m');if(m){MODE=m;OPEN={};SL=null;ZOOM=m=='all'?'fit':1;tView();return}if(e.target.closest('[data-root]')){tSel(-1);return}var nb=e.target.closest('.hk');if(nb){var id=+nb.getAttribute('data-id'),n=NODES[id],cur=OPEN[id]!==undefined?OPEN[id]:MODE=='all';if(!cur&&n&&n.par)n.par.k.forEach(function(x){if(x!==n)OPEN[x.id]=false});OPEN[id]=!cur;if(cur&&ZOOM<1)ZOOM=1;SL=o?o.scrollLeft:null;tView();return}var i=e.target.getAttribute('data-i');if(i!==null&&tc<0)tSel(+i)};
 tChips();tView();load();
-chips();news();
+renderCouncil();chips();news();
 (function(){var src=document.querySelector('.hlogo').src,sz=[64,52,42,34],OUT=2.6,HE=2.2,HS=1,T=OUT*2+HE+HS,LAG=0.3,SEP=4,EDGE=16;
 function fill(id,rev){var a=sz.slice();if(rev)a.reverse();$(id).innerHTML=a.map(function(v){return '<img src="'+src+'" alt="" style="--s:'+v+'px">'}).join('')}
 fill('lgR',true);fill('lgL',false);
@@ -348,7 +366,7 @@ onAuthStateChanged(auth,async u=>{if(!u){$('gate').style.display='grid';$('app')
 try{const s=await getDoc(doc(db,'members',u.phoneNumber));if(!s.exists())return show('sJoin');const m=s.data();
 if(m.status=='approved')return enter(m);show(m.status=='pending'?'sWait':'sDeny')}catch(e){err('تعذر التحقق من الحساب')}});
 let isAdmin=false;
-async function enter(m){isAdmin=m.role=='admin';$('gate').style.display='none';$('app').style.display='block';
+async function enter(m){isAdmin=m.role=='admin';$('gate').style.display='none';$('app').style.display='flex';
 try{const q=await getDocs(collection(db,'trees'));window.T={};q.forEach(d=>{window.T[d.id]=build(JSON.parse(d.data().rows))});tView()}catch(e){}
 await loadFeed();
 if(m.role=='admin'){$('navAdm').style.display='';adminLoad()}}
@@ -369,7 +387,7 @@ async function loadFeed(){try{const[n,e,cq]=await Promise.all([getDocs(collectio
 window.COUNCIL=cq.docs.map(d=>{const v=d.data();return{id:d.id,t:v.title,d:v.date,p:v.place,o:v.owner,s:v.summary}}).sort((a,b)=>String(a.d).localeCompare(String(b.d)));
 window.NEWS=n.docs.map(d=>{const v=d.data();return{id:d.id,b:BR.indexOf(v.branch),t:v.title,x:v.text,d:v.date,k:v.kind,p:!!v.pin}}).sort((a,b)=>(b.p-a.p)||String(b.d).localeCompare(String(a.d)));
 window.EV=e.docs.map(d=>{const v=d.data();return{id:d.id,b:BR.indexOf(v.branch),t:v.title,d:v.date,p:v.place,l:v.link}}).sort((a,b)=>String(a.d).localeCompare(String(b.d)));
-news();events();stats();council();feedAdmin()}catch(x){if(isAdmin)alert('تعذر تحميل الأخبار ('+E(x.code||x.message)+')')}}
+news();events();stats();council();feedAdmin();loadDocs()}catch(x){if(isAdmin)alert('تعذر تحميل الأخبار ('+E(x.code||x.message)+')')}}
 function feedAdmin(){if(!isAdmin)return;const row=(c,i,t,d)=>'<tr><td>'+E(t)+'</td><td>'+E(d)+'</td><td><button class="chip" data-edit="'+c+':'+E(i)+'">تعديل</button><button class="chip" data-del="'+c+':'+E(i)+'">حذف</button></td></tr>';
 $('aNews').innerHTML=NEWS.map(n=>row('news',n.id,n.t,n.d+' — '+(n.b<0?'جماعي':BR[n.b]))).join('')||'<tr><td>لا أخبار</td></tr>';
 $('aEv').innerHTML=EV.map(v=>row('events',v.id,v.t,v.d+' — '+(v.b<0?'جماعي':BR[v.b]))).join('')||'<tr><td>لا مناسبات</td></tr>';$('aCo').innerHTML=COUNCIL.map(r=>row('council',r.id,r.t,r.d)).join('')||'<tr><td>لا سجلات</td></tr>'}
@@ -395,6 +413,36 @@ $('tuBtn').onclick=async()=>{const M=['اطار','جذع','عنوان'];const ro
 if(!rows.length)return alert('الصق صفوف الفرع كما نسختها من الشيت');
 if(!confirm('سيحل هذا محل شجرة "'+$('tuB').selectedOptions[0].text+'" ('+rows.length+' صف). متابعة؟'))return;
 try{await setDoc(doc(db,'trees',$('tuB').value),{rows:JSON.stringify(rows)});window.T[$('tuB').value]=build(rows);tView();$('tuX').value='';alert('تم تحديث الشجرة')}catch(x){alert('تعذر التحديث ('+E(x.code||x.message)+')')}};
+
+async function loadDocs(){try{const[a,b,c]=await Promise.all([getDoc(doc(db,'settings','idea')),getDoc(doc(db,'settings','charter')),getDocs(collection(db,'decisions'))]);
+window.IDEA=a.exists()?(a.data().text||''):'';const ch=b.exists()?b.data():null;window.CHARTER=ch&&ch.fileId?{id:ch.fileId,name:ch.name,type:ch.type,size:ch.size,date:ch.date}:null;
+window.DECS=c.docs.map(d=>{const v=d.data();return{id:d.id,t:v.title,d:v.date,x:v.note,fid:v.fileId,fn:v.name,ft:v.type,fs:v.size}}).sort((x,y)=>String(x.d).localeCompare(String(y.d)))}catch(x){if(isAdmin)alert('تعذر تحميل وثائق المجلس ('+E(x.code||x.message)+') — تأكد من نشر قواعد Firestore الجديدة')}
+renderCouncil();docsAdmin()}
+function docsAdmin(){if(!isAdmin)return;if(document.activeElement!==$('ideaX'))$('ideaX').value=window.IDEA||'';
+$('chCur').innerHTML=window.CHARTER?'<p class="note">الميثاق الحالي: '+E(window.CHARTER.name)+' <button class="chip" id="chDel">حذف الميثاق</button></p>':'<p class="note">لا يوجد ميثاق مرفوع.</p>';
+$('aDc').innerHTML=(window.DECS||[]).map(r=>'<tr><td>'+E(r.t)+'</td><td>'+E(r.d)+'</td><td><button class="chip" data-deldoc="'+E(r.id)+'|'+E(r.fid)+'">حذف</button></td></tr>').join('')||'<tr><td>لا قرارات</td></tr>'}
+async function putFile(file,msg){if(file.size>6*1024*1024)throw new Error('حجم الملف أكبر من 6 ميغابايت');
+const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]);r.onerror=()=>rej(new Error('تعذرت قراءة الملف'));r.readAsDataURL(file)});
+const id=doc(collection(db,'files')).id,CH=700000,n=Math.ceil(b64.length/CH);
+for(let i=0;i<n;i++){msg('رفع الجزء '+(i+1)+' من '+n+'…');await setDoc(doc(db,'fchunks',id+'_'+i),{d:b64.slice(i*CH,(i+1)*CH)})}
+const type=file.type||'application/octet-stream';await setDoc(doc(db,'files',id),{name:file.name,type,size:file.size,n,createdAt:serverTimestamp()});return{fileId:id,name:file.name,type,size:file.size}}
+async function delFile(fid){if(!fid||fid=='undefined')return;try{const m=await getDoc(doc(db,'files',fid));const n=m.exists()?m.data().n:0;for(let i=0;i<n;i++)await deleteDoc(doc(db,'fchunks',fid+'_'+i));await deleteDoc(doc(db,'files',fid))}catch(x){}}
+$('ideaBtn').onclick=async()=>{try{await setDoc(doc(db,'settings','idea'),{text:$('ideaX').value.trim(),updatedAt:serverTimestamp()});await loadDocs();alert('تم حفظ الفكرة')}catch(x){alert('تعذر الحفظ ('+E(x.code||x.message)+')')}};
+$('chBtn').onclick=async()=>{const f=$('chF').files[0];if(!f)return alert('اختر ملف الميثاق أولًا');const old=window.CHARTER&&window.CHARTER.id;$('chBtn').disabled=true;
+try{const r=await putFile(f,t=>$('chMsg').textContent=t);await setDoc(doc(db,'settings','charter'),{...r,date:new Date().toISOString().slice(0,10)});if(old)await delFile(old);$('chF').value='';$('chMsg').textContent='';await loadDocs();alert('تم رفع الميثاق')}catch(x){$('chMsg').textContent='';alert('تعذر الرفع ('+E(x.code||x.message)+')')}$('chBtn').disabled=false};
+$('dcBtn').onclick=async()=>{const t=$('dcT').value.trim(),d=$('dcD').value,f=$('dcF').files[0];if(t.length<2||!d||!f)return alert('أكمل العنوان والتاريخ واختر الوثيقة');$('dcBtn').disabled=true;
+try{const r=await putFile(f,m=>$('dcMsg').textContent=m);await addDoc(collection(db,'decisions'),{title:t,date:d,note:$('dcN').value.trim(),...r,createdAt:serverTimestamp()});$('dcT').value=$('dcD').value=$('dcN').value=$('dcF').value='';$('dcMsg').textContent='';await loadDocs();alert('تمت إضافة القرار')}catch(x){$('dcMsg').textContent='';alert('تعذر الرفع ('+E(x.code||x.message)+')')}$('dcBtn').disabled=false};
+document.addEventListener('click',async e=>{if(!isAdmin)return;const b=e.target.closest('[data-deldoc]'),c=e.target.closest('#chDel');
+if(b&&confirm('حذف القرار ووثيقته؟')){const[id,fid]=b.dataset.deldoc.split('|');try{await deleteDoc(doc(db,'decisions',id));await delFile(fid);await loadDocs()}catch(x){alert('تعذر الحذف ('+E(x.code||x.message)+')')}}
+if(c&&confirm('حذف الميثاق؟')){try{const id=window.CHARTER.id;await deleteDoc(doc(db,'settings','charter'));await delFile(id);await loadDocs()}catch(x){alert('تعذر الحذف ('+E(x.code||x.message)+')')}}});
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-file]');if(!b)return;const fid=b.dataset.file,nm=b.dataset.name||'document',tp=b.dataset.type||'application/octet-stream';
+const view=/pdf|image/.test(tp),w=view?window.open('','_blank'):null,old=b.textContent;b.textContent='جارٍ التحميل…';b.disabled=true;
+try{const m=await getDoc(doc(db,'files',fid));if(!m.exists())throw new Error('الملف غير موجود');const n=m.data().n;
+const parts=await Promise.all(Array.from({length:n},(_,i)=>getDoc(doc(db,'fchunks',fid+'_'+i))));
+const bin=atob(parts.map(p=>p.data().d).join('')),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+const url=URL.createObjectURL(new Blob([u8],{type:tp}));
+if(w)w.location=url;else{const a=document.createElement('a');a.href=url;a.download=nm;document.body.appendChild(a);a.click();a.remove()}}
+catch(x){if(w)w.close();alert('تعذر فتح الوثيقة ('+E(x.code||x.message)+')')}b.textContent=old;b.disabled=false});
 $('cBtn').onclick=()=>{const t=$('cT').value.trim(),d=$('cD').value;if(t.length<2||!d)return alert('أكمل الحدث والتاريخ');
 saveDoc('council','council',{title:t,date:d,place:$('cP').value.trim(),owner:$('cR').value.trim(),summary:$('cS').value.trim()},'تمت الإضافة للسجل','تم حفظ التعديل')};
 $('cSeed').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const a=JSON.parse(await f.text());for(const r of a){await setDoc(doc(db,'council','r'+String(r.n).padStart(2,'0')),{title:r.title,date:r.date,place:r.place||'',owner:r.owner||'',summary:r.summary||'',createdAt:serverTimestamp()})}await loadFeed();alert('تم استيراد '+a.length+' نشاطًا')}catch(x){alert('تعذر الاستيراد ('+E(x.code||x.message)+')')}};
