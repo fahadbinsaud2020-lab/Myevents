@@ -211,8 +211,8 @@ footer{background:var(--pri2);color:#cfe0d6;text-align:center;padding:24px;font-
 <button class="btn" id="nBtn">نشر الخبر</button> <button class="chip" id="nCancel" hidden>إلغاء التعديل</button><table id="aNews"></table></div>
 <div class="card" style="margin-top:10px"><b>سجل المجلس: إضافة نشاط</b>
 <input id="cT" autocomplete="off" placeholder="الحدث (مثل: الاجتماع العاشر)"><input id="cD" type="date" autocomplete="off"><input id="cP" autocomplete="off" placeholder="المكان"><input id="cR" autocomplete="off" placeholder="المسؤول"><textarea id="cS" rows="2" autocomplete="off" placeholder="الملخص"></textarea>
-<button class="btn" id="cBtn">إضافة للسجل</button> <button class="chip" id="cCancel" hidden>إلغاء التعديل</button><table id="aCo"></table>
-<p class="note">استيراد السجل الحالي (مرة واحدة): ملف klaib-council.json</p><input type="file" id="cSeed" accept=".json"></div>
+<button class="btn" id="cBtn">إضافة للسجل</button> <button class="chip" id="cCancel" hidden>إلغاء التعديل</button> <button class="chip" id="cSeedBtn" type="button">📥 استيراد السجل من ملف klaib-council.json</button><table id="aCo"></table>
+<input type="file" id="cSeed" accept=".json,application/json" hidden></div>
 <div class="card" style="margin-top:10px"><b>المجلس: الفكرة</b><textarea id="ideaX" rows="6" autocomplete="off" placeholder="اكتب فكرة تأسيس المجلس"></textarea><button class="btn" id="ideaBtn">حفظ الفكرة</button></div>
 <div class="card" style="margin-top:10px"><b>المجلس: الميثاق (وثيقة واحدة — PDF أو Word أو صورة، حتى 6 ميغابايت)</b><input type="file" id="chF" accept=".pdf,.doc,.docx,image/*"><button class="btn" id="chBtn">رفع الميثاق</button> <span class="note" id="chMsg"></span><div id="chCur"></div></div>
 <div class="card" style="margin-top:10px"><b>المجلس: إضافة قرار (وثيقة)</b><input id="dcT" autocomplete="off" placeholder="عنوان القرار"><input id="dcD" type="date" autocomplete="off"><input id="dcN" autocomplete="off" placeholder="ملاحظة مختصرة (اختياري)"><input type="file" id="dcF" accept=".pdf,.doc,.docx,image/*"><button class="btn" id="dcBtn">إضافة القرار</button> <span class="note" id="dcMsg"></span><table id="aDc"></table></div>
@@ -465,7 +465,8 @@ await vShow(u8,tp,nm)}
 catch(x){$('vB').innerHTML='<div class="vmsg">تعذر فتح الوثيقة ('+E(x.code||x.message)+')</div>'}});
 $('cBtn').onclick=()=>{const t=$('cT').value.trim(),d=$('cD').value;if(t.length<2||!d)return alert('أكمل الحدث والتاريخ');
 saveDoc('council','council',{title:t,date:d,place:$('cP').value.trim(),owner:$('cR').value.trim(),summary:$('cS').value.trim()},'تمت الإضافة للسجل','تم حفظ التعديل')};
-$('cSeed').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const a=JSON.parse(await f.text());for(const r of a){await setDoc(doc(db,'council','r'+String(r.n).padStart(2,'0')),{title:r.title,date:r.date,place:r.place||'',owner:r.owner||'',summary:r.summary||'',createdAt:serverTimestamp()})}await loadFeed();alert('تم استيراد '+a.length+' نشاطًا')}catch(x){alert('تعذر الاستيراد ('+E(x.code||x.message)+')')}};
+$('cSeedBtn').onclick=()=>$('cSeed').click();
+$('cSeed').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const a=JSON.parse(await f.text());for(const r of a){await setDoc(doc(db,'council','r'+String(r.n).padStart(2,'0')),{title:r.title,date:r.date,place:r.place||'',owner:r.owner||'',summary:r.summary||'',createdAt:serverTimestamp()})}await loadFeed();alert('تم استيراد '+a.length+' نشاطًا');e.target.value=''}catch(x){alert('تعذر الاستيراد ('+E(x.code||x.message)+')')}};
 </script>
 </body>
 </html>
