@@ -269,7 +269,7 @@ PDFJS.catch(function(){PDFJS=null});return PDFJS}
 function vShow(u8,type,name){var box=$('vB');VURL=URL.createObjectURL(new Blob([u8],{type:type}));
 var dl=$('vD');dl.hidden=false;dl.onclick=function(){var a=document.createElement('a');a.href=VURL;a.download=name||'document';document.body.appendChild(a);a.click();a.remove()};
 if(/image/.test(type)){box.innerHTML='<img alt="">';box.firstChild.src=VURL;return Promise.resolve()}
-if(/pdf/.test(type)){return vLib().then(function(lib){return lib.getDocument({data:u8.slice()}).promise}).then(function(pdf){box.innerHTML='';
+if(/pdf/.test(type)){return vLib().then(function(lib){return lib.getDocument({data:u8.slice(),disableFontFace:true}).promise}).then(function(pdf){box.innerHTML='';
 var w=Math.min(box.clientWidth-16,820)*(window.devicePixelRatio||1),chain=Promise.resolve();
 for(var i=1;i<=pdf.numPages;i++)(function(n){chain=chain.then(function(){return pdf.getPage(n).then(function(pg){var v0=pg.getViewport({scale:1}),sc=w/v0.width,v=pg.getViewport({scale:sc}),c=document.createElement('canvas');c.width=v.width;c.height=v.height;box.appendChild(c);return pg.render({canvasContext:c.getContext('2d'),viewport:v}).promise})})})(i);return chain}).catch(function(e){box.innerHTML='<div class="vmsg">تعذر عرض الوثيقة هنا. استخدم زر «تنزيل» لفتحها.</div>'})}
 box.innerHTML='<div class="vmsg">هذا النوع من الملفات (Word) لا يُعرض داخل الصفحة.<br>اضغط «⬇ تنزيل» لفتحه على جهازك.</div>';return Promise.resolve()}
