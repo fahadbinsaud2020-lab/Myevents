@@ -106,7 +106,7 @@ textarea.inp{min-height:110px;direction:ltr;font-size:13px}
   <div class="in">
     <div class="top"><span class="sync wait" id="sync"><i></i>جارٍ الاتصال…</span><button id="loginBtn" type="button">دخول المشرف</button></div>
     <h1>استراحات الأعياد</h1>
-    <p class="sub">عائلة كليب بن عور — مصروفات استراحتي الفطر والأضحى مقابل قطة الفروع</p>
+    <p class="sub">عائلة كليب بن عور — مصروفات استراحتي الفطر والأضحى</p>
     <div class="big" id="hero"></div>
     <div class="meter"><i id="meterBar" style="width:0"></i></div>
     <div class="meterL" id="meterL"></div>
@@ -218,12 +218,12 @@ function render(){
       ${isAdmin?'<div style="display:flex;gap:8px"><button class="btn ghost" data-a="editEvent">تعديل</button><button class="btn danger" data-a="delEvent">حذف</button></div>':''}</div>
      <h2 style="font-size:clamp(26px,5vw,34px)">${title(e)}</h2><div style="color:var(--mute)">${esc(e.place)||''}${e.date?' · <span class="num">'+esc(e.date)+'</span>':''}${e.notes?'<br>'+esc(e.notes):''}</div>
      <div class="stats"><div class="stat"><div class="k">المصروفات</div><div class="v">${money(t.exp)}</div></div>
-      <div class="stat"><div class="k">القطة (${t.paid} من ${S.branches.length} فروع)</div><div class="v">${money(t.con)}</div></div>
+      <div class="stat"><div class="k">القطة (${t.paid} من ${S.branches.length})</div><div class="v">${money(t.con)}</div></div>
       <div class="stat"><div class="k">${netWord(t.net)}</div><div class="v ${netCls(t.net)}">${signed(t.net)}</div></div></div>
-     <section class="box"><h2>قطة الفروع</h2>
-      ${isAdmin?'<div class="unif noprint"><span>مبلغ موحد لكل فرع:</span><input class="amt" id="unifV" autocomplete="off" inputmode="decimal" placeholder="0"><button class="btn ghost" data-a="unif">تطبيق على الكل</button></div>':''}
-      <table><thead><tr><th>الفرع</th><th>المبلغ</th><th class="r">الحالة</th></tr></thead><tbody>
-      ${S.branches.map(b=>{const v=num(e.contrib[b.id]);return `<tr><td>فرع ${esc(b.name)}</td><td>${isAdmin?`<input class="amt" autocomplete="off" inputmode="decimal" data-c="${esc(b.id)}" value="${v||''}" placeholder="0" aria-label="قطة فرع ${esc(b.name)}">`:`<span class="amtv">${money(v)}</span>`}</td><td class="r"><span class="chip ${v>0?'ok':'no'}">${v>0?'دفع':'لم يدفع'}</span></td></tr>`}).join('')}
+     <section class="box"><h2>قطة الأبناء</h2>
+      ${isAdmin?'<div class="unif noprint"><span>مبلغ موحد للجميع:</span><input class="amt" id="unifV" autocomplete="off" inputmode="decimal" placeholder="0"><button class="btn ghost" data-a="unif">تطبيق على الكل</button></div>':''}
+      <table><thead><tr><th>الأبناء</th><th>المبلغ</th><th class="r">الحالة</th></tr></thead><tbody>
+      ${S.branches.map(b=>{const v=num(e.contrib[b.id]);return `<tr><td>أبناء ${esc(b.name)}</td><td>${isAdmin?`<input class="amt" autocomplete="off" inputmode="decimal" data-c="${esc(b.id)}" value="${v||''}" placeholder="0" aria-label="قطة أبناء ${esc(b.name)}">`:`<span class="amtv">${money(v)}</span>`}</td><td class="r"><span class="chip ${v>0?'ok':'no'}">${v>0?'دفع':'لم يدفع'}</span></td></tr>`}).join('')}
       <tr class="tot"><td>المجموع</td><td>${money(t.con)}</td><td></td></tr></tbody></table></section>
      <section class="box"><h2>المصروفات ${isAdmin?'<button class="btn" data-a="newExp">+ إضافة مصروف</button>':''}</h2>
       ${e.expenses.length?`<table class="stack"><thead><tr><th>البند</th><th>التفاصيل</th><th class="r">المبلغ</th>${isAdmin?'<th></th>':''}</tr></thead><tbody>
@@ -244,7 +244,7 @@ function render(){
      <section class="box"><h2>حسب الاستراحة</h2>${evs.length?`<table class="stack"><thead><tr><th>المناسبة</th><th class="r">المصروفات</th><th class="r">القطة</th><th class="r">الصافي</th></tr></thead><tbody>
       ${evs.map(e=>{const t=tot(e);return `<tr><td>${title(e)}</td><td class="r">${money(t.exp)}</td><td class="r">${money(t.con)}</td><td class="r ${netCls(t.net)}">${signed(t.net)}</td></tr>`}).join('')}
       <tr class="tot"><td>الإجمالي</td><td class="r">${money(A.exp)}</td><td class="r">${money(A.con)}</td><td class="r ${netCls(net)}">${signed(net)}</td></tr></tbody></table>`:'<div class="empty">لا توجد بيانات.</div>'}</section>
-     <section class="box"><h2>إجمالي قطة كل فرع</h2><div class="rows">${br.map(x=>`<div class="row"><span>فرع ${esc(x.n)}</span><div class="tr g"><i style="width:${x.v/mb*100}%"></i></div><span>${money(x.v)}</span></div>`).join('')}</div></section>
+     <section class="box"><h2>إجمالي قطة الأبناء</h2><div class="rows">${br.map(x=>`<div class="row"><span>أبناء ${esc(x.n)}</span><div class="tr g"><i style="width:${x.v/mb*100}%"></i></div><span>${money(x.v)}</span></div>`).join('')}</div></section>
      <section class="box"><h2>المصروفات حسب البند</h2>${cl.length?`<div class="rows">${cl.map(([k,v])=>`<div class="row"><span>${esc(k)}</span><div class="tr"><i style="width:${v/mc*100}%"></i></div><span>${money(v)}</span></div>`).join('')}</div>`:'<div class="empty">لا توجد مصروفات.</div>'}</section>`;
   }
   else if(!isAdmin){
@@ -252,8 +252,8 @@ function render(){
      <section class="box"><h2>المشرف</h2><p style="color:var(--mute);margin-top:0">الإضافة والتعديل متاحة لمشرف الأداة فقط بعد تسجيل الدخول برقم جواله.</p><button class="btn" data-a="login">دخول المشرف</button></section>`;
   }
   else{
-    app.innerHTML=`<section class="box"><h2>أسماء الفروع</h2>
-      ${S.branches.map((b,i)=>`<label class="f">الفرع ${i+1}<input data-bn="${esc(b.id)}" value="${esc(b.name)}"></label>`).join('')}</section>
+    app.innerHTML=`<section class="box"><h2>أسماء الأبناء</h2>
+      ${S.branches.map((b,i)=>`<label class="f">${i+1}. أبناء<input data-bn="${esc(b.id)}" value="${esc(b.name)}"></label>`).join('')}</section>
      <section class="box"><h2>النسخ الاحتياطي</h2><p style="color:var(--mute);margin-top:0">البيانات محفوظة في السحابة. النسخة الاحتياطية للاحتياط فقط.</p>
       <div class="acts" style="justify-content:flex-start"><button class="btn" data-a="dl">تنزيل ملف النسخة</button><button class="btn ghost" data-a="copy">نسخ النسخة</button>
       <label class="btn ghost" style="display:inline-flex;align-items:center">استعادة من ملف<input type="file" id="fileIn" accept=".json,application/json" hidden></label></div>
@@ -332,7 +332,7 @@ $('#app').addEventListener('click',e=>{
     share:()=>copyText(location.href.split('#')[0],'تم نسخ الرابط — أرسله في قروب العائلة'),login};
   const adm={newEvent:()=>eventForm(),editEvent:()=>eventForm(ev),newExp:()=>expForm(ev),logout:()=>signOut(auth),
     delEvent:()=>ask(`حذف ${TYPES[ev.type]} ${ev.year}هـ بكل مصروفاته وقطته؟`,()=>{S.events=S.events.filter(x=>x.id!==ev.id);cur=null;view='events';save();render()}),
-    unif:()=>{const v=num($('#unifV').value);if(v<=0)return toast('أدخل المبلغ أولاً');S.branches.forEach(b=>ev.contrib[b.id]=v);save();render();toast('تم تطبيق المبلغ على كل الفروع')},
+    unif:()=>{const v=num($('#unifV').value);if(v<=0)return toast('أدخل المبلغ أولاً');S.branches.forEach(b=>ev.contrib[b.id]=v);save();render();toast('تم تطبيق المبلغ على الجميع')},
     dl:()=>download(`eid-rest-backup-${new Date().toISOString().slice(0,10)}.json`,JSON.stringify(S,null,1)),
     copy:()=>copyText(JSON.stringify(S),'تم نسخ النسخة الاحتياطية'),
     restorePaste:()=>restore($('#pasteIn').value),
@@ -342,7 +342,7 @@ $('#app').addEventListener('click',e=>{
 $('#app').addEventListener('change',e=>{
   if(!isAdmin)return;
   const c=e.target.dataset.c;if(c){const ev=S.events.find(x=>x.id===cur);ev.contrib[c]=num(e.target.value);save();render();return}
-  const bn=e.target.dataset.bn;if(bn){const b=S.branches.find(x=>x.id===bn);if(e.target.value.trim()){b.name=e.target.value.trim();save();toast('تم حفظ اسم الفرع')}return}
+  const bn=e.target.dataset.bn;if(bn){const b=S.branches.find(x=>x.id===bn);if(e.target.value.trim()){b.name=e.target.value.trim();save();toast('تم حفظ الاسم')}return}
   if(e.target.id==='fileIn'&&e.target.files[0]){e.target.files[0].text().then(restore)}
 });
 $('#app').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset.c){e.preventDefault();const i=[...document.querySelectorAll('[data-c]')].indexOf(e.target);e.target.blur();setTimeout(()=>{const n=document.querySelectorAll('[data-c]')[i+1];n&&n.focus()},0)}});
