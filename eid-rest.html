@@ -103,33 +103,43 @@ textarea.inp{min-height:110px;direction:ltr;font-size:13px}
 @keyframes halo{0%,100%{box-shadow:0 0 0 4px #e9c46a,0 0 0 9px rgba(255,255,255,.12),0 12px 30px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 4px #ffd36b,0 0 0 16px rgba(255,211,107,.22),0 12px 30px rgba(0,0,0,.35)}}
 footer.foot{border-top:1px solid var(--line);padding:22px 16px 34px;display:flex;align-items:center;justify-content:center;gap:12px;color:var(--mute);font-size:14px;text-align:center}
 footer.foot img{width:54px;height:54px;border-radius:50%;background:#fff;clip-path:circle(50%);object-fit:cover;box-shadow:0 0 0 2px #e9c46a}
-@media(max-width:600px){.medal{width:86px}}
+
 @media(prefers-reduced-motion:reduce){.medal{animation:none}}
 @media(max-width:600px){.big{grid-template-columns:1fr 1fr}.big .lead{grid-column:1/-1}.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:1/-1}
  table{font-size:14px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:7em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:6.5em;margin-inline-start:-7em;color:var(--mute);font-size:13px}.stack td:empty{display:none}.stack tr.tot td::before{content:attr(data-l)}
  .rows .row{grid-template-columns:minmax(0,6.5em) minmax(0,1fr) auto}}
 @media print{nav.tabs,.btn,.icon,.note,.noprint{display:none!important}.hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.hero{background:var(--mar);color:#fff;position:relative;padding-block:26px;overflow:hidden}
+.hero::before,.hero::after{content:"";position:absolute;inset-inline:0;height:26px;background:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='48' height='26'><rect width='48' height='26' fill='%234f1020'/><rect width='48' height='2' fill='%23e9c46a'/><rect y='24' width='48' height='2' fill='%23e9c46a'/><path d='M0 22 12 5 24 22Z' fill='%23e9c46a'/><path d='M24 5 36 22 48 5Z' fill='%23f4ece4'/><path d='M12 11 15 15 12 19 9 15Z' fill='%234f1020'/><path d='M36 7 39 11 36 15 33 11Z' fill='%23b8324c'/></svg>") repeat-x;background-size:48px 26px}
+.hero::before{top:0}.hero::after{bottom:0;transform:scaleY(-1)}
+.hero .in{max-width:1000px;margin:auto;padding:16px max(5vw,16px)}
+.head{display:flex;align-items:center;gap:clamp(12px,2.5vw,22px)}
+.hero h1{font-size:clamp(24px,4vw,34px)}
+.hero p.sub{margin:4px 0 0;opacity:.85;font-size:15px}
+.medal{flex:none;width:clamp(66px,9vw,86px);aspect-ratio:1;border-radius:50%;background:#fff;display:grid;place-items:center;
+ box-shadow:0 0 0 3px #e9c46a,0 8px 20px rgba(0,0,0,.35);animation:medIn 1.1s cubic-bezier(.2,.9,.25,1.2) both,halo 4s ease-in-out 1.2s infinite;cursor:pointer}
+@keyframes halo{0%,100%{box-shadow:0 0 0 3px #e9c46a,0 8px 20px rgba(0,0,0,.35)}50%{box-shadow:0 0 0 3px #ffd36b,0 0 0 9px rgba(255,211,107,.25),0 8px 20px rgba(0,0,0,.35)}}
+nav.tabs .in{align-items:center}
+nav.tabs button.adm{flex:none;border:1px solid var(--line);border-radius:99px;padding:6px 14px;min-height:38px;font-size:13px;color:var(--mar);margin-inline-start:6px}
+nav.tabs .sync{flex:none;font-size:12px;color:var(--mute);white-space:nowrap}
+@media(max-width:600px){nav.tabs button{padding:12px 2px;font-size:14px}nav.tabs button.adm{padding:5px 10px;font-size:12px}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
 </head>
 <body>
 <header class="hero">
-  <svg class="sadu" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true"><defs><pattern id="sd" width="44" height="22" patternUnits="userSpaceOnUse"><path d="M0 22 11 4 22 22Z" fill="#ffd36b" opacity=".9"/><path d="M22 0 33 18 44 0Z" fill="#fff" opacity=".85"/><path d="M8 22 11 17 14 22Z M30 0 33 5 36 0Z" fill="#7a1f33"/></pattern></defs><rect width="400" height="22" fill="url(#sd)"/></svg>
-  <div class="in">
-    <div class="top"><span class="sync wait" id="sync"><i></i>جارٍ الاتصال…</span><button id="loginBtn" type="button">دخول المشرف</button></div>
-    <div class="head"><div class="tx"><h1>استراحات الأعياد</h1>
-    <p class="sub">عائلة كليب بن عور — مصروفات استراحتي الفطر والأضحى</p></div><div class="medal" id="medal" title="مجلس عائلة كليب بن عور"><img class="logo" alt="شعار مجلس عائلة كليب بن عور"></div></div>
-    <div class="big" id="hero"></div>
-    <div class="meter"><i id="meterBar" style="width:0"></i></div>
-    <div class="meterL" id="meterL"></div>
-  </div>
-  <svg class="sadu" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true" style="transform:scaleY(-1)"><rect width="400" height="22" fill="url(#sd)"/></svg>
+  <div class="in"><div class="head">
+    <div class="medal" id="medal" title="مجلس عائلة كليب بن عور"><img class="logo" alt="شعار مجلس عائلة كليب بن عور"></div>
+    <div class="tx"><h1>استراحات الأعياد</h1><p class="sub">عائلة كليب بن عور — مصروفات استراحتي الفطر والأضحى</p></div>
+  </div></div>
 </header>
 <nav class="tabs"><div class="in">
   <button id="t-events" data-v="events">الاستراحات</button>
   <button id="t-summary" data-v="summary">الملخص</button>
   <button id="t-settings" data-v="settings">الإعدادات</button>
+  <span class="sync" id="sync" hidden></span>
+  <button id="loginBtn" class="adm" type="button">دخول المشرف</button>
 </div></nav>
 <main id="app"></main>
 <footer class="foot"><img class="logo" alt=""><span>مجلس عائلة كليب بن عور · استراحات الأعياد</span></footer>
@@ -172,7 +182,7 @@ let S=blank();
 try{const c=JSON.parse(localStorage.getItem(CACHE));if(valid(c))S=c}catch(e){}
 let isAdmin=false,view='events',cur=null,loaded=false;
 
-function setSync(state,txt){const s=$('#sync');s.className='sync '+state;s.innerHTML='<i></i>'+esc(txt)}
+function setSync(state,txt){const s=$('#sync');s.hidden=!state;s.className='sync '+state;s.textContent=state?txt:''}
 async function save(){
   if(!isAdmin)return;
   S.updatedAt=new Date().toISOString();
@@ -205,15 +215,7 @@ const netWord=n=>n>0?'فائض':n<0?'عجز':'متوازن';
 const signed=n=>`${n<0?'−':''}${money(Math.abs(n))}`;
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),m.length>40?6000:2400)}
 
-function hero(){
-  const ev=view==='detail'&&S.events.find(e=>e.id===cur);
-  const t=ev?tot(ev):all(),net=t.con-t.exp;
-  $('#hero').innerHTML=`<div class="lead"><div class="k">${ev?'رصيد هذه الاستراحة':'الرصيد العام لكل الاستراحات'} · ${netWord(net)}</div><div class="v">${signed(net)}</div></div>
-   <div><div class="k">مجموع القطة</div><div class="v">${money(t.con)}</div></div>
-   <div><div class="k">مجموع المصروفات</div><div class="v">${money(t.exp)}</div></div>`;
-  $('#meterBar').style.width=(t.exp?Math.min(100,t.con/t.exp*100):0)+'%';
-  $('#meterL').textContent=t.exp?`القطة تغطي ${Math.round(t.con/t.exp*100)}% من المصروفات`:'لا توجد مصروفات بعد';
-}
+function hero(){}
 const shareBtn=`<button class="btn ghost noprint" data-a="share">نسخ رابط المشاركة</button>`;
 
 function render(){
@@ -222,8 +224,8 @@ function render(){
   const app=$('#app');
   if(!loaded&&!S.events.length){app.innerHTML='<div class="empty">جارٍ تحميل البيانات…</div>';return}
   if(view==='events'){
-    const evs=sorted();
-    app.innerHTML=`<div class="bar"><h2>الاستراحات (${evs.length})</h2><div style="display:flex;gap:8px;flex-wrap:wrap">${shareBtn}${isAdmin?'<button class="btn" data-a="newEvent">+ استراحة جديدة</button>':''}</div></div>`+
+    const evs=sorted(),A=all(),net=A.con-A.exp;
+    app.innerHTML=(evs.length?`<div class="stats" style="margin-top:0"><div class="stat"><div class="k">مجموع المصروفات</div><div class="v">${money(A.exp)}</div></div><div class="stat"><div class="k">مجموع القطة</div><div class="v">${money(A.con)}</div></div><div class="stat"><div class="k">الرصيد · ${netWord(net)}</div><div class="v ${netCls(net)}">${signed(net)}</div></div></div>`:'')+`<div class="bar"><h2>الاستراحات (${evs.length})</h2><div style="display:flex;gap:8px;flex-wrap:wrap">${shareBtn}${isAdmin?'<button class="btn" data-a="newEvent">+ استراحة جديدة</button>':''}</div></div>`+
      (evs.length?`<div class="grid">${evs.map(e=>{const t=tot(e);return `<button class="ev" data-open="${esc(e.id)}">
        <span class="tag">${e.type==='fitr'?'الفطر':'الأضحى'}</span><h3>${title(e)}</h3><div class="pl">${esc(e.place)||'—'}${e.date?' · <span class="num">'+esc(e.date)+'</span>':''}</div>
        <div class="trio"><div>المصروفات<b>${money(t.exp)}</b></div><div>القطة<b>${money(t.con)}</b></div><div>${netWord(t.net)}<b class="${netCls(t.net)}">${money(Math.abs(t.net))}</b></div></div></button>`}).join('')}</div>`
