@@ -119,7 +119,7 @@ textarea.inp{min-height:110px;direction:ltr;font-size:13px}
   <button id="t-settings" data-v="settings">الإعدادات</button>
 </div></nav>
 <main id="app"></main>
-<dialog id="dlg"><form id="dlgForm" method="dialog"></form></dialog>
+<dialog id="dlg"><form id="dlgForm" method="dialog" autocomplete="off"></form></dialog>
 <div id="toast" role="status"></div>
 <div id="recap"></div>
 
@@ -221,9 +221,9 @@ function render(){
       <div class="stat"><div class="k">القطة (${t.paid} من ${S.branches.length} فروع)</div><div class="v">${money(t.con)}</div></div>
       <div class="stat"><div class="k">${netWord(t.net)}</div><div class="v ${netCls(t.net)}">${signed(t.net)}</div></div></div>
      <section class="box"><h2>قطة الفروع</h2>
-      ${isAdmin?'<div class="unif noprint"><span>مبلغ موحد لكل فرع:</span><input class="amt" id="unifV" inputmode="decimal" placeholder="0"><button class="btn ghost" data-a="unif">تطبيق على الكل</button></div>':''}
+      ${isAdmin?'<div class="unif noprint"><span>مبلغ موحد لكل فرع:</span><input class="amt" id="unifV" autocomplete="off" inputmode="decimal" placeholder="0"><button class="btn ghost" data-a="unif">تطبيق على الكل</button></div>':''}
       <table><thead><tr><th>الفرع</th><th>المبلغ</th><th class="r">الحالة</th></tr></thead><tbody>
-      ${S.branches.map(b=>{const v=num(e.contrib[b.id]);return `<tr><td>فرع ${esc(b.name)}</td><td>${isAdmin?`<input class="amt" inputmode="decimal" data-c="${esc(b.id)}" value="${v||''}" placeholder="0" aria-label="قطة فرع ${esc(b.name)}">`:`<span class="amtv">${money(v)}</span>`}</td><td class="r"><span class="chip ${v>0?'ok':'no'}">${v>0?'دفع':'لم يدفع'}</span></td></tr>`}).join('')}
+      ${S.branches.map(b=>{const v=num(e.contrib[b.id]);return `<tr><td>فرع ${esc(b.name)}</td><td>${isAdmin?`<input class="amt" autocomplete="off" inputmode="decimal" data-c="${esc(b.id)}" value="${v||''}" placeholder="0" aria-label="قطة فرع ${esc(b.name)}">`:`<span class="amtv">${money(v)}</span>`}</td><td class="r"><span class="chip ${v>0?'ok':'no'}">${v>0?'دفع':'لم يدفع'}</span></td></tr>`}).join('')}
       <tr class="tot"><td>المجموع</td><td>${money(t.con)}</td><td></td></tr></tbody></table></section>
      <section class="box"><h2>المصروفات ${isAdmin?'<button class="btn" data-a="newExp">+ إضافة مصروف</button>':''}</h2>
       ${e.expenses.length?`<table class="stack"><thead><tr><th>البند</th><th>التفاصيل</th><th class="r">المبلغ</th>${isAdmin?'<th></th>':''}</tr></thead><tbody>
@@ -274,8 +274,8 @@ function ask(msg,fn,ok='حذف'){modal(`<h3>تأكيد</h3><p>${esc(msg)}</p>`,(
 
 let verifier=null;
 function login(){
-  modal(`<h3>دخول المشرف</h3><label class="f">رقم الجوال<input name="ph" inputmode="tel" dir="ltr" placeholder="05XXXXXXXX" required></label>`,fd=>{
-    let p=String(fd.get('ph')).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');
+  modal(`<h3>دخول المشرف</h3><label class="f">رقم الجوال<input name="eidr_ph" autocomplete="off" inputmode="tel" dir="ltr" placeholder="05XXXXXXXX" required></label>`,fd=>{
+    let p=String(fd.get('eidr_ph')).replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\D/g,'');
     if(p.startsWith('00'))p=p.slice(2);if(p.startsWith('0'))p='966'+p.slice(1);if(p.startsWith('5'))p='966'+p;
     if(!/^9665\d{8}$/.test(p)){toast('أدخل رقم جوال سعودي صحيح');return false}
     sendCode('+'+p);
@@ -286,8 +286,8 @@ async function sendCode(phone){
   try{
     verifier=verifier||new RecaptchaVerifier(auth,'recap',{size:'invisible'});
     const conf=await signInWithPhoneNumber(auth,phone,verifier);
-    modal(`<h3>رمز التحقق</h3><p style="color:var(--mute)">أُرسل رمز إلى <span class="num">${esc(phone)}</span></p><label class="f">الرمز<input name="code" inputmode="numeric" dir="ltr" autocomplete="one-time-code" required></label>`,fd=>{
-      conf.confirm(String(fd.get('code')).trim()).catch(()=>toast('الرمز غير صحيح'));
+    modal(`<h3>رمز التحقق</h3><p style="color:var(--mute)">أُرسل رمز إلى <span class="num">${esc(phone)}</span></p><label class="f">الرمز<input name="eidr_code" inputmode="numeric" dir="ltr" autocomplete="one-time-code" required></label>`,fd=>{
+      conf.confirm(String(fd.get('eidr_code')).trim()).catch(()=>toast('الرمز غير صحيح'));
     },'دخول');
   }catch(e){const m={'auth/too-many-requests':'محاولات كثيرة — انتظر ساعة وحاول','auth/quota-exceeded':'انتهت حصة الرسائل اليومية في Firebase — حاول بكرة','auth/invalid-phone-number':'رقم الجوال غير صحيح','auth/unauthorized-domain':'النطاق غير مصرح في Firebase','auth/captcha-check-failed':'فشل التحقق، حدّث الصفحة وحاول'};toast((m[e.code]||'تعذّر إرسال الرمز')+' ('+(e.code||'?')+')');try{verifier&&verifier.clear()}catch(_){}verifier=null}
 }
@@ -295,11 +295,11 @@ function eventForm(e){
   e=e||{type:'fitr',year:hijriNow,place:'',date:'',notes:''};
   modal(`<h3>${e.id?'تعديل الاستراحة':'استراحة جديدة'}</h3>
    <div class="two"><label class="f">العيد<select name="type"><option value="fitr"${e.type==='fitr'?' selected':''}>عيد الفطر</option><option value="adha"${e.type==='adha'?' selected':''}>عيد الأضحى</option></select></label>
-   <label class="f">السنة الهجرية<input name="year" inputmode="numeric" required value="${esc(e.year)}"></label></div>
-   <label class="f">اسم الاستراحة أو المكان<input name="place" value="${esc(e.place)}" placeholder="مثال: استراحة الياسمين"></label>
+   <label class="f">السنة الهجرية<input name="eidr_year" autocomplete="off" inputmode="numeric" required value="${esc(e.year)}"></label></div>
+   <label class="f">اسم الاستراحة أو المكان<input name="eidr_place" autocomplete="off" value="${esc(e.place)}" placeholder="مثال: استراحة الياسمين"></label>
    <label class="f">التاريخ (اختياري)<input name="date" type="date" value="${esc(e.date)}"></label>
-   <label class="f">ملاحظات<input name="notes" value="${esc(e.notes)}"></label>`,fd=>{
-    const d={type:fd.get('type'),year:String(fd.get('year')).trim(),place:fd.get('place').trim(),date:fd.get('date'),notes:fd.get('notes').trim()};
+   <label class="f">ملاحظات<input name="eidr_notes" autocomplete="off" value="${esc(e.notes)}"></label>`,fd=>{
+    const d={type:fd.get('type'),year:String(fd.get('eidr_year')).trim(),place:fd.get('eidr_place').trim(),date:fd.get('date'),notes:fd.get('eidr_notes').trim()};
     if(e.id)Object.assign(e,d);else{const n={id:uid(),...d,expenses:[],contrib:{}};S.events.push(n);cur=n.id;view='detail'}
     save();render()});
 }
@@ -307,10 +307,10 @@ function expForm(ev,x){
   x=x||{cat:CATS[0],desc:'',amount:''};
   const opts=[...new Set([...CATS,x.cat])].map(c=>`<option${c===x.cat?' selected':''}>${esc(c)}</option>`).join('');
   modal(`<h3>${x.id?'تعديل مصروف':'مصروف جديد'}</h3><label class="f">البند<select name="cat">${opts}</select></label>
-   <label class="f">التفاصيل (اختياري)<input name="desc" value="${esc(x.desc)}" placeholder="مثال: 4 ذبائح نعيمي"></label>
-   <label class="f">المبلغ (ر.س)<input name="amount" inputmode="decimal" dir="ltr" required value="${esc(x.amount)}"></label>`,fd=>{
-    const a=num(fd.get('amount'));if(a<=0){toast('أدخل مبلغاً صحيحاً');return false}
-    const d={cat:fd.get('cat'),desc:fd.get('desc').trim(),amount:a};
+   <label class="f">التفاصيل (اختياري)<input name="eidr_desc" autocomplete="off" value="${esc(x.desc)}" placeholder="مثال: 4 ذبائح نعيمي"></label>
+   <label class="f">المبلغ (ر.س)<input name="eidr_amount" autocomplete="off" inputmode="decimal" dir="ltr" required value="${esc(x.amount)}"></label>`,fd=>{
+    const a=num(fd.get('eidr_amount'));if(a<=0){toast('أدخل مبلغاً صحيحاً');return false}
+    const d={cat:fd.get('cat'),desc:fd.get('eidr_desc').trim(),amount:a};
     if(x.id)Object.assign(x,d);else ev.expenses.push({id:uid(),...d});
     save();render()});
 }
