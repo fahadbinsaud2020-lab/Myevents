@@ -132,7 +132,7 @@ import {initializeApp} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase
 import {getFirestore,doc,getDoc,onSnapshot,setDoc} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import {getAuth,onAuthStateChanged,RecaptchaVerifier,signInWithPhoneNumber,signOut} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
-const fb=initializeApp(FIREBASE_CONFIG,'eidRest');
+const fb=initializeApp(FIREBASE_CONFIG);
 const db=getFirestore(fb),auth=getAuth(fb);auth.languageCode='ar';
 const REF=doc(db,'eidRest','main');
 const CACHE='klaibEidRest_cache_v2';
@@ -185,7 +185,7 @@ const sorted=()=>[...S.events].sort((a,b)=>num(b.year)-num(a.year)||(a.type==='a
 const netCls=n=>n>=0?'pos':'neg';
 const netWord=n=>n>0?'فائض':n<0?'عجز':'متوازن';
 const signed=n=>`${n<0?'−':''}${money(Math.abs(n))}`;
-function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),2400)}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('on'),m.length>40?6000:2400)}
 
 function hero(){
   const ev=view==='detail'&&S.events.find(e=>e.id===cur);
@@ -289,7 +289,7 @@ async function sendCode(phone){
     modal(`<h3>رمز التحقق</h3><p style="color:var(--mute)">أُرسل رمز إلى <span class="num">${esc(phone)}</span></p><label class="f">الرمز<input name="code" inputmode="numeric" dir="ltr" autocomplete="one-time-code" required></label>`,fd=>{
       conf.confirm(String(fd.get('code')).trim()).catch(()=>toast('الرمز غير صحيح'));
     },'دخول');
-  }catch(e){toast('تعذّر إرسال الرمز، حاول مرة أخرى');try{verifier&&verifier.clear()}catch(_){}verifier=null}
+  }catch(e){const m={'auth/too-many-requests':'محاولات كثيرة — انتظر ساعة وحاول','auth/quota-exceeded':'انتهت حصة الرسائل اليومية في Firebase — حاول بكرة','auth/invalid-phone-number':'رقم الجوال غير صحيح','auth/unauthorized-domain':'النطاق غير مصرح في Firebase','auth/captcha-check-failed':'فشل التحقق، حدّث الصفحة وحاول'};toast((m[e.code]||'تعذّر إرسال الرمز')+' ('+(e.code||'?')+')');try{verifier&&verifier.clear()}catch(_){}verifier=null}
 }
 function eventForm(e){
   e=e||{type:'fitr',year:hijriNow,place:'',date:'',notes:''};
