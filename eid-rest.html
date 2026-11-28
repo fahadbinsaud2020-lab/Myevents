@@ -124,6 +124,15 @@ nav.tabs .in{align-items:center}
 nav.tabs button.adm{flex:none;border:1px solid var(--line);border-radius:99px;padding:6px 14px;min-height:38px;font-size:13px;color:var(--mar);margin-inline-start:6px}
 nav.tabs .sync{flex:none;font-size:12px;color:var(--mute);white-space:nowrap}
 @media(max-width:600px){nav.tabs button{padding:12px 2px;font-size:14px}nav.tabs button.adm{padding:5px 10px;font-size:12px}}
+html,body{height:100%}
+body{height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.hero,nav.tabs,footer.foot{flex:none}
+nav.tabs{position:static}
+.scr{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+footer.foot{padding:6px 12px;gap:8px;font-size:12px;background:var(--bg)}
+footer.foot img{width:32px!important;height:32px!important;box-shadow:0 0 0 1.5px #e9c46a!important}
+@media(max-width:600px){.hero .in{padding-block:10px}.hero p.sub{font-size:13px}}
+@media print{html,body{height:auto;overflow:visible;display:block}.scr{overflow:visible}footer.foot{display:none}}
 </style>
 <script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script>
 </head>
@@ -141,7 +150,7 @@ nav.tabs .sync{flex:none;font-size:12px;color:var(--mute);white-space:nowrap}
   <span class="sync" id="sync" hidden></span>
   <button id="loginBtn" class="adm" type="button">دخول المشرف</button>
 </div></nav>
-<main id="app"></main>
+<div class="scr" id="scr"><main id="app"></main></div>
 <footer class="foot"><img class="logo" alt=""><span>مجلس عائلة كليب بن عور · استراحات الأعياد</span></footer>
 <dialog id="dlg"><form id="dlgForm" method="dialog" autocomplete="off"></form></dialog>
 <div id="toast" role="status"></div>
@@ -341,9 +350,9 @@ async function copyText(t,ok){try{await navigator.clipboard.writeText(t);toast(o
 
 /* events */
 $('#loginBtn').onclick=()=>isAdmin?signOut(auth).then(()=>toast('تم تسجيل الخروج')):login();
-document.querySelector('nav.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;view=b.dataset.v;cur=null;render();scrollTo({top:0})});
+document.querySelector('nav.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;view=b.dataset.v;cur=null;render();$('#scr').scrollTo({top:0})});
 $('#app').addEventListener('click',e=>{
-  const o=e.target.closest('[data-open]');if(o){cur=o.dataset.open;view='detail';render();scrollTo({top:0});return}
+  const o=e.target.closest('[data-open]');if(o){cur=o.dataset.open;view='detail';render();$('#scr').scrollTo({top:0});return}
   const ev=S.events.find(x=>x.id===cur);
   const ee=e.target.closest('[data-ee]');if(ee&&ev&&isAdmin){expForm(ev,ev.expenses.find(x=>x.id===ee.dataset.ee));return}
   const de=e.target.closest('[data-de]');if(de&&ev&&isAdmin){ask('حذف هذا المصروف؟',()=>{ev.expenses=ev.expenses.filter(x=>x.id!==de.dataset.de);save();render()});return}
